@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
+const UserModel = require('../models/user.model');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -24,7 +24,7 @@ const login = async (req, res) => {
     }
 
     // Check for user (include password for comparison)
-    const user = await User.findOne({ username }).select('+password');
+    const user = await UserModel.findOne({ username }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -75,7 +75,7 @@ const login = async (req, res) => {
 // @access  Private
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await UserModel.findById(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -97,7 +97,7 @@ const updateProfile = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const user = await User.findById(req.user.id);
+    const user = await UserModel.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -145,7 +145,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user.id).select('+password');
+    const user = await UserModel.findById(req.user.id).select('+password');
 
     // Check current password
     const isPasswordMatch = await user.comparePassword(currentPassword);
