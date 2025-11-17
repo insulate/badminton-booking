@@ -12,61 +12,7 @@ http://localhost:3000/api/auth
 
 ## Endpoints
 
-### 1. Register (สมัครสมาชิก)
-
-**Endpoint:** `POST /api/auth/register`
-
-**Access:** Public (ไม่ต้อง Login)
-
-**Request Body:**
-```json
-{
-  "username": "johndoe",
-  "password": "password123",
-  "name": "John Doe"
-}
-```
-
-**Validation:**
-- `username`: Required, minimum 3 characters, unique
-- `password`: Required, minimum 6 characters
-- `name`: Required
-
-**Success Response (201 Created):**
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "user_id",
-    "username": "johndoe",
-    "name": "John Doe",
-    "role": "user",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
-```
-
-**Error Responses:**
-
-400 Bad Request - Missing fields:
-```json
-{
-  "success": false,
-  "message": "Please provide all required fields"
-}
-```
-
-400 Bad Request - User already exists:
-```json
-{
-  "success": false,
-  "message": "User already exists with this username"
-}
-```
-
----
-
-### 2. Login (เข้าสู่ระบบ)
+### 1. Login (เข้าสู่ระบบ)
 
 **Endpoint:** `POST /api/auth/login`
 
@@ -122,7 +68,7 @@ http://localhost:3000/api/auth
 
 ---
 
-### 3. Get Current User (ดูข้อมูลผู้ใช้ปัจจุบัน)
+### 2. Get Current User (ดูข้อมูลผู้ใช้ปัจจุบัน)
 
 **Endpoint:** `GET /api/auth/me`
 
@@ -169,7 +115,7 @@ Authorization: Bearer <token>
 
 ---
 
-### 4. Update Profile (แก้ไขข้อมูลส่วนตัว)
+### 3. Update Profile (แก้ไขข้อมูลส่วนตัว)
 
 **Endpoint:** `PUT /api/auth/profile`
 
@@ -205,7 +151,7 @@ Authorization: Bearer <token>
 
 ---
 
-### 5. Change Password (เปลี่ยนรหัสผ่าน)
+### 4. Change Password (เปลี่ยนรหัสผ่าน)
 
 **Endpoint:** `PUT /api/auth/password`
 
@@ -270,18 +216,17 @@ Authorization: Bearer <token>
 
 ### สำหรับ Frontend
 
-#### 1. Register/Login
+#### 1. Login
 ```javascript
-// Register
-const response = await fetch('http://localhost:3000/api/auth/register', {
+// Login
+const response = await fetch('http://localhost:3000/api/auth/login', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
     username: 'johndoe',
-    password: 'password123',
-    name: 'John Doe'
+    password: 'password123'
   })
 });
 
@@ -330,7 +275,7 @@ localStorage.removeItem('user');
 1. เปลี่ยน `JWT_SECRET` ให้เป็นค่าที่ปลอดภัย (random string ยาวๆ)
 2. ใช้ HTTPS แทน HTTP
 3. ตั้งค่า CORS ให้ระบุ domain ที่อนุญาตชัดเจน
-4. อาจเพิ่ม rate limiting สำหรับ login/register endpoints
+4. อาจเพิ่ม rate limiting สำหรับ login endpoint
 5. ควรเก็บ token ใน httpOnly cookie แทน localStorage (ปลอดภัยกว่า)
 
 ### Password Security:

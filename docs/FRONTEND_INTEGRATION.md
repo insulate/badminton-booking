@@ -73,21 +73,6 @@ export default api;
 import api from './api';
 
 const authService = {
-  // Register new user
-  register: async (userData) => {
-    try {
-      const response = await api.post('/auth/register', userData);
-      if (response.data.success) {
-        // Save token and user data
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data));
-      }
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
   // Login user
   login: async (username, password) => {
     try {
@@ -219,13 +204,6 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
-  const register = async (userData) => {
-    const response = await authService.register(userData);
-    setUser(response.data);
-    setIsAuthenticated(true);
-    return response;
-  };
-
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -243,7 +221,6 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     loading,
     login,
-    register,
     logout,
     updateProfile,
     isAdmin: user?.role === 'admin'
@@ -393,94 +370,6 @@ const Login = () => {
 export default Login;
 ```
 
-### Register Component (`src/pages/Register.jsx`)
-
-```javascript
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-
-const Register = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    name: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      await register(formData);
-      navigate('/');
-    } catch (err) {
-      setError(err.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="register-container">
-      <h2>Register</h2>
-      {error && <div className="error">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            minLength="3"
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            minLength="6"
-            required
-          />
-        </div>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Loading...' : 'Register'}
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default Register;
-```
-
 ### Profile Component (`src/pages/Profile.jsx`)
 
 ```javascript
@@ -575,7 +464,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
@@ -598,7 +486,6 @@ function App() {
           ) : (
             <>
               <a href="/login">Login</a>
-              <a href="/register">Register</a>
             </>
           )}
         </nav>
@@ -606,7 +493,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route
             path="/profile"
             element={
@@ -695,8 +581,7 @@ export const handleApiError = (error) => {
 3. ✅ `src/context/AuthContext.jsx` - Auth context & provider
 4. ✅ `src/components/ProtectedRoute.jsx` - Route guard
 5. ✅ `src/pages/Login.jsx` - Login page
-6. ✅ `src/pages/Register.jsx` - Register page
-7. ✅ `src/pages/Profile.jsx` - Profile page
+6. ✅ `src/pages/Profile.jsx` - Profile page
 
 ### Dependencies ที่ต้องติดตั้ง:
 

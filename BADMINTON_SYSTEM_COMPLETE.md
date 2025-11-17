@@ -268,7 +268,6 @@ Session: Evening Play (18:00-21:00)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/login` | เข้าสู่ระบบ |
-| POST | `/api/auth/register` | สมัครสมาชิก |
 | GET | `/api/auth/profile` | ดูข้อมูลผู้ใช้ |
 
 ### Courts Management

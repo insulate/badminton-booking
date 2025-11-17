@@ -5,31 +5,31 @@
 ```
 backend/
 ├── bin/
-│   └── www                 # Server entry point
+│   └── www                      # Server entry point
 ├── config/
-│   └── database.js         # MongoDB connection configuration
+│   └── database.js              # MongoDB connection configuration
 ├── controllers/
-│   └── authController.js   # Authentication logic
+│   └── auth.controller.js       # Authentication logic
 ├── middleware/
-│   └── auth.js            # JWT verification & authorization
+│   └── auth.js                  # JWT verification & authorization
 ├── models/
-│   └── User.js            # User schema (Mongoose)
+│   └── user.model.js            # User schema (Mongoose)
 ├── routes/
-│   ├── index.js           # Root routes
-│   ├── users.js           # User routes
-│   └── auth.js            # Authentication routes
-├── public/                # Static files
-├── app.js                 # Express app configuration
-├── package.json           # Dependencies
-├── .env.example           # Environment variables template
-└── .env                   # Environment variables (create this)
+│   ├── index.routes.js          # Root routes
+│   ├── users.routes.js          # User routes
+│   └── auth.routes.js           # Authentication routes
+├── public/                      # Static files
+├── app.js                       # Express app configuration
+├── package.json                 # Dependencies
+├── .env.example                 # Environment variables template
+└── .env                         # Environment variables (create this)
 ```
 
 ---
 
 ## Models
 
-### User Model (`models/User.js`)
+### User Model (`models/user.model.js`)
 
 **Schema Fields:**
 ```javascript
@@ -81,31 +81,25 @@ router.delete('/users/:id', protect, admin, deleteUser);
 
 ## Controllers
 
-### Auth Controller (`controllers/authController.js`)
+### Auth Controller (`controllers/auth.controller.js`)
 
 **Functions:**
 
-1. **`register(req, res)`**
-   - สมัครสมาชิกใหม่
-   - Validate input
-   - Check duplicate email
-   - Create user & return token
-
-2. **`login(req, res)`**
+1. **`login(req, res)`**
    - เข้าสู่ระบบ
    - Validate credentials
    - Check user status
    - Return user data & token
 
-3. **`getMe(req, res)`**
+2. **`getMe(req, res)`**
    - ดึงข้อมูลผู้ใช้ปัจจุบัน
    - Requires: `protect` middleware
 
-4. **`updateProfile(req, res)`**
+3. **`updateProfile(req, res)`**
    - แก้ไขข้อมูลส่วนตัว
    - Requires: `protect` middleware
 
-5. **`changePassword(req, res)`**
+4. **`changePassword(req, res)`**
    - เปลี่ยนรหัสผ่าน
    - Validate current password
    - Hash new password
@@ -118,11 +112,10 @@ router.delete('/users/:id', protect, admin, deleteUser);
 
 ## Routes
 
-### Auth Routes (`routes/auth.js`)
+### Auth Routes (`routes/auth.routes.js`)
 
 ```javascript
 // Public routes
-POST   /api/auth/register      // Register new user
 POST   /api/auth/login         // Login
 
 // Private routes (require token)
@@ -258,17 +251,6 @@ npm start
 ## Testing API
 
 ### Using cURL
-
-**Register:**
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "johndoe",
-    "password": "password123",
-    "name": "John Doe"
-  }'
-```
 
 **Login:**
 ```bash

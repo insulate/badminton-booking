@@ -35,7 +35,6 @@
   - ไฟล์: `backend/middleware/auth.js`
 
 - [x] สร้าง Auth Routes `/api/auth` ✅
-  - POST `/register` - สมัครสมาชิก
   - POST `/login` - เข้าสู่ระบบ (ใช้ username + password)
   - GET `/profile` - ดูข้อมูลผู้ใช้
   - PUT `/profile` - อัพเดทข้อมูล
@@ -62,11 +61,11 @@
 
 - [x] สร้าง API Service ✅
   - services/api.js (Axios instance with interceptors)
-  - services/authService.js (login, register, logout, profile)
+  - services/authService.js (login, logout, profile)
 
 - [x] สร้าง Auth Store (Zustand) ✅
   - store/authStore.js
-  - login, logout, register, updateProfile state management
+  - login, logout, updateProfile state management
 
 - [x] สร้าง Login Page ✅
   - LoginPage.jsx พร้อม beautiful Tailwind UI
@@ -89,7 +88,7 @@
   - Auto redirect based on auth state
 
 ### Testing Sprint 1
-- [x] ทดสอบ Register + Login API ✅
+- [x] ทดสอบ Login API ✅
 - [x] ทดสอบหน้า Login ใช้งานได้ ✅
 - [x] ทดสอบ redirect หลัง login ✅
 - [x] ทดสอบ Logout ✅
@@ -101,7 +100,7 @@
 - ✅ **Backend Authentication API พร้อมใช้งาน 100%**
   - User Model with username-based login
   - JWT Authentication & Authorization
-  - Auth endpoints: register, login, profile, change-password
+  - Auth endpoints: login, profile, change-password
   - CORS configured for frontend
   - MongoDB Atlas connected (dev_badminton database)
   - Admin user created successfully
@@ -567,7 +566,6 @@
 6. ⏳ ทดสอบระบบ Login
 
 **Backend API Endpoints พร้อมใช้งาน:**
-- POST `/api/auth/register` - สมัครสมาชิก
 - POST `/api/auth/login` - เข้าสู่ระบบ (username + password)
 - GET `/api/auth/profile` - ดูข้อมูลผู้ใช้ (ต้อง JWT token)
 - PUT `/api/auth/profile` - อัพเดทข้อมูล

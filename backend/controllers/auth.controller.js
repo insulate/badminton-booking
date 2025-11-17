@@ -8,58 +8,6 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
-const register = async (req, res) => {
-  try {
-    const { username, password, name } = req.body;
-
-    // Validate input
-    if (!username || !password || !name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields'
-      });
-    }
-
-    // Check if user already exists
-    const userExists = await User.findOne({ username });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this username'
-      });
-    }
-
-    // Create user
-    const user = await User.create({
-      username,
-      password,
-      name
-    });
-
-    if (user) {
-      res.status(201).json({
-        success: true,
-        data: {
-          _id: user._id,
-          username: user.username,
-          name: user.name,
-          role: user.role,
-          token: generateToken(user._id)
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Server error'
-    });
-  }
-};
-
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
@@ -230,7 +178,6 @@ const changePassword = async (req, res) => {
 };
 
 module.exports = {
-  register,
   login,
   getMe,
   updateProfile,
