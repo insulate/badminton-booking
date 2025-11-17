@@ -29,3 +29,8 @@ frontend/build/
 
 # Backend specific
 backend/logs/
+
+# Testing
+.playwright-mcp/
+coverage/
+*.lcov
