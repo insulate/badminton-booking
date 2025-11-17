@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { ROUTES } from '../../constants';
 import useAuthStore from '../../store/authStore';
 import {
   LayoutDashboard,
@@ -20,23 +21,23 @@ export default function AdminLayout() {
   const handleLogout = () => {
     logout();
     toast.success('ออกจากระบบสำเร็จ');
-    navigate('/login');
+    navigate(ROUTES.LOGIN);
   };
 
   const menuItems = [
     {
       name: 'Dashboard',
-      path: '/admin/dashboard',
+      path: ROUTES.ADMIN.DASHBOARD,
       icon: LayoutDashboard,
     },
     {
       name: 'จัดการผู้ใช้งาน',
-      path: '/admin/users',
+      path: ROUTES.ADMIN.USERS,
       icon: Users,
     },
     {
       name: 'ตั้งค่า',
-      path: '/admin/settings',
+      path: ROUTES.ADMIN.SETTINGS,
       icon: Settings,
     },
   ];

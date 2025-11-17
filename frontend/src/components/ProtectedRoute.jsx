@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { ROUTES } from '../constants';
 import useAuthStore from '../store/authStore';
 
 export default function ProtectedRoute({ children }) {
@@ -30,7 +31,7 @@ export default function ProtectedRoute({ children }) {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   // Render children if authenticated

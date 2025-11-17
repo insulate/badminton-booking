@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { ROUTES } from '../constants';
 import useAuthStore from '../store/authStore';
 import { authAPI } from '../lib/api';
 import { LogIn, User, Lock, AlertCircle } from 'lucide-react';
@@ -18,7 +19,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin/dashboard', { replace: true });
+      navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -50,7 +51,7 @@ export default function Login() {
       toast.success('เข้าสู่ระบบสำเร็จ!');
 
       // Redirect to admin dashboard
-      navigate('/admin/dashboard');
+      navigate(ROUTES.ADMIN.DASHBOARD);
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
       setError(errorMessage);

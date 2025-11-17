@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { API_BASE_URL, API_ENDPOINTS, ROUTES } from '../constants';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -30,7 +31,7 @@ api.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = ROUTES.LOGIN;
     }
     return Promise.reject(error);
   }
@@ -39,22 +40,22 @@ api.interceptors.response.use(
 // Authentication API
 export const authAPI = {
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
+    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
     return response.data;
   },
 
   getMe: async () => {
-    const response = await api.get('/auth/me');
+    const response = await api.get(API_ENDPOINTS.AUTH.ME);
     return response.data;
   },
 
   updateProfile: async (data) => {
-    const response = await api.put('/auth/profile', data);
+    const response = await api.put(API_ENDPOINTS.AUTH.UPDATE_PROFILE, data);
     return response.data;
   },
 
   changePassword: async (data) => {
-    const response = await api.put('/auth/password', data);
+    const response = await api.put(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, data);
     return response.data;
   },
 };
@@ -62,32 +63,32 @@ export const authAPI = {
 // User API (Admin only)
 export const userAPI = {
   getAll: async (params) => {
-    const response = await api.get('/users', { params });
+    const response = await api.get(API_ENDPOINTS.USERS.LIST, { params });
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/users/${id}`);
+    const response = await api.get(API_ENDPOINTS.USERS.GET(id));
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post('/users', data);
+    const response = await api.post(API_ENDPOINTS.USERS.CREATE, data);
     return response.data;
   },
 
   update: async (id, data) => {
-    const response = await api.put(`/users/${id}`, data);
+    const response = await api.put(API_ENDPOINTS.USERS.UPDATE(id), data);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/users/${id}`);
+    const response = await api.delete(API_ENDPOINTS.USERS.DELETE(id));
     return response.data;
   },
 
   restore: async (id) => {
-    const response = await api.patch(`/users/${id}/restore`);
+    const response = await api.patch(API_ENDPOINTS.USERS.RESTORE(id));
     return response.data;
   },
 };
