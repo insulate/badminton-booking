@@ -6,9 +6,9 @@ const logger = require('morgan');
 const cors = require('cors');
 const connectDB = require('./config/database');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const authRouter = require('./routes/auth');
+const indexRouter = require('./routes/index.routes');
+const usersRouter = require('./routes/users.routes');
+const authRouter = require('./routes/auth.routes');
 
 const app = express();
 

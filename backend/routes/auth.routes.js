@@ -6,7 +6,7 @@ const {
   getMe,
   updateProfile,
   changePassword
-} = require('../controllers/authController');
+} = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 
 // Public routes
