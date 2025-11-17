@@ -8,6 +8,7 @@ const connectDB = require('./config/database');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/auth', authRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {
