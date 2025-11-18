@@ -15,11 +15,12 @@
 - รองรับการจองหลายช่วงเวลาต่อเนื่อง
 
 ### 2. ระบบตีก๊วน (Group Play)
-- ลงทะเบียนผู้เล่นหน้างาน
-- จัดคิวการเล่นอัตโนมัติ
-- ระบบจับคู่ตามระดับความสามารถ
-- หมุนเวียนผู้เล่น (Winner Stays / All Rotate)
-- แสดงคิวและเวลารอบนหน้าจอ
+- Check-in ผู้เล่น พร้อมคิดค่าเข้าร่วม (ครั้งเดียวต่อวัน)
+- บันทึกทีมที่ลงสนามแข่ง (สถานะ: กำลังเล่น)
+- บันทึกผลเมื่อเล่นเสร็จ + ใช้สินค้า (ลูกแบด, น้ำ, ขนม)
+- คำนวณค่าใช้จ่ายรวมต่อคน (ค่าเข้าร่วม + ค่าสินค้า ÷ จำนวนคนในทีม)
+- สรุปยอดเงินเมื่อ Check-out
+- รองรับการเล่นซ้ำหลายเกม (จ่ายค่าเข้าร่วมครั้งเดียว)
 
 ### 3. ระบบขายสินค้า (POS)
 - ขายสินค้า, อาหาร, เครื่องดื่ม
@@ -245,19 +246,27 @@ Selected: 2 ช่วงเวลา
 ### 3. หน้าตีก๊วน
 
 ```
-Session: Evening Play (18:00-21:00)
-สถานะ: กำลังเล่น
+Session: ก๊วนจันทร์-ศุกร์ (Court A, 18:00-24:00)
+สถานะ: กำลังเปิด
 
-┌─────────────────────────┬──────────────────────────┐
-│     คิวรอเล่น (8 คน)    │    กำลังเล่น (4 คอร์ท)   │
-├─────────────────────────┼──────────────────────────┤
-│ 1. สมชาย (รอ 15 นาที)  │ Court 1: ทีม A vs ทีม B │
-│ 2. สมหญิง (รอ 30 นาที)  │         (เวลา 12:45)     │
-│ 3. สมศรี (รอ 45 นาที)   │ Court 2: ทีม C vs ทีม D │
-│ ...                     │         (เวลา 08:30)     │
-└─────────────────────────┴──────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│           ผู้เล่นที่ Check-in แล้ว (8 คน)                 │
+├──────┬──────────────┬──────┬─────────┬──────────┬─────────┤
+│ ชื่อ │   เบอร์โทร   │ เข้า │ เล่นแล้ว│ ค่าใช้จ่าย│ สถานะ   │
+├──────┼──────────────┼──────┼─────────┼──────────┼─────────┤
+│สมชาย │ 081-234-5678 │14:05 │ 3 เกม   │  95 บาท  │ กำลังเล่น│
+│สมหญิง│ 082-345-6789 │14:10 │ 2 เกม   │  70 บาท  │ รอ      │
+│สมศรี │ 083-456-7890 │14:15 │ 1 เกม   │  45 บาท  │ รอ      │
+└──────┴──────────────┴──────┴─────────┴──────────┴─────────┘
 
-[ลงทะเบียนผู้เล่นใหม่] [จบเกม] [จัดคิวใหม่]
+┌───────────────────────────────────────────────────────────┐
+│                   เกมที่กำลังเล่น                         │
+├──────────────────────────────────────────────────────────┤
+│ เกม #1: สมชาย + สมพร vs สมหมาย + สมใจ                   │
+│         เริ่ม: 15:30 | กำลังเล่น                         │
+└──────────────────────────────────────────────────────────┘
+
+[Check-in ผู้เล่น] [เริ่มเกมใหม่] [จบเกม] [Check-out]
 ```
 
 ---
@@ -291,12 +300,14 @@ Session: Evening Play (18:00-21:00)
 ### Group Play (ตีก๊วน)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/groupplay` | ดู Session ทั้งหมด |
-| POST | `/api/groupplay` | สร้าง Session ใหม่ |
-| POST | `/api/groupplay/:id/register` | ลงทะเบียนผู้เล่น |
-| PATCH | `/api/groupplay/:id/checkin/:phone` | Check-in ผู้เล่น |
-| PATCH | `/api/groupplay/:id/start` | เริ่ม Session |
-| GET | `/api/groupplay/:id/queue` | ดูคิว |
+| GET | `/api/groupplay` | ดู Session ทั้งหมด (filter by date, court, status) |
+| POST | `/api/groupplay` | สร้าง Session ใหม่ (แบบวันเดียว หรือ recurring) + สร้าง booking ใน Calendar |
+| GET | `/api/groupplay/:id` | ดูรายละเอียด Session |
+| POST | `/api/groupplay/:id/checkin` | Check-in ผู้เล่น + เก็บค่าเข้าร่วม |
+| POST | `/api/groupplay/:id/game/start` | เริ่มเกมใหม่ (เลือกผู้เล่น 2-4 คน) |
+| PATCH | `/api/groupplay/:id/game/:gameId/finish` | จบเกม + บันทึกสินค้าที่ใช้ + คำนวณค่าใช้จ่าย |
+| POST | `/api/groupplay/:id/checkout` | Check-out ผู้เล่น + สรุปยอดเงิน |
+| DELETE | `/api/groupplay/:id` | ลบ Session + ลบ booking ใน Calendar |
 
 ### Products & Sales
 | Method | Endpoint | Description |
@@ -363,40 +374,45 @@ Session: Evening Play (18:00-21:00)
 ### GroupPlay (ตีก๊วน)
 ```javascript
 {
-  date: Date,
-  session: {
-    name: String,         // "Evening Session"
-    startTime: String,
-    endTime: String
-  },
-  courts: [ObjectId],     // ref: Court
+  sessionName: String,              // เช่น "ก๊วนจันทร์-ศุกร์"
+  court: ObjectId,                  // ref: Court
+  date: Date,                       // วันที่เริ่ม (สำหรับ session แบบวันเดียว)
+  daysOfWeek: [String],             // ["monday", "tuesday", ...] สำหรับ recurring
+  startTime: String,                // เช่น "18:00"
+  endTime: String,                  // เช่น "24:00"
+  entryFee: Number,                 // Default 30 บาท (configurable)
+  recurring: Boolean,               // true ถ้าเป็น session ประจำ
   players: [{
     name: String,
     phone: String,
-    level: String,        // beginner/intermediate/advanced
+    password: String,               // Default password สำหรับอนาคต
+    checkedIn: Boolean,
     checkInTime: Date,
-    status: String,       // waiting/playing/finished
-    gamesPlayed: Number,
-    fee: Number,
-    paid: Boolean
+    entryFeePaid: Boolean,          // จ่ายค่าเข้าร่วมแล้วหรือยัง
+    games: [{
+      gameNumber: Number,
+      teammates: [PlayerId],        // คนที่เล่นด้วยกัน
+      opponents: [PlayerId],        // คนฝั่งตรงข้าม
+      status: String,               // "playing", "finished"
+      startTime: Date,
+      endTime: Date,
+      items: [{                     // สินค้าที่ใช้ในเกมนี้ (ลูกแบด, น้ำ, ขนม)
+        product: ObjectId,          // ref: Product
+        quantity: Number,
+        price: Number
+      }],
+      totalItemsCost: Number,       // รวมค่าสินค้าในเกมนี้
+      costPerPlayer: Number         // totalItemsCost / จำนวนผู้เล่นในเกม
+    }],
+    totalCost: Number,              // entryFee + sum(costPerPlayer ของทุกเกม)
+    paymentStatus: String,          // "unpaid", "paid"
+    checkedOut: Boolean,
+    checkOutTime: Date
   }],
-  queue: [String],        // Phone numbers
-  currentGames: [{
-    court: ObjectId,
-    players: [String],
-    startTime: Date,
-    score: {
-      team1: Number,
-      team2: Number
-    },
-    status: String        // playing/finished
-  }],
-  settings: {
-    gameType: String,     // singles/doubles/mixed
-    pointsPerGame: Number,
-    minutesPerGame: Number,
-    rotationType: String  // winner_stays/all_rotate
-  }
+  status: String,                   // "scheduled", "active", "completed"
+  createdBy: ObjectId,              // ref: User
+  createdAt: Date,
+  updatedAt: Date
 }
 ```
 
@@ -588,19 +604,44 @@ const booking = {
 const response = await axios.post('/api/bookings', booking);
 ```
 
-### 3. การลงทะเบียนผู้เล่นตีก๊วน
+### 3. Check-in ผู้เล่นตีก๊วน
 ```javascript
-// POST /api/groupplay/:sessionId/register
+// POST /api/groupplay/:sessionId/checkin
 const player = {
   name: "สมศรี",
-  phone: "0898765432",
-  level: "intermediate",
-  fee: 100
+  phone: "0898765432"
 };
 
+// Check-in และเก็บค่าเข้าร่วม 30 บาท (ครั้งเดียวต่อวัน)
 const response = await axios.post(
-  `/api/groupplay/${sessionId}/register`, 
+  `/api/groupplay/${sessionId}/checkin`,
   player
+);
+```
+
+### 4. จบเกมและคำนวณค่าใช้จ่าย
+```javascript
+// PATCH /api/groupplay/:sessionId/game/:gameId/finish
+const gameData = {
+  items: [
+    {
+      product: "65f1234567890abcdef12345", // ลูกแบด
+      quantity: 1,
+      price: 60
+    },
+    {
+      product: "65f1234567890abcdef12346", // น้ำ
+      quantity: 1,
+      price: 20
+    }
+  ]
+};
+
+// คำนวณ: totalItemsCost = 80 บาท
+// costPerPlayer = 80 ÷ 4 คน = 20 บาท/คน
+const response = await axios.patch(
+  `/api/groupplay/${sessionId}/game/${gameId}/finish`,
+  gameData
 );
 ```
 

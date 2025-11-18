@@ -364,105 +364,10 @@
 
 ---
 
-## **PHASE 5: Group Play System** 👥
-> ระยะเวลา: 2 วัน | ความสำคัญ: ปานกลาง | Full-Stack Feature
+## **PHASE 5: POS & Products** 🛒
+> ระยะเวลา: 1-2 วัน | ความสำคัญ: สูง | Full-Stack Feature
 
-### 5.1 Backend - Group Play API
-**ไฟล์**:
-- `backend/models/groupplay.model.js`
-- `backend/routes/groupplay.routes.js`
-
-**Schema**:
-```javascript
-{
-  sessionName: String,
-  court: ObjectId (ref: Court),
-  date: Date,
-  startTime: String,
-  endTime: String,
-  maxPlayers: Number,
-  currentPlayers: [{
-    name: String,
-    phone: String,
-    level: String,        // "beginner", "intermediate", "advanced"
-    checkedIn: Boolean,
-    gamesPlayed: Number,
-  }],
-  queue: [PlayerId],
-  currentGames: [{
-    court: Number,
-    players: [PlayerId],
-    startTime: Date,
-  }],
-  matchingMode: String,   // "fifo", "skill-based", "random"
-  rotationMode: String,   // "winner-stays", "all-rotate"
-  status: String,         // "scheduled", "active", "completed"
-}
-```
-
-**API Endpoints**: 10+ endpoints
-- `GET /api/groupplay` - ดู Session ทั้งหมด
-- `POST /api/groupplay` - สร้าง Session ใหม่
-- `POST /api/groupplay/:id/register` - ลงทะเบียนผู้เล่น
-- `PATCH /api/groupplay/:id/checkin/:playerId` - Check-in ผู้เล่น
-- `PATCH /api/groupplay/:id/start` - เริ่ม Session
-- `GET /api/groupplay/:id/queue` - ดูคิว
-- `POST /api/groupplay/:id/match` - จับคู่ผู้เล่นอัตโนมัติ
-- `PATCH /api/groupplay/:id/finish-game` - จบเกม (update queue)
-- `PATCH /api/groupplay/:id/end` - จบ Session
-- `DELETE /api/groupplay/:id` - ลบ Session
-
-**Logic**:
-- จัดการคิว (FIFO / Skill-based)
-- จับคู่ผู้เล่น (singles/doubles)
-- หมุนเวียน (winner stays / all rotate)
-- นับเกมที่เล่นของแต่ละคน
-
-**Tasks**:
-- [ ] สร้าง GroupPlay Model
-- [ ] สร้าง API routes
-- [ ] สร้าง queue management logic
-- [ ] สร้าง matching algorithm
-- [ ] ทดสอบ API
-
----
-
-### 5.2 Frontend - Group Play
-**ไฟล์**:
-- `frontend/src/pages/admin/GroupPlayPage.jsx`
-- `frontend/src/components/groupplay/SessionCard.jsx`
-- `frontend/src/components/groupplay/PlayerRegistrationForm.jsx`
-- `frontend/src/components/groupplay/QueueDisplay.jsx`
-- `frontend/src/components/groupplay/CurrentGamesGrid.jsx`
-- `frontend/src/components/groupplay/PlayerList.jsx`
-
-**Features**:
-- สร้าง/เลือก Session
-- เพิ่มผู้เล่นเข้าคิว (ชื่อ, เบอร์, ระดับ)
-- Check-in ผู้เล่น
-- จับคู่อัตโนมัติ (คลิกปุ่มเดียว)
-- บันทึกผลแพ้ชนะ (จบเกม)
-- แสดงสถิติผู้เล่น (เล่นไปกี่เกม)
-
-**Tasks**:
-- [ ] สร้าง GroupPlayPage
-- [ ] สร้าง SessionCard component
-- [ ] สร้าง PlayerRegistrationForm component
-- [ ] สร้าง QueueDisplay component (real-time)
-- [ ] สร้าง CurrentGamesGrid component
-- [ ] สร้าง PlayerList component
-- [ ] สร้าง Matching Button (จับคู่)
-- [ ] Integrate กับ API
-- [ ] เพิ่มใน main menu
-
-**🎯 Milestone**: Group Play System พร้อมใช้งานครบ 100%
-
----
-
-## **PHASE 6: POS & Products** 🛒
-> ระยะเวลา: 1-2 วัน | ความสำคัญ: ปานกลาง | Full-Stack Feature
-
-### 6.1 Backend - Products & Sales API
+### 5.1 Backend - Products & Sales API
 **ไฟล์**:
 - `backend/models/product.model.js`
 - `backend/models/sale.model.js`
@@ -529,7 +434,7 @@
 
 ---
 
-### 6.2 Frontend - Product Management
+### 5.2 Frontend - Product Management
 **ไฟล์**:
 - `frontend/src/pages/admin/settings/ProductsPage.jsx`
 - `frontend/src/components/products/ProductTable.jsx`
@@ -552,7 +457,7 @@
 
 ---
 
-### 6.3 Frontend - POS Page
+### 5.3 Frontend - POS Page
 **ไฟล์**:
 - `frontend/src/pages/admin/POSPage.jsx`
 - `frontend/src/components/pos/ProductGrid.jsx`
@@ -578,6 +483,177 @@
 - [ ] เพิ่มใน main menu
 
 **🎯 Milestone**: POS & Products พร้อมใช้งานครบ 100%
+
+---
+
+---
+
+## **PHASE 6: Group Play System** 👥
+> ระยะเวลา: 2-3 วัน | ความสำคัญ: สูง | Full-Stack Feature | **ต้องทำหลัง POS (Phase 5)**
+
+⚠️ **หมายเหตุ**: Phase นี้ต้องทำหลังจาก Phase 5 (POS) เสร็จแล้ว เพราะต้องใช้ข้อมูลสินค้าในการคำนวณค่าใช้จ่าย
+
+### 6.1 Backend - Group Play API
+**ไฟล์**:
+- `backend/models/groupplay.model.js`
+- `backend/routes/groupplay.routes.js`
+
+**Schema**:
+```javascript
+{
+  sessionName: String,              // เช่น "ก๊วนจันทร์-ศุกร์"
+  court: ObjectId (ref: Court),
+  date: Date,                       // วันที่เริ่ม (สำหรับ session แบบวันเดียว)
+  daysOfWeek: [String],             // ["monday", "tuesday", ...] สำหรับ recurring
+  startTime: String,                // เช่น "18:00"
+  endTime: String,                  // เช่น "24:00"
+  entryFee: Number,                 // Default 30 บาท (configurable)
+  players: [{
+    name: String,
+    phone: String,
+    password: String,               // Default password สำหรับอนาคต
+    checkedIn: Boolean,
+    checkInTime: Date,
+    entryFeePaid: Boolean,          // จ่ายค่าเข้าร่วมแล้วหรือยัง
+    games: [{
+      gameNumber: Number,
+      teammates: [PlayerId],        // คนที่เล่นด้วยกัน
+      opponents: [PlayerId],        // คนฝั่งตรงข้าม
+      status: String,               // "playing", "finished"
+      startTime: Date,
+      endTime: Date,
+      items: [{                     // สินค้าที่ใช้ในเกมนี้ (ลูกแบด, น้ำ, ขนม)
+        product: ObjectId (ref: Product),
+        quantity: Number,
+        price: Number
+      }],
+      totalItemsCost: Number,       // รวมค่าสินค้าในเกมนี้
+      costPerPlayer: Number         // totalItemsCost / จำนวนผู้เล่นในเกม
+    }],
+    totalCost: Number,              // entryFee + sum(costPerPlayer ของทุกเกม)
+    paymentStatus: String,          // "unpaid", "paid"
+    checkedOut: Boolean,
+    checkOutTime: Date
+  }],
+  status: String,                   // "scheduled", "active", "completed"
+  recurring: Boolean,               // true ถ้าเป็น session ประจำ
+  createdBy: ObjectId (ref: User),
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+**API Endpoints**: 8 endpoints
+- `GET /api/groupplay` - ดู Session ทั้งหมด (filter by date, court, status)
+- `POST /api/groupplay` - สร้าง Session ใหม่ (แบบวันเดียว หรือ recurring)
+  - ตรวจสอบว่าสนามว่างหรือไม่
+  - สร้าง booking ใน Calendar (แสดงเป็น "ก๊วนสนาม")
+- `GET /api/groupplay/:id` - ดูรายละเอียด Session
+- `POST /api/groupplay/:id/checkin` - Check-in ผู้เล่น + เก็บค่าเข้าร่วม
+  - บันทึกข้อมูลผู้เล่น (ชื่อ, เบอร์)
+  - เก็บค่าเข้าร่วม (ครั้งเดียวต่อวัน)
+  - Set entryFeePaid = true
+- `POST /api/groupplay/:id/game/start` - เริ่มเกมใหม่
+  - เลือกผู้เล่น 2-4 คน จากรายชื่อที่ check-in แล้ว
+  - สร้าง game object ใหม่ใน player.games[] ของผู้เล่นทุกคน
+  - Set status = "playing"
+- `PATCH /api/groupplay/:id/game/:gameId/finish` - จบเกม + บันทึกสินค้าที่ใช้
+  - เลือกสินค้าจาก POS (ลูกแบด, น้ำ, ขนม)
+  - คำนวณ totalItemsCost
+  - คำนวณ costPerPlayer = totalItemsCost / จำนวนผู้เล่น
+  - Update totalCost ของผู้เล่นแต่ละคน
+  - Set status = "finished", endTime = now
+- `POST /api/groupplay/:id/checkout` - Check-out ผู้เล่น
+  - แสดงสรุปยอดเงิน (entryFee + รวมค่าสินค้าทุกเกม)
+  - อัพเดท paymentStatus = "paid"
+  - Set checkedOut = true, checkOutTime = now
+- `DELETE /api/groupplay/:id` - ลบ Session
+  - ลบ booking ใน Calendar ด้วย
+
+**Logic**:
+- ตรวจสอบว่าผู้เล่นจ่ายค่าเข้าร่วมแล้วหรือยัง (ครั้งเดียวต่อวัน)
+- คำนวณค่าใช้จ่ายต่อคนในแต่ละเกม (ค่าสินค้า ÷ จำนวนผู้เล่น)
+- คำนวณยอดรวมทั้งหมดของผู้เล่น (ค่าเข้าร่วม + ค่าสินค้าจากทุกเกม)
+- Integration กับ Booking Calendar (block court, แสดงเป็น "ก๊วนสนาม")
+- Integration กับ POS (ดึงข้อมูลสินค้า, ราคา)
+
+**Tasks**:
+- [ ] สร้าง GroupPlay Model (schema ใหม่ตามด้านบน)
+- [ ] สร้าง API routes (8 endpoints)
+- [ ] สร้าง cost calculation logic
+- [ ] Integrate กับ Booking Calendar API
+- [ ] Integrate กับ POS/Product API
+- [ ] ทดสอบ API (Postman/curl)
+- [ ] ทดสอบ calculation scenarios ต่างๆ
+
+---
+
+### 6.2 Frontend - Group Play
+**ไฟล์**:
+- `frontend/src/pages/admin/GroupPlayPage.jsx`
+- `frontend/src/components/groupplay/SessionManager.jsx`
+- `frontend/src/components/groupplay/CreateSessionModal.jsx`
+- `frontend/src/components/groupplay/PlayerCheckInModal.jsx`
+- `frontend/src/components/groupplay/PlayerList.jsx`
+- `frontend/src/components/groupplay/StartGameModal.jsx`
+- `frontend/src/components/groupplay/FinishGameModal.jsx`
+- `frontend/src/components/groupplay/CheckOutModal.jsx`
+- `frontend/src/components/groupplay/GamesList.jsx`
+
+**Features**:
+1. **สร้าง Session**
+   - เลือกสนาม
+   - เลือกวันที่ (แบบวันเดียว หรือ recurring Mon-Fri)
+   - กำหนดเวลา (เช่น 18:00-24:00)
+   - ตั้งค่าค่าเข้าร่วม (default 30 บาท)
+   - ตรวจสอบว่าสนามว่างหรือไม่ (alert ถ้าซ้อน)
+
+2. **Check-in ผู้เล่น**
+   - กรอกชื่อ + เบอร์โทร
+   - คิดค่าเข้าร่วม 30 บาท (ครั้งเดียวต่อวัน)
+   - แสดงปุ่ม "จ่ายเงินแล้ว"
+   - เพิ่มผู้เล่นเข้ารายชื่อ
+
+3. **เริ่มเกม (Start Game)**
+   - เลือกผู้เล่น 2-4 คน จากรายชื่อที่ check-in แล้ว
+   - บันทึกว่าใครเล่นกับใคร (teammates vs opponents)
+   - แสดงสถานะ "กำลังเล่น"
+
+4. **จบเกม (Finish Game)**
+   - เลือกสินค้าที่ใช้จาก POS (ลูกแบด, น้ำ, ขนม)
+   - แสดงยอดรวมค่าสินค้า
+   - แสดงค่าใช้จ่ายต่อคน (รวมค่าสินค้า ÷ จำนวนผู้เล่น)
+   - บันทึกเวลาจบเกม
+
+5. **Check-out ผู้เล่น**
+   - แสดงสรุปยอดเงิน:
+     - ค่าเข้าร่วม: 30 บาท (ครั้งเดียว)
+     - เกมที่ 1: +15 บาท (ลูกแบด 60÷4)
+     - เกมที่ 2: +20 บาท (ลูกแบด 60÷4 + น้ำ 20÷4)
+     - รวม: 65 บาท
+   - ปุ่ม "จ่ายเงินแล้ว"
+   - บันทึกเวลา check-out
+
+6. **แสดงรายการเกม**
+   - แสดงเกมที่กำลังเล่น
+   - แสดงเกมที่เล่นเสร็จแล้ว (พร้อมค่าใช้จ่าย)
+   - แสดงสถิติของผู้เล่นแต่ละคน (เล่นไปกี่เกม, ค่าใช้จ่ายรวม)
+
+**Tasks**:
+- [ ] สร้าง GroupPlayPage (main page)
+- [ ] สร้าง SessionManager component (เลือก/สร้าง session)
+- [ ] สร้าง CreateSessionModal (form สร้าง session + recurring days)
+- [ ] สร้าง PlayerCheckInModal (check-in + เก็บค่าเข้าร่วม)
+- [ ] สร้าง PlayerList component (แสดงรายชื่อผู้เล่นที่ check-in)
+- [ ] สร้าง StartGameModal (เลือกผู้เล่น 2-4 คน)
+- [ ] สร้าง FinishGameModal (เลือกสินค้า + คำนวณค่าใช้จ่าย)
+- [ ] สร้าง CheckOutModal (สรุปยอดเงิน + ปุ่มจ่ายเงิน)
+- [ ] สร้าง GamesList component (แสดงเกมทั้งหมด + สถิติ)
+- [ ] Integrate ทุก component กับ API
+- [ ] เพิ่ม "Group Play" ใน Admin menu
+- [ ] ทดสอบ flow ทั้งหมด (check-in → start game → finish → checkout)
+
+**🎯 Milestone**: Group Play System พร้อมใช้งานครบ 100% (รองรับ recurring sessions, POS integration, cost calculation)
 
 ---
 
