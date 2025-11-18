@@ -8,9 +8,8 @@ import { X, Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, DollarSign }
 const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePayment }) => {
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [paymentData, setPaymentData] = useState({
-    paymentStatus: booking.paymentStatus || 'pending',
     paymentMethod: booking.paymentMethod || 'cash',
-    paidAmount: booking.pricing?.paidAmount || 0,
+    amountPaid: 0, // Amount to pay (incremental)
   });
 
   if (!isOpen || !booking) return null;
@@ -216,24 +215,6 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      สถานะการชำระเงิน
-                    </label>
-                    <select
-                      value={paymentData.paymentStatus}
-                      onChange={(e) =>
-                        setPaymentData({ ...paymentData, paymentStatus: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="pending">รอชำระ</option>
-                      <option value="partial">ชำระบางส่วน</option>
-                      <option value="paid">ชำระแล้ว</option>
-                      <option value="refunded">คืนเงิน</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       วิธีการชำระเงิน
                     </label>
                     <select
@@ -256,9 +237,9 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     </label>
                     <input
                       type="number"
-                      value={paymentData.paidAmount}
+                      value={paymentData.amountPaid}
                       onChange={(e) =>
-                        setPaymentData({ ...paymentData, paidAmount: Number(e.target.value) })
+                        setPaymentData({ ...paymentData, amountPaid: Number(e.target.value) })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       min="0"
@@ -303,7 +284,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     <div className="flex-1">
                       <p className="text-sm text-gray-600">จำนวนเงินที่ชำระ</p>
                       <p className="font-medium text-gray-900">
-                        ฿{formatPrice(booking.pricing?.paidAmount || 0)} / ฿
+                        ฿{formatPrice(booking.pricing?.deposit || 0)} / ฿
                         {formatPrice(booking.pricing?.total || 0)}
                       </p>
                     </div>
