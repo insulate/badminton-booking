@@ -287,19 +287,34 @@ const TimeSlotModal = ({ timeslot, onClose, onSuccess }) => {
             </div>
           </div>
 
-          {/* Peak Hour */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="peakHour"
-              id="peakHour"
-              checked={formData.peakHour}
-              onChange={handleChange}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="peakHour" className="ml-2 text-sm font-medium text-gray-700">
-              Peak Hour (ช่วงเวลาเร่งด่วน)
-            </label>
+          {/* Peak Hour Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div>
+              <label htmlFor="peakHour" className="text-sm font-medium text-gray-700">
+                Peak Hour (ช่วงเวลาเร่งด่วน)
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                เปิดใช้งานราคา Peak Hour สำหรับช่วงเวลานี้
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({
+                  ...prev,
+                  peakHour: !prev.peakHour,
+                }))
+              }
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                formData.peakHour ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData.peakHour ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Status */}

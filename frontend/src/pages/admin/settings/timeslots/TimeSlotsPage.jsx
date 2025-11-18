@@ -55,6 +55,39 @@ const TimeSlotsPage = () => {
     }
   };
 
+  const handleTogglePeakHour = async (timeslot) => {
+    const newPeakHourStatus = !timeslot.peakHour;
+
+    // Optimistic update - อัปเดต UI ทันทีก่อนเรียก API
+    setTimeslots((prevTimeslots) =>
+      prevTimeslots.map((t) =>
+        t._id === timeslot._id ? { ...t, peakHour: newPeakHourStatus } : t
+      )
+    );
+
+    try {
+      const response = await timeslotsAPI.update(timeslot._id, {
+        ...timeslot,
+        peakHour: newPeakHourStatus,
+      });
+      if (response.success) {
+        toast.success(
+          newPeakHourStatus ? 'เปิด Peak Hour สำเร็จ' : 'ปิด Peak Hour สำเร็จ'
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling peak hour:', error);
+      toast.error('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ Peak Hour');
+
+      // Revert กลับถ้า API ล้มเหลว
+      setTimeslots((prevTimeslots) =>
+        prevTimeslots.map((t) =>
+          t._id === timeslot._id ? { ...t, peakHour: timeslot.peakHour } : t
+        )
+      );
+    }
+  };
+
   const handleEdit = (timeslot) => {
     setSelectedTimeslot(timeslot);
     setShowModal(true);
@@ -250,13 +283,20 @@ const TimeSlotsPage = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {timeslot.peakHour ? (
-                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                  Peak
-                                </span>
-                              ) : (
-                                <span className="text-gray-400 text-xs">-</span>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleTogglePeakHour(timeslot)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                                  timeslot.peakHour ? 'bg-orange-600' : 'bg-gray-300'
+                                }`}
+                                title={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
+                              >
+                                <span
+                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                    timeslot.peakHour ? 'translate-x-6' : 'translate-x-1'
+                                  }`}
+                                />
+                              </button>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">{timeslot.pricing.normal}฿</div>
@@ -354,13 +394,20 @@ const TimeSlotsPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{getDayTypeBadge(timeslot.dayType)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {timeslot.peakHour ? (
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            Peak
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-xs">-</span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePeakHour(timeslot)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                            timeslot.peakHour ? 'bg-orange-600' : 'bg-gray-300'
+                          }`}
+                          title={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              timeslot.peakHour ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{timeslot.pricing.normal}฿</div>
