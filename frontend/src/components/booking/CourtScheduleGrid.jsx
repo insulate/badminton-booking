@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 /**
  * CourtScheduleGrid Component
  * ตารางแสดงสนาม x ช่วงเวลา พร้อมสถานะว่าง/จองแล้ว
  */
 const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
+  const [selectedBooking, setSelectedBooking] = useState(null);
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
@@ -57,7 +59,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
   // Get slot status color
   const getSlotColor = (slot) => {
     if (!slot.available) {
-      return 'bg-red-100 border-red-300 cursor-not-allowed';
+      return 'bg-red-100 border-red-300 hover:bg-red-200 hover:shadow-md cursor-pointer';
     }
     if (slot.peakHour) {
       return 'bg-orange-50 border-orange-300 hover:bg-orange-100 cursor-pointer';
@@ -68,6 +70,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
   // Handle slot click
   const handleSlotClick = (court, slot) => {
     if (slot.available) {
+      // For available slots, open booking modal
       onSlotClick({
         court,
         timeSlot: {
@@ -77,7 +80,39 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
           peakHour: slot.peakHour,
         },
       });
+    } else {
+      // For booked slots, show booking details in modal
+      setSelectedBooking({
+        ...slot.booking,
+        courtNumber: court.courtNumber,
+        courtName: court.courtName,
+        timeSlot: `${slot.startTime} - ${slot.endTime}`,
+        peakHour: slot.peakHour,
+      });
     }
+  };
+
+  // Get booking status text
+  const getBookingStatusText = (status) => {
+    const statusMap = {
+      pending: 'รอยืนยัน',
+      confirmed: 'ยืนยันแล้ว',
+      'checked-in': 'เช็คอินแล้ว',
+      completed: 'เสร็จสิ้น',
+      cancelled: 'ยกเลิก',
+    };
+    return statusMap[status] || status;
+  };
+
+  // Get payment status text
+  const getPaymentStatusText = (status) => {
+    const statusMap = {
+      pending: 'รอชำระ',
+      partial: 'ชำระบางส่วน',
+      paid: 'ชำระแล้ว',
+      refunded: 'คืนเงินแล้ว',
+    };
+    return statusMap[status] || status;
   };
 
   return (
@@ -152,12 +187,8 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
                           <div className="text-xs font-semibold text-green-700">ว่าง</div>
                         ) : (
                           <div className="text-xs">
-                            <div className="font-semibold text-red-700">จองแล้ว</div>
-                            <div className="text-red-600 mt-0.5">
-                              {slot.booking?.customerName || ''}
-                            </div>
-                            <div className="text-red-500 text-[10px] mt-0.5">
-                              {slot.booking?.customerPhone || ''}
+                            <div className="font-semibold text-red-700">
+                              {slot.booking?.customerName || 'N/A'}
                             </div>
                           </div>
                         )}
@@ -191,6 +222,148 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
           </div>
         </div>
       </div>
+
+      {/* Booking Detail Modal */}
+      {selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">รายละเอียดการจอง</h3>
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              {/* Booking Code */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <p className="text-sm text-blue-600 font-medium">รหัสจอง</p>
+                <p className="text-xl font-bold text-blue-900 mt-1">
+                  {selectedBooking.bookingCode}
+                </p>
+              </div>
+
+              {/* Court and Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">สนาม</p>
+                  <p className="font-semibold text-gray-900">
+                    {selectedBooking.courtNumber}
+                  </p>
+                  <p className="text-xs text-gray-500">{selectedBooking.courtName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">เวลา</p>
+                  <p className="font-semibold text-gray-900">
+                    {selectedBooking.timeSlot}
+                  </p>
+                  {selectedBooking.peakHour && (
+                    <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-800 rounded">
+                      Peak Hour
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Customer Info */}
+              <div className="border-t border-gray-200 pt-4">
+                <p className="text-sm text-gray-600 mb-2">ข้อมูลลูกค้า</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <p className="font-medium text-gray-900">
+                      {selectedBooking.customerName}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                    <p className="text-gray-900">{selectedBooking.customerPhone}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="border-t border-gray-200 pt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">สถานะการจอง</p>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedBooking.bookingStatus === 'confirmed'
+                          ? 'bg-green-100 text-green-800'
+                          : selectedBooking.bookingStatus === 'completed'
+                          ? 'bg-blue-100 text-blue-800'
+                          : selectedBooking.bookingStatus === 'checked-in'
+                          ? 'bg-purple-100 text-purple-800'
+                          : selectedBooking.bookingStatus === 'cancelled'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {getBookingStatusText(selectedBooking.bookingStatus)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">สถานะการชำระ</p>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedBooking.paymentStatus === 'paid'
+                          ? 'bg-green-100 text-green-800'
+                          : selectedBooking.paymentStatus === 'partial'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : selectedBooking.paymentStatus === 'refunded'
+                          ? 'bg-gray-100 text-gray-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}
+                    >
+                      {getPaymentStatusText(selectedBooking.paymentStatus)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
