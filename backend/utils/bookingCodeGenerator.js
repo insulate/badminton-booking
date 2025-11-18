@@ -1,9 +1,12 @@
-const Booking = require('../models/booking.model');
+const Counter = require('../models/counter.model');
 
 /**
- * Generate unique booking code
+ * Generate unique booking code using atomic counter
  * Format: BK{YYYYMMDD}{0001}
  * Example: BK202501180001
+ *
+ * This implementation uses MongoDB's atomic findAndModify operation
+ * to prevent race conditions when multiple bookings are created simultaneously.
  *
  * @param {Date} date - Booking date
  * @returns {Promise<string>} Generated booking code
@@ -19,20 +22,12 @@ const generateBookingCode = async (date = new Date()) => {
     // Prefix for booking code
     const prefix = 'BK';
 
-    // Find the latest booking code for today
-    const latestBooking = await Booking.findOne({
-      bookingCode: new RegExp(`^${prefix}${dateStr}`),
-    })
-      .sort({ bookingCode: -1 })
-      .select('bookingCode');
+    // Counter name for this date (resets daily)
+    const counterName = `booking-${prefix}${dateStr}`;
 
-    let runningNumber = 1;
-
-    if (latestBooking) {
-      // Extract running number from the latest booking code
-      const lastNumber = parseInt(latestBooking.bookingCode.slice(-4));
-      runningNumber = lastNumber + 1;
-    }
+    // Get next sequence number atomically (thread-safe)
+    // This prevents race conditions by using MongoDB's atomic $inc operation
+    const runningNumber = await Counter.getNextSequence(counterName);
 
     // Generate new booking code
     const bookingCode = `${prefix}${dateStr}${String(runningNumber).padStart(4, '0')}`;
