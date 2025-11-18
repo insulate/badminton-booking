@@ -35,12 +35,22 @@ router.put('/', protect, admin, async (req, res) => {
   try {
     let settings = await Setting.findOne();
 
+    // Whitelist allowed fields to prevent mass assignment vulnerabilities
+    const allowedFields = ['venue', 'operating', 'booking', 'payment', 'general'];
+    const updateData = {};
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
     if (!settings) {
       // Create new settings if none exist
-      settings = new Setting(req.body);
+      settings = new Setting(updateData);
     } else {
-      // Update existing settings
-      Object.assign(settings, req.body);
+      // Update existing settings with whitelisted fields only
+      Object.assign(settings, updateData);
     }
 
     await settings.save();

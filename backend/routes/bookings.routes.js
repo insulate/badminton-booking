@@ -73,11 +73,15 @@ router.get('/', protect, async (req, res) => {
     }
 
     if (customerPhone) {
-      query['customer.phone'] = new RegExp(customerPhone, 'i');
+      // Escape special regex characters to prevent ReDoS attacks
+      const escapedPhone = customerPhone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query['customer.phone'] = { $regex: escapedPhone, $options: 'i' };
     }
 
     if (bookingCode) {
-      query.bookingCode = new RegExp(bookingCode, 'i');
+      // Escape special regex characters to prevent ReDoS attacks
+      const escapedCode = bookingCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.bookingCode = { $regex: escapedCode, $options: 'i' };
     }
 
     // Pagination
@@ -553,6 +557,7 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
       });
     }
 
+    // Find booking first to validate
     const booking = await Booking.findById(req.params.id);
 
     if (!booking || booking.deletedAt) {
@@ -569,20 +574,46 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
       });
     }
 
-    await booking.updatePayment(amountPaid);
+    // Calculate new payment status
+    const newAmountPaid = (booking.amountPaid || 0) + amountPaid;
+    let newPaymentStatus = 'unpaid';
 
-    if (paymentMethod) {
-      booking.paymentMethod = paymentMethod;
-      await booking.save();
+    if (newAmountPaid >= booking.totalPrice) {
+      newPaymentStatus = 'paid';
+    } else if (newAmountPaid > 0) {
+      newPaymentStatus = 'partial';
     }
 
-    await booking.populate('court', 'courtNumber name type');
-    await booking.populate('timeSlot', 'startTime endTime peakHour');
+    // Prepare update object
+    const updateData = {
+      amountPaid: newAmountPaid,
+      paymentStatus: newPaymentStatus,
+    };
+
+    if (paymentMethod) {
+      updateData.paymentMethod = paymentMethod;
+    }
+
+    // Atomic update to prevent race conditions
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    )
+      .populate('court', 'courtNumber name type')
+      .populate('timeSlot', 'startTime endTime peakHour');
+
+    if (!updatedBooking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found after update',
+      });
+    }
 
     res.status(200).json({
       success: true,
       message: 'Payment updated successfully',
-      data: booking,
+      data: updatedBooking,
     });
   } catch (error) {
     console.error('Update payment error:', error);

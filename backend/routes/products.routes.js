@@ -268,9 +268,9 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
 /**
  * @route   PATCH /api/products/:id/stock
  * @desc    Update product stock
- * @access  Private (Admin/Staff)
+ * @access  Private (Admin only)
  */
-router.patch('/:id/stock', protect, async (req, res) => {
+router.patch('/:id/stock', protect, admin, async (req, res) => {
   try {
     const { stock } = req.body;
 

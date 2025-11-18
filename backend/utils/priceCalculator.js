@@ -62,6 +62,15 @@ const calculatePrice = async ({
         customerType === 'member' ? timeSlot.pricing.member : timeSlot.pricing.normal;
     }
 
+    // Validate price per hour
+    if (typeof pricePerHour !== 'number' || isNaN(pricePerHour)) {
+      throw new Error('Invalid price configuration: price is not a number');
+    }
+
+    if (pricePerHour < 0) {
+      throw new Error('Invalid price configuration: price cannot be negative');
+    }
+
     // Calculate subtotal
     const subtotal = pricePerHour * duration;
 
