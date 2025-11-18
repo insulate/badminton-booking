@@ -25,6 +25,18 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/users/${id}`,
     RESTORE: (id) => `/users/${id}/restore`,
   },
+
+  // Settings (Admin)
+  SETTINGS: {
+    GET: '/settings',
+    UPDATE_ALL: '/settings',
+    UPDATE_VENUE: '/settings/venue',
+    UPDATE_OPERATING: '/settings/operating',
+    UPDATE_BOOKING: '/settings/booking',
+    UPDATE_PAYMENT: '/settings/payment',
+    UPDATE_GENERAL: '/settings/general',
+    RESET: '/settings/reset',
+  },
 };
 
 export default API_ENDPOINTS;

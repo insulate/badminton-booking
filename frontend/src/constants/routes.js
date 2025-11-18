@@ -13,7 +13,11 @@ export const ROUTES = {
     ROOT: '/admin',
     DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
-    SETTINGS: '/admin/settings',
+    SETTINGS_VENUE: '/admin/settings/venue',
+    SETTINGS_OPERATING: '/admin/settings/operating',
+    SETTINGS_BOOKING: '/admin/settings/booking',
+    SETTINGS_PAYMENT: '/admin/settings/payment',
+    SETTINGS_GENERAL: '/admin/settings/general',
   },
 
   // Redirect

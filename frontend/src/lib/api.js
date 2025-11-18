@@ -93,4 +93,47 @@ export const userAPI = {
   },
 };
 
+// Settings API (Admin only)
+export const settingsAPI = {
+  get: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.GET);
+    return response.data;
+  },
+
+  updateAll: async (data) => {
+    const response = await api.put(API_ENDPOINTS.SETTINGS.UPDATE_ALL, data);
+    return response.data;
+  },
+
+  updateVenue: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_VENUE, data);
+    return response.data;
+  },
+
+  updateOperating: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_OPERATING, data);
+    return response.data;
+  },
+
+  updateBooking: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_BOOKING, data);
+    return response.data;
+  },
+
+  updatePayment: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_PAYMENT, data);
+    return response.data;
+  },
+
+  updateGeneral: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_GENERAL, data);
+    return response.data;
+  },
+
+  reset: async () => {
+    const response = await api.post(API_ENDPOINTS.SETTINGS.RESET);
+    return response.data;
+  },
+};
+
 export default api;

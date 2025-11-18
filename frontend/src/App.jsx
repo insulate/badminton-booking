@@ -6,7 +6,13 @@ import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
-import SettingsPage from './pages/admin/SettingsPage';
+
+// Settings Pages
+import VenueSettingsPage from './pages/admin/settings/VenueSettingsPage';
+import OperatingHoursPage from './pages/admin/settings/OperatingHoursPage';
+import BookingSettingsPage from './pages/admin/settings/BookingSettingsPage';
+import PaymentSettingsPage from './pages/admin/settings/PaymentSettingsPage';
+import GeneralSettingsPage from './pages/admin/settings/GeneralSettingsPage';
 
 function App() {
   return (
@@ -53,7 +59,13 @@ function App() {
           <Route index element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+
+          {/* Settings Routes */}
+          <Route path="settings/venue" element={<VenueSettingsPage />} />
+          <Route path="settings/operating" element={<OperatingHoursPage />} />
+          <Route path="settings/booking" element={<BookingSettingsPage />} />
+          <Route path="settings/payment" element={<PaymentSettingsPage />} />
+          <Route path="settings/general" element={<GeneralSettingsPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}

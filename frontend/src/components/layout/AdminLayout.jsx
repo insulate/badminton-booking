@@ -11,7 +11,12 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Building2,
+  Clock,
+  Calendar,
+  CreditCard,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -41,6 +46,31 @@ export default function AdminLayout() {
           name: 'จัดการผู้ใช้งาน',
           path: ROUTES.ADMIN.USERS,
           icon: Users,
+        },
+        {
+          name: 'ข้อมูลสนาม',
+          path: ROUTES.ADMIN.SETTINGS_VENUE,
+          icon: Building2,
+        },
+        {
+          name: 'เวลาทำการ',
+          path: ROUTES.ADMIN.SETTINGS_OPERATING,
+          icon: Clock,
+        },
+        {
+          name: 'การตั้งค่าการจอง',
+          path: ROUTES.ADMIN.SETTINGS_BOOKING,
+          icon: Calendar,
+        },
+        {
+          name: 'วิธีการชำระเงิน',
+          path: ROUTES.ADMIN.SETTINGS_PAYMENT,
+          icon: CreditCard,
+        },
+        {
+          name: 'การตั้งค่าทั่วไป',
+          path: ROUTES.ADMIN.SETTINGS_GENERAL,
+          icon: SettingsIcon,
         },
       ],
     },
