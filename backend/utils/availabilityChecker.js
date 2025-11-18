@@ -227,11 +227,11 @@ const getCourtSchedule = async (date, dayType) => {
 
       // Process all bookings for this court
       bookings
-        .filter((b) => b.court._id.equals(court._id))
+        .filter((b) => b.court && b.court._id.equals(court._id))
         .forEach((booking) => {
           // Find the starting timeslot index
           const startIndex = timeSlots.findIndex((ts) =>
-            ts._id.equals(booking.timeSlot._id)
+            booking.timeSlot && ts._id.equals(booking.timeSlot._id)
           );
 
           if (startIndex !== -1) {
