@@ -13,6 +13,8 @@ const settingsRouter = require('./routes/settings.routes');
 const courtsRouter = require('./routes/courts.routes');
 const timeslotsRouter = require('./routes/timeslots.routes');
 const bookingsRouter = require('./routes/bookings.routes');
+const productsRouter = require('./routes/products.routes');
+const salesRouter = require('./routes/sales.routes');
 
 const app = express();
 
@@ -38,6 +40,8 @@ app.use('/api/settings', settingsRouter);
 app.use('/api/courts', courtsRouter);
 app.use('/api/timeslots', timeslotsRouter);
 app.use('/api/bookings', bookingsRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/sales', salesRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {

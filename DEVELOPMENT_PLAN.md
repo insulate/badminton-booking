@@ -380,10 +380,7 @@
   sku: String,
   name: String,
   category: String,
-  price: {
-    normal: Number,
-    member: Number,
-  },
+  price: Number,
   stock: Number,
   lowStockAlert: Number,
   status: String,        // "active", "inactive"
