@@ -4,6 +4,7 @@ import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
 import BookingFilters from '../../components/booking/BookingFilters';
 import BookingsTable from '../../components/booking/BookingsTable';
 import BookingDetailModal from '../../components/booking/BookingDetailModal';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { toast } from 'react-hot-toast';
 
 /**
@@ -22,6 +23,13 @@ const BookingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+    type: 'warning',
+  });
   const [filters, setFilters] = useState({
     dateFrom: getTodayDate(),
     dateTo: getTodayDate(),
@@ -122,7 +130,7 @@ const BookingsPage = () => {
   const handleCheckin = async (bookingId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
+      const response = await axios.patch(
         `${API_BASE_URL}${API_ENDPOINTS.BOOKINGS.CHECKIN(bookingId)}`,
         {},
         {
@@ -143,31 +151,86 @@ const BookingsPage = () => {
   };
 
   // Handle cancel booking
-  const handleCancel = async (bookingId) => {
-    if (!confirm('คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?')) {
-      return;
-    }
+  const handleCancel = (bookingId) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'ยกเลิกการจอง',
+      message: 'คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.patch(
+            `${API_BASE_URL}${API_ENDPOINTS.BOOKINGS.CANCEL(bookingId)}`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `${API_BASE_URL}${API_ENDPOINTS.BOOKINGS.CANCEL(bookingId)}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          if (response.data.success) {
+            toast.success('ยกเลิกการจองสำเร็จ');
+            loadBookings(); // Reload bookings
+          }
+        } catch (error) {
+          console.error('Cancel booking error:', error);
+          toast.error(error.response?.data?.message || 'ยกเลิกการจองไม่สำเร็จ');
         }
-      );
+      },
+    });
+  };
 
-      if (response.data.success) {
-        toast.success('ยกเลิกการจองสำเร็จ');
-        loadBookings(); // Reload bookings
-      }
-    } catch (error) {
-      console.error('Cancel booking error:', error);
-      toast.error(error.response?.data?.message || 'ยกเลิกการจองไม่สำเร็จ');
-    }
+  // Handle mark as paid
+  const handleMarkAsPaid = (bookingId) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'อัพเดตสถานะการชำระเงิน',
+      message: 'ยืนยันการอัพเดตสถานะเป็น "ชำระเงินแล้ว"?',
+      type: 'success',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+
+          // Get booking details first to get the total amount
+          const bookingResponse = await axios.get(
+            `${API_BASE_URL}${API_ENDPOINTS.BOOKINGS.GET(bookingId)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!bookingResponse.data.success) {
+            toast.error('ไม่สามารถโหลดข้อมูลการจองได้');
+            return;
+          }
+
+          const booking = bookingResponse.data.data;
+
+          // Update payment with full amount
+          const response = await axios.patch(
+            `${API_BASE_URL}${API_ENDPOINTS.BOOKINGS.UPDATE_PAYMENT(bookingId)}`,
+            { amountPaid: booking.pricing.total },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            toast.success('อัปเดตสถานะการชำระเงินเป็น "ชำระแล้ว" สำเร็จ');
+            loadBookings(); // Reload bookings
+          }
+        } catch (error) {
+          console.error('Mark as paid error:', error);
+          toast.error(error.response?.data?.message || 'อัปเดตสถานะการชำระเงินไม่สำเร็จ');
+        }
+      },
+    });
   };
 
   // Handle update payment
@@ -220,6 +283,7 @@ const BookingsPage = () => {
           onClick={loadBookings}
           disabled={loading}
           className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          title="รีเฟรชรายการจอง"
         >
           <svg
             className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
@@ -250,6 +314,7 @@ const BookingsPage = () => {
           pagination={pagination}
           onPageChange={handlePageChange}
           onViewDetail={handleViewDetail}
+          onMarkAsPaid={handleMarkAsPaid}
           onCheckin={handleCheckin}
           onCancel={handleCancel}
         />
@@ -265,6 +330,16 @@ const BookingsPage = () => {
           onUpdatePayment={handleUpdatePayment}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type}
+      />
     </div>
   );
 };

@@ -180,6 +180,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              title="ปิดหน้าต่าง"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -333,6 +334,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                       ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
+                  title="เลือกสถานะ: ยังไม่ชำระเงิน"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <div className={`w-4 h-4 rounded-full border-2 ${
@@ -355,6 +357,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                       ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
+                  title="เลือกสถานะ: ชำระเงินแล้ว"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <div className={`w-4 h-4 rounded-full border-2 ${
@@ -420,6 +423,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 onClick={handleClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 disabled={loading}
+                title="ยกเลิกและปิดหน้าต่าง"
               >
                 ยกเลิก
               </button>
@@ -427,6 +431,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 type="submit"
                 disabled={loading}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="บันทึกการจองใหม่"
               >
                 {loading ? 'กำลังบันทึก...' : 'ยืนยันการจอง'}
               </button>

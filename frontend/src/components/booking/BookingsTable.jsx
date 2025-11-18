@@ -1,4 +1,4 @@
-import { Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react';
 
 /**
  * BookingsTable Component
@@ -12,6 +12,7 @@ const BookingsTable = ({
   onViewDetail,
   onCheckin,
   onCancel,
+  onMarkAsPaid,
 }) => {
   // Get booking status badge
   const getStatusBadge = (status) => {
@@ -67,6 +68,11 @@ const BookingsTable = ({
   // Can cancel
   const canCancel = (booking) => {
     return ['pending', 'confirmed'].includes(booking.bookingStatus);
+  };
+
+  // Can mark as paid
+  const canMarkAsPaid = (booking) => {
+    return booking.paymentStatus !== 'paid' && booking.bookingStatus !== 'cancelled';
   };
 
   if (loading) {
@@ -221,6 +227,17 @@ const BookingsTable = ({
                         <Eye size={18} />
                       </button>
 
+                      {/* Mark as Paid */}
+                      {canMarkAsPaid(booking) && (
+                        <button
+                          onClick={() => onMarkAsPaid(booking._id)}
+                          className="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                          title="อัพเดตชำระเงินแล้ว"
+                        >
+                          <DollarSign size={18} />
+                        </button>
+                      )}
+
                       {/* Check-in */}
                       {canCheckin(booking) && (
                         <button
@@ -265,6 +282,7 @@ const BookingsTable = ({
                 onClick={() => onPageChange(pagination.page - 1)}
                 disabled={pagination.page === 1}
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="ไปหน้าก่อนหน้า"
               >
                 <ChevronLeft size={16} className="mr-1" />
                 ก่อนหน้า
@@ -276,6 +294,7 @@ const BookingsTable = ({
                 onClick={() => onPageChange(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages}
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="ไปหน้าถัดไป"
               >
                 ถัดไป
                 <ChevronRight size={16} className="ml-1" />

@@ -255,6 +255,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
               <button
                 onClick={() => setSelectedBooking(null)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
+                title="ปิดหน้าต่าง"
               >
                 <X size={24} />
               </button>
@@ -379,6 +380,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
               <button
                 onClick={() => setSelectedBooking(null)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                title="ปิดหน้าต่าง"
               >
                 ปิด
               </button>

@@ -84,6 +84,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              title="ปิดหน้าต่าง"
             >
               <X size={24} />
             </button>
@@ -204,6 +205,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                   <button
                     onClick={() => setIsEditingPayment(true)}
                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    title="แก้ไขข้อมูลการชำระเงิน"
                   >
                     แก้ไข
                   </button>
@@ -268,12 +270,14 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     <button
                       onClick={handleUpdatePayment}
                       className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                      title="บันทึกการเปลี่ยนแปลง"
                     >
                       บันทึก
                     </button>
                     <button
                       onClick={() => setIsEditingPayment(false)}
                       className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      title="ยกเลิกการแก้ไข"
                     >
                       ยกเลิก
                     </button>
@@ -353,6 +357,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
             <button
               onClick={onClose}
               className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              title="ปิดหน้าต่าง"
             >
               ปิด
             </button>
