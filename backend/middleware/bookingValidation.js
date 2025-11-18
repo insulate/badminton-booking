@@ -114,12 +114,17 @@ const validateBookingRequest = async (req, res, next) => {
 
     if (settings && settings.booking) {
       // Check advance booking limit
+      // Normalize dates to UTC midnight to avoid timezone issues
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const maxAdvanceDate = new Date(today);
-      maxAdvanceDate.setDate(today.getDate() + settings.booking.advanceBookingDays);
+      today.setUTCHours(0, 0, 0, 0);
 
-      if (bookingDate > maxAdvanceDate) {
+      const normalizedBookingDate = new Date(bookingDate);
+      normalizedBookingDate.setUTCHours(0, 0, 0, 0);
+
+      const maxAdvanceDate = new Date(today);
+      maxAdvanceDate.setUTCDate(today.getUTCDate() + settings.booking.advanceBookingDays);
+
+      if (normalizedBookingDate > maxAdvanceDate) {
         return res.status(400).json({
           success: false,
           message: `Cannot book more than ${settings.booking.advanceBookingDays} days in advance`,
@@ -127,7 +132,7 @@ const validateBookingRequest = async (req, res, next) => {
       }
 
       // Check minimum booking date (cannot book in the past)
-      if (bookingDate < today) {
+      if (normalizedBookingDate < today) {
         return res.status(400).json({
           success: false,
           message: 'Cannot book in the past',

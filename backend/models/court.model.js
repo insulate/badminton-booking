@@ -14,6 +14,14 @@ const courtSchema = new mongoose.Schema(
       required: [true, 'กรุณาระบุชื่อสนาม'],
       trim: true,
     },
+    type: {
+      type: String,
+      enum: {
+        values: ['normal', 'premium', 'vip'],
+        message: 'ประเภทสนามต้องเป็น normal, premium หรือ vip',
+      },
+      default: 'normal',
+    },
     status: {
       type: String,
       required: [true, 'กรุณาระบุสถานะสนาม'],
@@ -40,6 +48,7 @@ const courtSchema = new mongoose.Schema(
 // Index for better query performance
 courtSchema.index({ courtNumber: 1 });
 courtSchema.index({ status: 1 });
+courtSchema.index({ type: 1 });
 courtSchema.index({ deletedAt: 1 });
 
 // Query helper to exclude soft-deleted documents

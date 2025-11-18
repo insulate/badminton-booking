@@ -332,6 +332,25 @@ router.patch('/:id', protect, validateBookingUpdate, async (req, res) => {
       });
     }
 
+    // Validate booking status transitions
+    if (bookingStatus && bookingStatus !== booking.bookingStatus) {
+      const validTransitions = {
+        confirmed: ['checked-in', 'cancelled'],
+        'checked-in': ['completed'],
+        completed: [], // Cannot transition from completed
+        cancelled: [], // Cannot transition from cancelled
+      };
+
+      const allowedNextStates = validTransitions[booking.bookingStatus] || [];
+
+      if (!allowedNextStates.includes(bookingStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status transition from '${booking.bookingStatus}' to '${bookingStatus}'`,
+        });
+      }
+    }
+
     // Update fields
     if (customer) {
       if (customer.name) booking.customer.name = customer.name;

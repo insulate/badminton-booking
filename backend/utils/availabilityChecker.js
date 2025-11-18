@@ -52,8 +52,24 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
       };
     }
 
+    // Validate that timeslots are actually consecutive (no gaps)
+    const slotsNeeded = allTimeSlots.slice(startIndex, startIndex + duration);
+    for (let i = 0; i < slotsNeeded.length - 1; i++) {
+      const currentSlot = slotsNeeded[i];
+      const nextSlot = slotsNeeded[i + 1];
+
+      // Check if current slot's endTime matches next slot's startTime
+      if (currentSlot.endTime !== nextSlot.startTime) {
+        return {
+          available: false,
+          conflictingBooking: null,
+          message: `Time slots are not consecutive. Gap between ${currentSlot.endTime} and ${nextSlot.startTime}`,
+        };
+      }
+    }
+
     // Get the timeslot IDs we need to check
-    const timeSlotsToCheck = allTimeSlots.slice(startIndex, startIndex + duration).map((ts) => ts._id);
+    const timeSlotsToCheck = slotsNeeded.map((ts) => ts._id);
 
     // Get all bookings for this court and date
     const endOfDay = new Date(bookingDate);
