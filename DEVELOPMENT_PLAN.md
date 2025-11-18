@@ -11,381 +11,532 @@
 - [x] Frontend: User Management (complete CRUD)
 - [x] Constants for routes and API endpoints
 - [x] Protected routes
+- [x] **Backend: Settings System (Phase 1.1)**
 
 ### 📊 สถิติ
-- **Backend APIs**: 6/30+ endpoints
-- **Frontend Pages**: 3/10+ pages
-- **Database Models**: 1/8 models
-- **Progress**: ~15%
+- **Backend APIs**: 14/40+ endpoints (Settings: 8, Users: 4, Auth: 2)
+- **Frontend Pages**: 3/12+ pages
+- **Database Models**: 2/8 models (User, Setting)
+- **Progress**: ~25%
 
 ---
 
 ## 🚀 แผนการพัฒนา (Development Roadmap)
-
-## **PHASE 1: Core Settings & Court Management** 🏗️
-> ระยะเวลา: 2-3 วัน | ความสำคัญ: สูงสุด
-
-### 1.1 Backend - Settings System
-**ไฟล์**: `backend/models/setting.model.js`
-```javascript
-Schema: {
-  venue: { name, address, phone, email },
-  operating: { openTime, closeTime, daysOpen[] },
-  booking: { advanceBookingDays, minBookingHours, etc. },
-  payment: { acceptCash, acceptTransfer, etc. }
-}
-```
-
-**API Routes**: `backend/routes/settings.routes.js`
-- `GET /api/settings` - ดูการตั้งค่าทั้งหมด
-- `PUT /api/settings` - อัพเดทการตั้งค่าทั้งหมด
-- `PATCH /api/settings/:section` - อัพเดทเฉพาะส่วน
-
-**Seeder**: `backend/seeders/settings.seeder.js`
-
-**Tasks**:
-- [x] สร้าง Setting Model
-- [x] สร้าง Settings API routes
-- [x] สร้าง default settings seeder
-- [x] ทดสอบ API ด้วย Postman/Thunder Client
+> **หลักการใหม่**: ทำ Backend + Frontend ของแต่ละฟีเจอร์ไปพร้อมกัน เพื่อให้ได้ฟีเจอร์ที่สมบูรณ์และทดสอบได้ทันที
 
 ---
 
-### 1.2 Backend - Court Management
-**ไฟล์**: `backend/models/court.model.js`
-```javascript
-Schema: {
-  courtNumber: String,    // "C01", "C02"
-  name: String,           // "Court 1"
-  type: String,           // normal/premium/tournament
-  status: String,         // available/maintenance/inactive
-  description: String
-}
-```
+## **PHASE 1: Settings System** ⚙️
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Status: Backend ✅ Frontend ⏳
 
-**API Routes**: `backend/routes/courts.routes.js`
-- `GET /api/courts` - ดูสนามทั้งหมด
-- `POST /api/courts` - เพิ่มสนามใหม่
-- `PUT /api/courts/:id` - แก้ไขสนาม
-- `DELETE /api/courts/:id` - ลบสนาม
-
-**Seeder**: `backend/seeders/courts.seeder.js`
-
-**Tasks**:
-- [ ] สร้าง Court Model
-- [ ] สร้าง Courts API routes
-- [ ] เพิ่ม validation (unique courtNumber)
-- [ ] ทดสอบ API
-
----
-
-### 1.3 Backend - Time Slot Management
-**ไฟล์**: `backend/models/timeslot.model.js`
-```javascript
-Schema: {
-  startTime: String,      // "06:00"
-  endTime: String,        // "07:00"
-  dayType: String,        // weekday/weekend/holiday
-  pricing: {
-    normal: Number,
-    member: Number,
-    walkIn: Number
-  },
-  peakHour: Boolean,
-  status: String          // active/inactive
-}
-```
-
-**API Routes**: `backend/routes/timeslots.routes.js`
-- `GET /api/timeslots` - ดูช่วงเวลาทั้งหมด
-- `POST /api/timeslots` - เพิ่มช่วงเวลาใหม่
-- `PUT /api/timeslots/:id` - แก้ไขช่วงเวลา
-- `DELETE /api/timeslots/:id` - ลบช่วงเวลา
-- `GET /api/timeslots/active` - ดูช่วงเวลาที่เปิดใช้งาน
-
-**Seeder**: `backend/seeders/timeslots.seeder.js`
-
-**Tasks**:
-- [ ] สร้าง TimeSlot Model
-- [ ] สร้าง TimeSlots API routes
-- [ ] เพิ่ม validation (เวลาไม่ซ้อนทับกัน)
-- [ ] ทดสอบ API
-
----
-
-### 1.4 Frontend - Settings Page
+### 1.1 Backend - Settings API ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/SettingsOverview.jsx`
-- `frontend/src/pages/admin/settings/VenueSettings.jsx`
-- `frontend/src/pages/admin/settings/OperatingHours.jsx`
-- `frontend/src/pages/admin/settings/PaymentSettings.jsx`
+- `backend/models/setting.model.js`
+- `backend/routes/settings.routes.js`
+- `backend/seeders/settings.seeder.js`
+
+**API Endpoints**: 8 endpoints
+- `GET /api/settings` - ดูการตั้งค่าทั้งหมด ✅
+- `PUT /api/settings` - อัพเดทการตั้งค่าทั้งหมด ✅
+- `PATCH /api/settings/venue` - อัพเดทข้อมูลสนาม ✅
+- `PATCH /api/settings/operating` - อัพเดทเวลาทำการ ✅
+- `PATCH /api/settings/booking` - อัพเดทการตั้งค่าการจอง ✅
+- `PATCH /api/settings/payment` - อัพเดทการชำระเงิน ✅
+- `PATCH /api/settings/general` - อัพเดทการตั้งค่าทั่วไป ✅
+- `POST /api/settings/reset` - รีเซ็ตเป็นค่าเริ่มต้น ✅
+
+**Status**:
+- [x] Model, Routes, Seeder สร้างเสร็จ
+- [x] ทดสอบ API ทั้งหมดแล้ว
+
+---
+
+### 1.2 Frontend - Settings Pages ⏳
+**ไฟล์**:
+- `frontend/src/pages/admin/settings/SettingsPage.jsx` (Overview)
+- `frontend/src/pages/admin/settings/VenueSettingsPage.jsx`
+- `frontend/src/pages/admin/settings/OperatingHoursPage.jsx`
+- `frontend/src/pages/admin/settings/BookingSettingsPage.jsx`
+- `frontend/src/pages/admin/settings/PaymentSettingsPage.jsx`
+- `frontend/src/pages/admin/settings/GeneralSettingsPage.jsx`
 
 **Features**:
-- Tab-based settings interface
-- Form validation
-- Real-time preview
-- Save confirmation
+- Tab-based settings interface หรือ Card-based navigation
+- Form validation ด้วย react-hook-form
+- Real-time preview (optional)
+- Save confirmation with toast notifications
+- Loading states
 
 **Tasks**:
 - [ ] สร้าง Settings Overview (landing page with cards)
 - [ ] สร้างฟอร์มข้อมูลสนาม (Venue Settings)
 - [ ] สร้างฟอร์มเวลาทำการ (Operating Hours)
+- [ ] สร้างฟอร์มการตั้งค่าการจอง (Booking Settings)
 - [ ] สร้างฟอร์มวิธีการชำระเงิน (Payment Settings)
-- [ ] Integrate กับ API
+- [ ] สร้างฟอร์มการตั้งค่าทั่วไป (General Settings)
+- [ ] Integrate ทุกฟอร์มกับ Settings API
 - [ ] เพิ่มใน Settings menu accordion
+- [ ] ทดสอบการบันทึกและแสดงผลครบทุก section
+
+**🎯 Milestone**: Settings System ครบทั้ง Backend + Frontend พร้อมใช้งาน 100%
 
 ---
 
-### 1.5 Frontend - Court Management
-**ไฟล์**: `frontend/src/pages/admin/settings/CourtManagement.jsx`
+## **PHASE 2: Court Management** 🏸
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Full-Stack Feature
+
+### 2.1 Backend - Courts API
+**ไฟล์**:
+- `backend/models/court.model.js`
+- `backend/routes/courts.routes.js`
+- `backend/seeders/courts.seeder.js`
+
+**Schema**:
+```javascript
+{
+  courtNumber: String,     // "C01", "C02" (unique)
+  name: String,            // "Court 1", "Court Premium"
+  type: String,            // "normal", "premium", "tournament"
+  status: String,          // "available", "maintenance", "inactive"
+  description: String,
+  hourlyRate: {
+    weekday: Number,
+    weekend: Number,
+    holiday: Number
+  },
+  facilities: [String],    // ["AC", "ไฟ LED", "พื้นไม้"]
+}
+```
+
+**API Endpoints**: 5 endpoints
+- `GET /api/courts` - ดูสนามทั้งหมด (with filters)
+- `GET /api/courts/:id` - ดูรายละเอียดสนาม
+- `POST /api/courts` - เพิ่มสนามใหม่
+- `PUT /api/courts/:id` - แก้ไขสนาม
+- `DELETE /api/courts/:id` - ลบสนาม (soft delete)
+
+**Tasks**:
+- [ ] สร้าง Court Model with validation
+- [ ] สร้าง Courts API routes
+- [ ] สร้าง default courts seeder (5-6 สนาม)
+- [ ] ทดสอบ API
+
+---
+
+### 2.2 Frontend - Court Management
+**ไฟล์**:
+- `frontend/src/pages/admin/settings/CourtsPage.jsx`
+- `frontend/src/components/courts/CourtTable.jsx`
+- `frontend/src/components/courts/CourtModal.jsx`
 
 **Features**:
-- Table แสดงรายการสนาม
+- Table แสดงรายการสนาม (courtNumber, name, type, status)
 - Modal สำหรับเพิ่ม/แก้ไขสนาม
 - Status toggle (available/maintenance/inactive)
 - Search & Filter
 - Delete with confirmation
-
-**Components**:
-- `CourtTable` - แสดงรายการ
-- `CourtModal` - Form เพิ่ม/แก้ไข
-- `CourtCard` - Card view (optional)
+- Badge สำหรับ type (normal/premium/tournament)
 
 **Tasks**:
-- [ ] สร้างหน้า Court Management
-- [ ] สร้าง Court Table with CRUD
-- [ ] สร้าง Court Modal
-- [ ] Integrate กับ API
+- [ ] สร้าง CourtsPage
+- [ ] สร้าง CourtTable component
+- [ ] สร้าง CourtModal component
+- [ ] Integrate กับ Courts API
 - [ ] เพิ่มใน Settings menu
+- [ ] ทดสอบ CRUD operations
+
+**🎯 Milestone**: Court Management System พร้อมใช้งานครบ 100%
 
 ---
 
-### 1.6 Frontend - Time Slot & Pricing
-**ไฟล์**: `frontend/src/pages/admin/settings/TimeSlotManagement.jsx`
+## **PHASE 3: Time Slot & Pricing** ⏰
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูง | Full-Stack Feature
+
+### 3.1 Backend - Time Slots API
+**ไฟล์**:
+- `backend/models/timeslot.model.js`
+- `backend/routes/timeslots.routes.js`
+- `backend/seeders/timeslots.seeder.js`
+
+**Schema**:
+```javascript
+{
+  startTime: String,       // "06:00"
+  endTime: String,         // "07:00"
+  dayType: String,         // "weekday", "weekend", "holiday"
+  pricing: {
+    normal: Number,        // ราคาสนามปกติ
+    member: Number,        // ราคาสมาชิก
+    walkIn: Number,        // ราคา Walk-in
+  },
+  peakHour: Boolean,       // ช่วงเวลา Peak
+  status: String,          // "active", "inactive"
+}
+```
+
+**API Endpoints**: 6 endpoints
+- `GET /api/timeslots` - ดูช่วงเวลาทั้งหมด
+- `GET /api/timeslots/active` - ดูช่วงเวลาที่เปิดใช้งาน
+- `POST /api/timeslots` - เพิ่มช่วงเวลาใหม่
+- `PUT /api/timeslots/:id` - แก้ไขช่วงเวลา
+- `PATCH /api/timeslots/:id/pricing` - แก้ไขราคาเฉพาะ
+- `DELETE /api/timeslots/:id` - ลบช่วงเวลา
+
+**Tasks**:
+- [ ] สร้าง TimeSlot Model
+- [ ] สร้าง TimeSlots API routes
+- [ ] สร้าง default timeslots seeder (06:00-22:00)
+- [ ] เพิ่ม validation (เวลาไม่ซ้อนทับกัน)
+- [ ] ทดสอบ API
+
+---
+
+### 3.2 Frontend - Time Slot Management
+**ไฟล์**:
+- `frontend/src/pages/admin/settings/TimeSlotsPage.jsx`
+- `frontend/src/components/timeslots/TimeSlotTable.jsx`
+- `frontend/src/components/timeslots/TimeSlotModal.jsx`
 
 **Features**:
 - Table แสดงช่วงเวลาและราคา
-- แยกตาม weekday/weekend/holiday
-- แสดง Peak hours
-- Quick edit pricing
-- Bulk operations
+- แยกแสดงตาม weekday/weekend/holiday
+- แสดง Peak hours (highlight)
+- Quick edit pricing (inline edit)
+- Bulk operations (เปิด/ปิดหลายช่วงเวลา)
 
 **Tasks**:
-- [ ] สร้างหน้า Time Slot Management
-- [ ] สร้าง TimeSlot Table
-- [ ] สร้าง Pricing Form
+- [ ] สร้าง TimeSlotsPage
+- [ ] สร้าง TimeSlotTable grouped by dayType
+- [ ] สร้าง TimeSlotModal (with pricing form)
+- [ ] Quick edit inline สำหรับราคา
 - [ ] Integrate กับ API
 - [ ] เพิ่มใน Settings menu
 
+**🎯 Milestone**: Time Slot & Pricing System พร้อมใช้งานครบ 100%
+
 ---
 
-## **PHASE 2: Booking System** 📅
-> ระยะเวลา: 3-4 วัน | ความสำคัญ: สูง
+## **PHASE 4: Booking System** 📅
+> ระยะเวลา: 2 วัน | ความสำคัญ: สูงสุด | Full-Stack Feature
 
-### 2.1 Backend - Booking System
-**ไฟล์**: `backend/models/booking.model.js`
+### 4.1 Backend - Bookings API
+**ไฟล์**:
+- `backend/models/booking.model.js`
+- `backend/routes/bookings.routes.js`
+- `backend/middleware/bookingValidation.js`
 
-**API Routes**: `backend/routes/bookings.routes.js`
-- `GET /api/bookings` - ดูการจองทั้งหมด
-- `GET /api/bookings/schedule/daily` - ตารางรายวัน
+**Schema**:
+```javascript
+{
+  bookingCode: String,     // Auto-generated "BK202501180001"
+  customer: {
+    name: String,
+    phone: String,
+    email: String,
+  },
+  court: ObjectId (ref: Court),
+  date: Date,
+  timeSlot: ObjectId (ref: TimeSlot),
+  duration: Number,        // hours (1, 2, 3)
+  pricing: {
+    subtotal: Number,
+    discount: Number,
+    deposit: Number,
+    total: Number,
+  },
+  paymentStatus: String,   // "pending", "partial", "paid"
+  bookingStatus: String,   // "confirmed", "checked-in", "completed", "cancelled"
+  paymentMethod: String,
+  notes: String,
+}
+```
+
+**API Endpoints**: 10+ endpoints
+- `GET /api/bookings` - ดูการจองทั้งหมด (with filters)
+- `GET /api/bookings/schedule/daily?date=2025-01-18` - ตารางรายวัน
+- `GET /api/bookings/:id` - ดูรายละเอียดการจอง
 - `POST /api/bookings` - สร้างการจองใหม่
+- `POST /api/bookings/check-availability` - ตรวจสอบสนามว่าง
+- `PATCH /api/bookings/:id` - แก้ไขการจอง
 - `PATCH /api/bookings/:id/cancel` - ยกเลิกการจอง
 - `PATCH /api/bookings/:id/checkin` - Check-in
+- `PATCH /api/bookings/:id/checkout` - Check-out
 - `PATCH /api/bookings/:id/payment` - อัพเดทการชำระเงิน
 
 **Business Logic**:
-- ตรวจสอบสนามว่าง
-- คำนวณราคาตามช่วงเวลา
+- ตรวจสอบสนามว่าง (ไม่ให้จองซ้อน)
+- คำนวณราคาตามช่วงเวลา (TimeSlot pricing)
 - สร้าง booking code อัตโนมัติ
-- Validation ไม่ให้จองซ้อน
-
-**Seeder**: `backend/seeders/bookings.seeder.js`
+- Validation ตามกฎการจอง (advanceBookingDays, maxBookingHours)
 
 **Tasks**:
 - [ ] สร้าง Booking Model
 - [ ] สร้าง Booking API routes
 - [ ] สร้าง booking validation middleware
+- [ ] สร้าง availability check logic
 - [ ] สร้าง price calculation logic
-- [ ] ทดสอบ API
+- [ ] สร้าง booking code generator
+- [ ] ทดสอบ API ทุก endpoint
 
 ---
 
-### 2.2 Frontend - Booking Calendar
-**ไฟล์**: `frontend/src/pages/admin/BookingPage.jsx`
-
-**Components**:
-- `BookingCalendar` - ปฏิทินเลือกวัน
-- `CourtSchedule` - ตารางสนาม + เวลา
-- `BookingForm` - ฟอร์มจอง
-- `BookingModal` - รายละเอียดการจอง
+### 4.2 Frontend - Booking Calendar
+**ไฟล์**:
+- `frontend/src/pages/admin/BookingPage.jsx`
+- `frontend/src/components/booking/BookingCalendar.jsx`
+- `frontend/src/components/booking/CourtScheduleGrid.jsx`
+- `frontend/src/components/booking/BookingForm.jsx`
+- `frontend/src/components/booking/BookingModal.jsx`
 
 **Features**:
-- Calendar date picker
-- Court availability grid
-- Time slot selection
-- Customer form
-- Price calculation preview
-- Payment method selection
+- เลือกวันจาก Calendar
+- แสดง Court availability grid (สนาม x ช่วงเวลา)
+- คลิกช่วงเวลาที่ว่างเพื่อจอง
+- ฟอร์มกรอกข้อมูลลูกค้า
+- แสดงการคำนวณราคาแบบ real-time
+- เลือก Payment method
 
 **Tasks**:
-- [ ] สร้างหน้า Booking
-- [ ] สร้าง Calendar component
-- [ ] สร้าง Court Schedule grid
-- [ ] สร้าง Booking Form
-- [ ] Integrate กับ API
+- [ ] สร้าง BookingPage
+- [ ] สร้าง BookingCalendar component
+- [ ] สร้าง CourtScheduleGrid component
+- [ ] สร้าง BookingForm component
+- [ ] สร้าง Price Calculator
+- [ ] Integrate กับ Bookings API
 - [ ] เพิ่มใน main menu
 
 ---
 
-### 2.3 Frontend - Booking Management
-**ไฟล์**: `frontend/src/pages/admin/BookingManagement.jsx`
+### 4.3 Frontend - Booking Management
+**ไฟล์**:
+- `frontend/src/pages/admin/BookingsPage.jsx`
+- `frontend/src/components/booking/BookingsTable.jsx`
+- `frontend/src/components/booking/BookingDetailModal.jsx`
+- `frontend/src/components/booking/BookingFilters.jsx`
 
 **Features**:
-- รายการจองทั้งหมด
-- Filter (วันที่, สถานะ, สนาม)
-- Search (รหัสจอง, ชื่อ, เบอร์)
-- Quick actions (Check-in, Cancel, Payment)
+- Table แสดงรายการจองทั้งหมด
+- Filter (วันที่, สถานะ, สนาม, ลูกค้า)
+- Search (รหัสจอง, ชื่อ, เบอร์โทร)
+- Quick actions (Check-in, Cancel, Update Payment)
 - Export รายงาน
 
 **Tasks**:
-- [ ] สร้างหน้า Booking Management
-- [ ] สร้าง Booking List Table
-- [ ] สร้าง Filter & Search
-- [ ] สร้าง Quick Actions
+- [ ] สร้าง BookingsPage
+- [ ] สร้าง BookingsTable component
+- [ ] สร้าง BookingFilters component
+- [ ] สร้าง Search functionality
+- [ ] สร้าง Quick Action buttons
+- [ ] สร้าง BookingDetailModal
+- [ ] Integrate กับ Bookings API
 - [ ] เพิ่มใน main menu
+
+**🎯 Milestone**: Booking System พร้อมใช้งานครบ 100%
 
 ---
 
-## **PHASE 3: Group Play System** 👥
-> ระยะเวลา: 3-4 วัน | ความสำคัญ: ปานกลาง
+## **PHASE 5: Group Play System** 👥
+> ระยะเวลา: 2 วัน | ความสำคัญ: ปานกลาง | Full-Stack Feature
 
-### 3.1 Backend - Group Play
-**ไฟล์**: `backend/models/groupplay.model.js`
+### 5.1 Backend - Group Play API
+**ไฟล์**:
+- `backend/models/groupplay.model.js`
+- `backend/routes/groupplay.routes.js`
 
-**API Routes**: `backend/routes/groupplay.routes.js`
+**Schema**:
+```javascript
+{
+  sessionName: String,
+  court: ObjectId (ref: Court),
+  date: Date,
+  startTime: String,
+  endTime: String,
+  maxPlayers: Number,
+  currentPlayers: [{
+    name: String,
+    phone: String,
+    level: String,        // "beginner", "intermediate", "advanced"
+    checkedIn: Boolean,
+    gamesPlayed: Number,
+  }],
+  queue: [PlayerId],
+  currentGames: [{
+    court: Number,
+    players: [PlayerId],
+    startTime: Date,
+  }],
+  matchingMode: String,   // "fifo", "skill-based", "random"
+  rotationMode: String,   // "winner-stays", "all-rotate"
+  status: String,         // "scheduled", "active", "completed"
+}
+```
+
+**API Endpoints**: 10+ endpoints
 - `GET /api/groupplay` - ดู Session ทั้งหมด
 - `POST /api/groupplay` - สร้าง Session ใหม่
 - `POST /api/groupplay/:id/register` - ลงทะเบียนผู้เล่น
-- `PATCH /api/groupplay/:id/checkin/:phone` - Check-in ผู้เล่น
+- `PATCH /api/groupplay/:id/checkin/:playerId` - Check-in ผู้เล่น
 - `PATCH /api/groupplay/:id/start` - เริ่ม Session
 - `GET /api/groupplay/:id/queue` - ดูคิว
-- `PATCH /api/groupplay/:id/match` - จับคู่ผู้เล่น
-- `PATCH /api/groupplay/:id/finish-game` - จบเกม
+- `POST /api/groupplay/:id/match` - จับคู่ผู้เล่นอัตโนมัติ
+- `PATCH /api/groupplay/:id/finish-game` - จบเกม (update queue)
+- `PATCH /api/groupplay/:id/end` - จบ Session
+- `DELETE /api/groupplay/:id` - ลบ Session
 
 **Logic**:
-- จัดการคิว (FIFO / ตามระดับ)
+- จัดการคิว (FIFO / Skill-based)
 - จับคู่ผู้เล่น (singles/doubles)
 - หมุนเวียน (winner stays / all rotate)
-- นับเกมที่เล่น
+- นับเกมที่เล่นของแต่ละคน
 
 **Tasks**:
 - [ ] สร้าง GroupPlay Model
-- [ ] สร้าง GroupPlay API routes
+- [ ] สร้าง API routes
 - [ ] สร้าง queue management logic
 - [ ] สร้าง matching algorithm
 - [ ] ทดสอบ API
 
 ---
 
-### 3.2 Frontend - Group Play
-**ไฟล์**: `frontend/src/pages/admin/GroupPlayPage.jsx`
-
-**Components**:
-- `SessionCard` - แสดง session ที่กำลังเล่น
-- `PlayerRegistration` - ลงทะเบียนผู้เล่น
-- `QueueDisplay` - แสดงคิวรอเล่น
-- `CurrentGames` - เกมที่กำลังเล่น
-- `PlayerList` - รายชื่อผู้เล่นทั้งหมด
+### 5.2 Frontend - Group Play
+**ไฟล์**:
+- `frontend/src/pages/admin/GroupPlayPage.jsx`
+- `frontend/src/components/groupplay/SessionCard.jsx`
+- `frontend/src/components/groupplay/PlayerRegistrationForm.jsx`
+- `frontend/src/components/groupplay/QueueDisplay.jsx`
+- `frontend/src/components/groupplay/CurrentGamesGrid.jsx`
+- `frontend/src/components/groupplay/PlayerList.jsx`
 
 **Features**:
 - สร้าง/เลือก Session
-- เพิ่มผู้เล่นเข้าคิว
+- เพิ่มผู้เล่นเข้าคิว (ชื่อ, เบอร์, ระดับ)
 - Check-in ผู้เล่น
-- จับคู่อัตโนมัติ
-- บันทึกผลแพ้ชนะ
-- แสดงสถิติผู้เล่น
+- จับคู่อัตโนมัติ (คลิกปุ่มเดียว)
+- บันทึกผลแพ้ชนะ (จบเกม)
+- แสดงสถิติผู้เล่น (เล่นไปกี่เกม)
 
 **Tasks**:
-- [ ] สร้างหน้า Group Play
-- [ ] สร้าง Session Management
-- [ ] สร้าง Player Registration Form
-- [ ] สร้าง Queue Display
-- [ ] สร้าง Current Games Grid
+- [ ] สร้าง GroupPlayPage
+- [ ] สร้าง SessionCard component
+- [ ] สร้าง PlayerRegistrationForm component
+- [ ] สร้าง QueueDisplay component (real-time)
+- [ ] สร้าง CurrentGamesGrid component
+- [ ] สร้าง PlayerList component
+- [ ] สร้าง Matching Button (จับคู่)
 - [ ] Integrate กับ API
 - [ ] เพิ่มใน main menu
 
+**🎯 Milestone**: Group Play System พร้อมใช้งานครบ 100%
+
 ---
 
-## **PHASE 4: POS & Products** 🛒
-> ระยะเวลา: 2-3 วัน | ความสำคัญ: ปานกลาง
+## **PHASE 6: POS & Products** 🛒
+> ระยะเวลา: 1-2 วัน | ความสำคัญ: ปานกลาง | Full-Stack Feature
 
-### 4.1 Backend - Products & Sales
+### 6.1 Backend - Products & Sales API
 **ไฟล์**:
 - `backend/models/product.model.js`
 - `backend/models/sale.model.js`
-
-**API Routes**:
 - `backend/routes/products.routes.js`
 - `backend/routes/sales.routes.js`
 
-**Products API**:
+**Products Schema**:
+```javascript
+{
+  sku: String,
+  name: String,
+  category: String,
+  price: {
+    normal: Number,
+    member: Number,
+  },
+  stock: Number,
+  lowStockAlert: Number,
+  status: String,        // "active", "inactive"
+}
+```
+
+**Sales Schema**:
+```javascript
+{
+  saleCode: String,      // "SL202501180001"
+  items: [{
+    product: ObjectId,
+    quantity: Number,
+    price: Number,
+    subtotal: Number,
+  }],
+  customer: {
+    type: String,        // "member", "walk-in"
+    name: String,
+    phone: String,
+  },
+  total: Number,
+  paymentMethod: String,
+  relatedBooking: ObjectId,  // (optional) ถ้ารวมบิลกับค่าสนาม
+}
+```
+
+**API Endpoints**:
+**Products**:
 - `GET /api/products` - ดูสินค้าทั้งหมด
 - `POST /api/products` - เพิ่มสินค้า
 - `PUT /api/products/:id` - แก้ไขสินค้า
-- `DELETE /api/products/:id` - ลบสินค้า
 - `PATCH /api/products/:id/stock` - อัพเดทสต็อก
+- `DELETE /api/products/:id` - ลบสินค้า
 
-**Sales API**:
+**Sales**:
 - `POST /api/sales` - บันทึกการขาย
 - `GET /api/sales` - ดูประวัติการขาย
-- `GET /api/sales/daily` - รายงานรายวัน
+- `GET /api/sales/daily?date=2025-01-18` - รายงานรายวัน
 - `GET /api/sales/:id` - ดูรายละเอียดบิล
 
-**Seeder**: `backend/seeders/products.seeder.js`
-
 **Tasks**:
-- [ ] สร้าง Product Model
-- [ ] สร้าง Sale Model
+- [ ] สร้าง Product & Sale Models
 - [ ] สร้าง Products API routes
 - [ ] สร้าง Sales API routes
+- [ ] สร้าง products seeder
 - [ ] ทดสอบ API
 
 ---
 
-### 4.2 Frontend - Product Management
-**ไฟล์**: `frontend/src/pages/admin/settings/ProductManagement.jsx`
+### 6.2 Frontend - Product Management
+**ไฟล์**:
+- `frontend/src/pages/admin/settings/ProductsPage.jsx`
+- `frontend/src/components/products/ProductTable.jsx`
+- `frontend/src/components/products/ProductModal.jsx`
 
 **Features**:
-- รายการสินค้าทั้งหมด
-- เพิ่ม/แก้ไข/ลบสินค้า
-- จัดหมวดหมู่
+- Table แสดงรายการสินค้า
+- CRUD operations
+- จัดหมวดหมู่สินค้า
 - จัดการสต็อก
-- ตั้งราคาสมาชิก/ทั่วไป
+- Low stock alert
 
 **Tasks**:
-- [ ] สร้างหน้า Product Management
-- [ ] สร้าง Product Table
-- [ ] สร้าง Product Form Modal
+- [ ] สร้าง ProductsPage
+- [ ] สร้าง ProductTable component
+- [ ] สร้าง ProductModal component
 - [ ] Stock Management UI
+- [ ] Integrate กับ API
 - [ ] เพิ่มใน Settings menu
 
 ---
 
-### 4.3 Frontend - POS Page
-**ไฟล์**: `frontend/src/pages/admin/POSPage.jsx`
-
-**Components**:
-- `ProductGrid` - กริดสินค้า
-- `Cart` - ตะกร้าสินค้า
-- `PaymentModal` - ชำระเงิน
-- `ReceiptPrint` - พิมพ์ใบเสร็จ
+### 6.3 Frontend - POS Page
+**ไฟล์**:
+- `frontend/src/pages/admin/POSPage.jsx`
+- `frontend/src/components/pos/ProductGrid.jsx`
+- `frontend/src/components/pos/Cart.jsx`
+- `frontend/src/components/pos/PaymentModal.jsx`
+- `frontend/src/components/pos/ReceiptPreview.jsx`
 
 **Features**:
-- เลือกสินค้าจาก grid
-- คำนวณราคารวม
-- เลือกประเภทลูกค้า (สมาชิก/ทั่วไป)
-- รวมบิลกับค่าสนาม (optional)
-- ชำระเงินหลายช่องทาง
+- เลือกสินค้าจาก grid (คลิกเพิ่มเข้าตะกร้า)
+- แสดง Cart พร้อมคำนวณราคารวม
+- เลือกประเภทลูกค้า (สมาชิก/ทั่วไป) → ราคาเปลี่ยน
+- รวมบิลกับค่าสนาม (optional link to booking)
+- เลือก Payment method
 - พิมพ์ใบเสร็จ
 
 **Tasks**:
@@ -393,122 +544,134 @@ Schema: {
 - [ ] สร้าง Product Grid
 - [ ] สร้าง Shopping Cart
 - [ ] สร้าง Payment Modal
+- [ ] สร้าง Receipt Preview
 - [ ] Integrate กับ API
 - [ ] เพิ่มใน main menu
 
+**🎯 Milestone**: POS & Products พร้อมใช้งานครบ 100%
+
 ---
 
-## **PHASE 5: Reports & Analytics** 📊
-> ระยะเวลา: 2 วัน | ความสำคัญ: ต่ำ
+## **PHASE 7: Reports & Analytics** 📊
+> ระยะเวลา: 1 วัน | ความสำคัญ: ปานกลาง | Full-Stack Feature
 
-### 5.1 Backend - Reports API
-**API Routes**: `backend/routes/reports.routes.js`
-- `GET /api/reports/revenue/daily` - รายได้รายวัน
-- `GET /api/reports/revenue/monthly` - รายได้รายเดือน
+### 7.1 Backend - Reports API
+**ไฟล์**: `backend/routes/reports.routes.js`
+
+**API Endpoints**: 6+ endpoints
+- `GET /api/reports/revenue/daily?date=2025-01-18` - รายได้รายวัน
+- `GET /api/reports/revenue/monthly?month=2025-01` - รายได้รายเดือน
+- `GET /api/reports/revenue/yearly?year=2025` - รายได้รายปี
 - `GET /api/reports/bookings/summary` - สรุปการจอง
 - `GET /api/reports/products/sales` - ยอดขายสินค้า
 - `GET /api/reports/courts/usage` - การใช้งานสนาม
 
 **Tasks**:
-- [ ] สร้าง Reports API routes
-- [ ] สร้าง aggregation queries
+- [ ] สร้าง Reports routes
+- [ ] สร้าง MongoDB aggregation queries
 - [ ] ทดสอบ API
 
 ---
 
-### 5.2 Frontend - Reports Page
+### 7.2 Frontend - Reports Page
 **ไฟล์**: `frontend/src/pages/admin/ReportsPage.jsx`
 
 **Features**:
-- กราฟรายได้
-- สรุปการจอง
-- ยอดขายสินค้า
-- สถิติการใช้สนาม
-- Export รายงาน (PDF/Excel)
+- กราฟรายได้ (Line/Bar chart)
+- สรุปการจอง (Pie chart)
+- ยอดขายสินค้า Top 10
+- สถิติการใช้สนามแต่ละสนาม
+- Date range picker
+- Export รายงาน (CSV/PDF)
 
 **Tasks**:
 - [ ] สร้างหน้า Reports
-- [ ] สร้าง Charts (recharts)
+- [ ] สร้าง Revenue Charts (recharts)
+- [ ] สร้าง Booking Summary Chart
+- [ ] สร้าง Product Sales Table
+- [ ] สร้าง Court Usage Stats
 - [ ] สร้าง Export function
 - [ ] เพิ่มใน main menu
 
+**🎯 Milestone**: Reports & Analytics พร้อมใช้งานครบ 100%
+
 ---
 
-## **PHASE 6: Enhancement & Polish** ✨
-> ระยะเวลา: 1-2 วัน | ความสำคัญ: ต่ำ
+## **PHASE 8: Enhancement & Polish** ✨
+> ระยะเวลา: 1 วัน | ความสำคัญ: ต่ำ
 
 ### Tasks
-- [ ] Add loading states everywhere
-- [ ] Add error handling
-- [ ] Add success/error notifications (toast)
-- [ ] Improve mobile responsiveness
-- [ ] Add keyboard shortcuts
-- [ ] Add print styles
-- [ ] Optimize performance
-- [ ] Write API documentation
-- [ ] Add inline help/tooltips
+- [ ] เพิ่ม Loading states ทุกหน้า
+- [ ] เพิ่ม Error handling และ Error boundaries
+- [ ] เพิ่ม Toast notifications (success/error)
+- [ ] ปรับปรุง Mobile responsiveness
+- [ ] เพิ่ม Keyboard shortcuts
+- [ ] เพิ่ม Print styles สำหรับ Receipt/Report
+- [ ] Optimize performance (lazy loading, code splitting)
+- [ ] เขียน API documentation (Swagger/Postman)
+- [ ] เพิ่ม Help tooltips/ออนไลน์ช่วยเหลือ
+- [ ] Security audit
+- [ ] Final testing
+
+**🎯 Milestone**: ระบบพร้อมใช้งานจริง Production-ready!
 
 ---
 
-## 📦 ลำดับการพัฒนาที่แนะนำ
+## 📦 ลำดับการพัฒนาที่แนะนำ (Revised)
 
-### สัปดาห์ที่ 1
-1. ✅ Day 1-2: PHASE 1.1-1.3 (Backend Settings, Courts, TimeSlots)
-2. ✅ Day 3-4: PHASE 1.4-1.6 (Frontend Settings, Courts, TimeSlots)
-3. ✅ Day 5-7: Testing & Bug fixes Phase 1
+### สัปดาห์ที่ 1: Foundation + Core Bookings
+**Day 1**: Phase 1 - Settings System (Backend ✅ + Frontend)
+**Day 2**: Phase 2 - Court Management (Full-stack)
+**Day 3**: Phase 3 - Time Slot & Pricing (Full-stack)
+**Day 4-5**: Phase 4.1-4.2 - Booking API + Calendar (Backend + บางส่วน Frontend)
+**Day 6**: Phase 4.3 - Booking Management (Frontend)
+**Day 7**: Testing Phase 1-4
 
-### สัปดาห์ที่ 2
-1. ✅ Day 1-2: PHASE 2.1 (Backend Booking)
-2. ✅ Day 3-4: PHASE 2.2 (Frontend Booking Calendar)
-3. ✅ Day 5-6: PHASE 2.3 (Frontend Booking Management)
-4. ✅ Day 7: Testing Phase 2
-
-### สัปดาห์ที่ 3
-1. ✅ Day 1-2: PHASE 3.1 (Backend Group Play)
-2. ✅ Day 3-5: PHASE 3.2 (Frontend Group Play)
-3. ✅ Day 6-7: Testing Phase 3
-
-### สัปดาห์ที่ 4
-1. ✅ Day 1-2: PHASE 4.1-4.2 (Backend & Frontend Products)
-2. ✅ Day 3-4: PHASE 4.3 (Frontend POS)
-3. ✅ Day 5-6: PHASE 5 (Reports)
-4. ✅ Day 7: PHASE 6 (Polish & Testing)
+### สัปดาห์ที่ 2: Advanced Features
+**Day 1-2**: Phase 5 - Group Play System (Full-stack)
+**Day 3-4**: Phase 6 - POS & Products (Full-stack)
+**Day 5**: Phase 7 - Reports & Analytics (Full-stack)
+**Day 6**: Phase 8 - Enhancement & Polish
+**Day 7**: Final Testing + Bug Fixes
 
 ---
 
 ## 🎯 Milestones
 
-- **Milestone 1**: Settings & Courts ระบบพร้อมใช้งาน (Week 1)
-- **Milestone 2**: Booking System ใช้งานได้เต็มรูปแบบ (Week 2)
-- **Milestone 3**: Group Play พร้อมใช้งาน (Week 3)
-- **Milestone 4**: ระบบครบทุกฟีเจอร์ (Week 4)
+- **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100%
+- **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ
+- **Milestone 3** (Week 2 Day 2): Group Play พร้อมใช้งาน
+- **Milestone 4** (Week 2 Day 5): ระบบครบทุกฟีเจอร์
+- **Milestone 5** (Week 2 Day 7): Production Ready!
 
 ---
 
 ## 📝 หมายเหตุ
 
 ### Priority
-- 🔴 สูงสุด: Settings, Courts, Booking
-- 🟡 สูง: Time Slots, Booking Management
-- 🟢 ปานกลาง: Group Play, POS
+- 🔴 สูงสุด: Settings, Courts, TimeSlots, Bookings
+- 🟡 สูง: Group Play
+- 🟢 ปานกลาง: POS, Products
 - 🔵 ต่ำ: Reports, Enhancement
 
 ### ข้อควรระวัง
-1. **Time Zone**: ใช้ moment.js หรือ date-fns สำหรับจัดการเวลา
+1. **Time Zone**: ใช้ date-fns หรือ dayjs สำหรับจัดการเวลา
 2. **Validation**: Validate ทั้ง frontend และ backend
-3. **Real-time**: พิจารณาใช้ WebSocket สำหรับ Group Play
+3. **Real-time**: พิจารณาใช้ Socket.io สำหรับ Group Play (optional)
 4. **Mobile**: ออกแบบให้ responsive ตั้งแต่เริ่ม
-5. **Testing**: เขียน test สำหรับ critical paths
+5. **Testing**: ทดสอบ integration ทันทีที่ทำ full-stack feature เสร็จ
 
-### เทคโนโลยีเพิ่มเติมที่อาจใช้
-- **Charts**: recharts, chart.js
-- **Calendar**: react-big-calendar, fullcalendar
-- **Date**: moment.js, date-fns, dayjs
-- **Forms**: react-hook-form, formik
-- **Table**: react-table, ag-grid
+### เทคโนโลยีเพิ่มเติมที่แนะนำ
+- **Forms**: react-hook-form + zod validation
+- **State**: Zustand หรือ Context API
+- **Charts**: recharts
+- **Calendar**: react-calendar
+- **Date**: date-fns
+- **Table**: TanStack Table
+- **Notifications**: react-hot-toast
 - **Print**: react-to-print
 - **Export**: xlsx, jspdf
 
 ---
 
-**หมายเหตุ**: แผนนี้สามารถปรับเปลี่ยนได้ตามความเหมาะสม อาจมีการเพิ่ม/ลดฟีเจอร์ หรือปรับลำดับการทำงานตามความต้องการจริง
+**หมายเหตุ**: แผนใหม่นี้เน้นการทำ Full-Stack Feature ทีละฟีเจอร์ เพื่อให้สามารถทดสอบและใช้งานได้ทันที ไม่ต้องรอทำ Backend ทั้งหมดก่อน
