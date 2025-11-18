@@ -1,0 +1,126 @@
+### Settings API Tests
+### สำหรับทดสอบด้วย REST Client extension ใน VS Code
+
+@baseUrl = http://localhost:3000/api
+@token = YOUR_JWT_TOKEN_HERE
+
+### 1. Login to get token first
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+### 2. Get all settings
+GET {{baseUrl}}/settings
+Authorization: Bearer {{token}}
+
+###
+
+### 3. Update venue settings only
+PATCH {{baseUrl}}/settings/venue
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "XYZ Badminton Club",
+  "address": "456 ถนนพระราม 9 กรุงเทพฯ",
+  "phone": "02-999-8888",
+  "email": "contact@xyzbadminton.com"
+}
+
+###
+
+### 4. Update operating hours
+PATCH {{baseUrl}}/settings/operating
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "openTime": "07:00",
+  "closeTime": "23:00",
+  "daysOpen": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+}
+
+###
+
+### 5. Update booking settings
+PATCH {{baseUrl}}/settings/booking
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "advanceBookingDays": 14,
+  "minBookingHours": 1,
+  "maxBookingHours": 4,
+  "cancellationHours": 48,
+  "requireDeposit": true,
+  "depositAmount": 500
+}
+
+###
+
+### 6. Update payment settings
+PATCH {{baseUrl}}/settings/payment
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "acceptCash": true,
+  "acceptTransfer": true,
+  "acceptCreditCard": true,
+  "acceptPromptPay": true,
+  "promptPayNumber": "0812345678",
+  "bankAccount": {
+    "bankName": "ธนาคารกสิกรไทย",
+    "accountNumber": "1234567890",
+    "accountName": "ABC Badminton Club"
+  }
+}
+
+###
+
+### 7. Update all settings at once
+PUT {{baseUrl}}/settings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "venue": {
+    "name": "ABC Badminton Club",
+    "address": "123 ถนนสุขุมวิท กรุงเทพฯ",
+    "phone": "02-123-4567",
+    "email": "info@abcbadminton.com"
+  },
+  "operating": {
+    "openTime": "06:00",
+    "closeTime": "22:00",
+    "daysOpen": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+  },
+  "booking": {
+    "advanceBookingDays": 7,
+    "minBookingHours": 1,
+    "maxBookingHours": 3,
+    "cancellationHours": 24,
+    "requireDeposit": false,
+    "depositAmount": 0
+  },
+  "payment": {
+    "acceptCash": true,
+    "acceptTransfer": true,
+    "acceptCreditCard": false,
+    "acceptPromptPay": true
+  }
+}
+
+###
+
+### 8. Reset settings to default
+POST {{baseUrl}}/settings/reset
+Authorization: Bearer {{token}}
+
+###

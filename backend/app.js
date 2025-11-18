@@ -9,6 +9,7 @@ const connectDB = require('./config/database');
 const indexRouter = require('./routes/index.routes');
 const usersRouter = require('./routes/users.routes');
 const authRouter = require('./routes/auth.routes');
+const settingsRouter = require('./routes/settings.routes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/settings', settingsRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {
