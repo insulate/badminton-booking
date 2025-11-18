@@ -42,9 +42,10 @@ const settingSchema = new mongoose.Schema(
         default: '22:00',
         validate: {
           validator: function (v) {
-            return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(v);
+            // Accept 00:00-24:00 format (24:00 = midnight)
+            return /^([0-1]?[0-9]|2[0-4]):[0-5][0-9]$/.test(v);
           },
-          message: 'Invalid time format. Use HH:MM (e.g., 22:00)',
+          message: 'Invalid time format. Use HH:MM (e.g., 22:00 or 24:00 for midnight)',
         },
       },
       daysOpen: {
@@ -157,11 +158,12 @@ const settingSchema = new mongoose.Schema(
 settingSchema.pre('save', function (next) {
   const openHour = parseInt(this.operating.openTime.split(':')[0]);
   const openMin = parseInt(this.operating.openTime.split(':')[1]);
-  const closeHour = parseInt(this.operating.closeTime.split(':')[0]);
+  let closeHour = parseInt(this.operating.closeTime.split(':')[0]);
   const closeMin = parseInt(this.operating.closeTime.split(':')[1]);
 
   const openTimeInMin = openHour * 60 + openMin;
-  const closeTimeInMin = closeHour * 60 + closeMin;
+  // Treat 24:00 as end of day (24 * 60 = 1440 minutes)
+  const closeTimeInMin = closeHour === 24 ? 1440 : closeHour * 60 + closeMin;
 
   if (closeTimeInMin <= openTimeInMin) {
     next(new Error('Close time must be after open time'));

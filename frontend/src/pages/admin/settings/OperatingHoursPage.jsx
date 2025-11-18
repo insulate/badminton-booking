@@ -78,7 +78,17 @@ const OperatingHoursPage = () => {
       return;
     }
 
-    if (formData.openTime >= formData.closeTime) {
+    // Validate time range (support 24:00 for midnight)
+    const openHour = parseInt(formData.openTime.split(':')[0]);
+    const openMin = parseInt(formData.openTime.split(':')[1]);
+    let closeHour = parseInt(formData.closeTime.split(':')[0]);
+    const closeMin = parseInt(formData.closeTime.split(':')[1]);
+
+    const openTimeInMin = openHour * 60 + openMin;
+    // Treat 24:00 as end of day
+    const closeTimeInMin = closeHour === 24 ? 1440 : closeHour * 60 + closeMin;
+
+    if (closeTimeInMin <= openTimeInMin) {
       toast.error('เวลาเปิดต้องน้อยกว่าเวลาปิด');
       return;
     }
@@ -137,13 +147,18 @@ const OperatingHoursPage = () => {
                   เวลาเปิด <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="time"
+                  type="text"
                   name="openTime"
                   value={formData.openTime}
                   onChange={handleChange}
+                  placeholder="06:00"
+                  pattern="^([0-1]?[0-9]|2[0-4]):[0-5][0-9]$"
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  ใช้รูปแบบ HH:MM (เช่น 06:00 หรือ 09:00)
+                </p>
               </div>
 
               {/* Close Time */}
@@ -152,13 +167,18 @@ const OperatingHoursPage = () => {
                   เวลาปิด <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="time"
+                  type="text"
                   name="closeTime"
                   value={formData.closeTime}
                   onChange={handleChange}
+                  placeholder="22:00 (หรือ 24:00 สำหรับเที่ยงคืน)"
+                  pattern="^([0-1]?[0-9]|2[0-4]):[0-5][0-9]$"
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  ใช้รูปแบบ HH:MM (เช่น 22:00 หรือ 24:00 สำหรับเที่ยงคืน)
+                </p>
               </div>
             </div>
 

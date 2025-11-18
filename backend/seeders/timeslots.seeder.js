@@ -8,7 +8,12 @@ const generateTimeslots = (openTime, closeTime) => {
 
   // Parse open and close times
   const openHour = parseInt(openTime.split(':')[0]);
-  const closeHour = parseInt(closeTime.split(':')[0]);
+  let closeHour = parseInt(closeTime.split(':')[0]);
+
+  // Handle 24:00 (midnight) as end of day
+  if (closeHour === 24) {
+    closeHour = 24; // Keep as 24 for calculation
+  }
 
   // Generate hours array based on operating hours
   const hours = Array.from({ length: closeHour - openHour }, (_, i) => i + openHour);
@@ -18,7 +23,9 @@ const generateTimeslots = (openTime, closeTime) => {
   dayTypes.forEach((dayType) => {
     hours.forEach((hour) => {
       const startHour = hour.toString().padStart(2, '0');
-      const endHour = (hour + 1).toString().padStart(2, '0');
+      const nextHour = hour + 1;
+      // Handle 24:00 for midnight
+      const endHour = nextHour === 24 ? '24' : nextHour.toString().padStart(2, '0');
       const startTime = `${startHour}:00`;
       const endTime = `${endHour}:00`;
 
