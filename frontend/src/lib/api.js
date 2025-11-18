@@ -136,4 +136,32 @@ export const settingsAPI = {
   },
 };
 
+// Courts API (Admin only)
+export const courtsAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.COURTS.LIST, { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.COURTS.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.COURTS.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.COURTS.UPDATE(id), data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(API_ENDPOINTS.COURTS.DELETE(id));
+    return response.data;
+  },
+};
+
 export default api;

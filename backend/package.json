@@ -6,7 +6,8 @@
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
     "seed:settings": "node seeders/settings.seeder.js",
-    "seed:all": "node seeders/settings.seeder.js",
+    "seed:courts": "node seeders/courts.seeder.js",
+    "seed:all": "node seeders/settings.seeder.js && node seeders/courts.seeder.js",
     "test": "jest --verbose --runInBand",
     "test:watch": "jest --watch"
   },

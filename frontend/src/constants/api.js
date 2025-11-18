@@ -37,6 +37,15 @@ export const API_ENDPOINTS = {
     UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
   },
+
+  // Courts Management (Admin)
+  COURTS: {
+    LIST: '/courts',
+    GET: (id) => `/courts/${id}`,
+    CREATE: '/courts',
+    UPDATE: (id) => `/courts/${id}`,
+    DELETE: (id) => `/courts/${id}`,
+  },
 };
 
 export default API_ENDPOINTS;
