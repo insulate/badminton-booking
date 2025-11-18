@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Court = require('../models/court.model');
+const Booking = require('../models/booking.model');
 const { protect, admin } = require('../middleware/auth');
 
 /**
@@ -194,6 +195,20 @@ router.delete('/:id', protect, admin, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'ไม่พบข้อมูลสนาม',
+      });
+    }
+
+    // Check if court has active bookings
+    const activeBookings = await Booking.countDocuments({
+      court: req.params.id,
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+    });
+
+    if (activeBookings > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `ไม่สามารถลบสนามได้ เนื่องจากมีการจองที่ยังใช้งานอยู่ ${activeBookings} รายการ`,
       });
     }
 

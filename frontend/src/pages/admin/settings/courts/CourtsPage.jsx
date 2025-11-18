@@ -32,7 +32,11 @@ const CourtsPage = () => {
   };
 
   const handleDelete = async (court) => {
-    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบสนาม "${court.name}"?`)) {
+    if (
+      !window.confirm(
+        `คุณแน่ใจหรือไม่ที่จะลบสนาม "${court.name}"?\n\nหมายเหตุ: ไม่สามารถลบสนามที่มีการจองที่ยังใช้งานอยู่`
+      )
+    ) {
       return;
     }
 
@@ -44,7 +48,10 @@ const CourtsPage = () => {
       }
     } catch (error) {
       console.error('Error deleting court:', error);
-      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการลบสนาม');
+      const errorMessage = error.response?.data?.message || 'เกิดข้อผิดพลาดในการลบสนาม';
+      toast.error(errorMessage, {
+        duration: 5000, // Show error longer for important messages
+      });
     }
   };
 
