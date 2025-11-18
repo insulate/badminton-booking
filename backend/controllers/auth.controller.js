@@ -75,7 +75,7 @@ const login = async (req, res) => {
 // @access  Private
 const getMe = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user.id);
+    const user = await UserModel.findById(req.user._id);
 
     res.status(200).json({
       success: true,
@@ -97,7 +97,7 @@ const updateProfile = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const user = await UserModel.findById(req.user.id);
+    const user = await UserModel.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({
@@ -145,7 +145,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    const user = await UserModel.findById(req.user.id).select('+password');
+    const user = await UserModel.findById(req.user._id).select('+password');
 
     // Check current password
     const isPasswordMatch = await user.comparePassword(currentPassword);

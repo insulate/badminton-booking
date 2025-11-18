@@ -244,9 +244,9 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="cash">เงินสด</option>
-                      <option value="bank_transfer">โอนเงิน</option>
-                      <option value="qr_code">QR Code</option>
-                      <option value="credit_card">บัตรเครดิต</option>
+                      <option value="transfer">โอนเงิน</option>
+                      <option value="qr">QR Code</option>
+                      <option value="card">บัตรเครดิต</option>
                     </select>
                   </div>
 
@@ -291,9 +291,9 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                       <p className="text-sm text-gray-600">วิธีการชำระเงิน</p>
                       <p className="font-medium text-gray-900">
                         {booking.paymentMethod === 'cash' && 'เงินสด'}
-                        {booking.paymentMethod === 'bank_transfer' && 'โอนเงิน'}
-                        {booking.paymentMethod === 'qr_code' && 'QR Code'}
-                        {booking.paymentMethod === 'credit_card' && 'บัตรเครดิต'}
+                        {booking.paymentMethod === 'transfer' && 'โอนเงิน'}
+                        {booking.paymentMethod === 'qr' && 'QR Code'}
+                        {booking.paymentMethod === 'card' && 'บัตรเครดิต'}
                       </p>
                     </div>
                   </div>

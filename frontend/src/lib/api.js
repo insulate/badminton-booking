@@ -207,4 +207,59 @@ export const timeslotsAPI = {
   },
 };
 
+// Bookings API
+export const bookingsAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.LIST, { params });
+    return response.data;
+  },
+
+  getDailySchedule: async (date) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.DAILY_SCHEDULE, {
+      params: { date },
+    });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.BOOKINGS.UPDATE(id), data);
+    return response.data;
+  },
+
+  checkAvailability: async (data) => {
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.CHECK_AVAILABILITY, data);
+    return response.data;
+  },
+
+  checkin: async (id) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.CHECKIN(id));
+    return response.data;
+  },
+
+  checkout: async (id) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.CHECKOUT(id));
+    return response.data;
+  },
+
+  cancel: async (id) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.CANCEL(id));
+    return response.data;
+  },
+
+  updatePayment: async (id, data) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.UPDATE_PAYMENT(id), data);
+    return response.data;
+  },
+};
+
 export default api;
