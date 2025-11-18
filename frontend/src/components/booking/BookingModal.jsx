@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
+import { bookingsAPI } from '../../lib/api';
 
 /**
  * BookingModal Component
@@ -33,30 +34,50 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
 
   // Calculate price when duration changes
   useEffect(() => {
+    let isMounted = true;
+
+    const calculatePrice = async () => {
+      if (!bookingData?.timeSlot?._id) return;
+
+      try {
+        // Call backend API to calculate price
+        const response = await bookingsAPI.calculatePrice({
+          timeSlotId: bookingData.timeSlot._id,
+          duration: formData.duration,
+          customerType: 'normal', // TODO: Get from user profile when member system is implemented
+          discountPercent: 0,
+          depositAmount: 0,
+        });
+
+        // Only update state if component is still mounted
+        if (isMounted && response.success) {
+          setPricing(response.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Calculate price error:', error);
+          // Fallback to basic pricing if API fails
+          const pricePerHour = bookingData.timeSlot.peakHour ? 150 : 120;
+          const subtotal = pricePerHour * formData.duration;
+          setPricing({
+            subtotal,
+            discount: 0,
+            total: subtotal,
+            pricePerHour,
+          });
+        }
+      }
+    };
+
     if (bookingData && formData.duration > 0) {
       calculatePrice();
     }
+
+    // Cleanup function to prevent memory leak
+    return () => {
+      isMounted = false;
+    };
   }, [formData.duration, bookingData]);
-
-  const calculatePrice = async () => {
-    if (!bookingData?.timeSlot) return;
-
-    try {
-      // Mock price calculation (in real app, could call API)
-      // For now, use simple calculation: 120 baht/hour (normal price)
-      const pricePerHour = bookingData.timeSlot.peakHour ? 150 : 120;
-      const subtotal = pricePerHour * formData.duration;
-
-      setPricing({
-        subtotal,
-        discount: 0,
-        total: subtotal,
-        pricePerHour,
-      });
-    } catch (error) {
-      console.error('Calculate price error:', error);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

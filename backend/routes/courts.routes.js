@@ -3,6 +3,7 @@ const router = express.Router();
 const Court = require('../models/court.model');
 const Booking = require('../models/booking.model');
 const { protect, admin } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validateObjectId');
 
 /**
  * @route   GET /api/courts
@@ -40,7 +41,7 @@ router.get('/', protect, async (req, res) => {
  * @desc    Get single court by ID
  * @access  Private
  */
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, validateObjectId(), async (req, res) => {
   try {
     const court = await Court.findOne({
       _id: req.params.id,
@@ -116,7 +117,7 @@ router.post('/', protect, admin, async (req, res) => {
  * @desc    Update court
  * @access  Private (Admin)
  */
-router.put('/:id', protect, admin, async (req, res) => {
+router.put('/:id', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const court = await Court.findOne({
       _id: req.params.id,
@@ -184,7 +185,7 @@ router.put('/:id', protect, admin, async (req, res) => {
  * @desc    Soft delete court
  * @access  Private (Admin)
  */
-router.delete('/:id', protect, admin, async (req, res) => {
+router.delete('/:id', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const court = await Court.findOne({
       _id: req.params.id,
@@ -198,17 +199,37 @@ router.delete('/:id', protect, admin, async (req, res) => {
       });
     }
 
-    // Check if court has active bookings
-    const activeBookings = await Booking.countDocuments({
+    // Check if court has any bookings (including future bookings)
+    // We check all non-cancelled bookings, not just active ones
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Check for future or current bookings
+    const futureBookings = await Booking.countDocuments({
+      court: req.params.id,
+      date: { $gte: today },
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+    });
+
+    if (futureBookings > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `ไม่สามารถลบสนามได้ เนื่องจากมีการจองในอนาคต ${futureBookings} รายการ`,
+      });
+    }
+
+    // Also check for any non-cancelled bookings in the past (for record keeping)
+    const allBookings = await Booking.countDocuments({
       court: req.params.id,
       deletedAt: null,
       bookingStatus: { $ne: 'cancelled' },
     });
 
-    if (activeBookings > 0) {
+    if (allBookings > 0) {
       return res.status(400).json({
         success: false,
-        message: `ไม่สามารถลบสนามได้ เนื่องจากมีการจองที่ยังใช้งานอยู่ ${activeBookings} รายการ`,
+        message: `ไม่สามารถลบสนามได้ เนื่องจากมีประวัติการจอง ${allBookings} รายการ กรุณายกเลิกหรือทำให้เสร็จสิ้นก่อน`,
       });
     }
 

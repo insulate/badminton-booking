@@ -241,6 +241,11 @@ export const bookingsAPI = {
     return response.data;
   },
 
+  calculatePrice: async (data) => {
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.CALCULATE_PRICE, data);
+    return response.data;
+  },
+
   checkin: async (id) => {
     const response = await api.patch(API_ENDPOINTS.BOOKINGS.CHECKIN(id));
     return response.data;

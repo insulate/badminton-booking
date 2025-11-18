@@ -151,8 +151,23 @@ bookingSchema.methods.checkOut = function () {
 
 // Update payment
 bookingSchema.methods.updatePayment = function (amountPaid) {
-  const totalPaid = (this.pricing.deposit || 0) + amountPaid;
+  // Validate amount is positive
+  if (amountPaid < 0) {
+    throw new Error('Payment amount must be positive');
+  }
 
+  const currentDeposit = this.pricing.deposit || 0;
+  const totalPaid = currentDeposit + amountPaid;
+  const remainingBalance = this.pricing.total - currentDeposit;
+
+  // Prevent overpayment
+  if (amountPaid > remainingBalance) {
+    throw new Error(
+      `Payment amount (${amountPaid}) exceeds remaining balance (${remainingBalance}). Total: ${this.pricing.total}, Already paid: ${currentDeposit}`
+    );
+  }
+
+  // Update deposit and payment status
   if (totalPaid >= this.pricing.total) {
     this.paymentStatus = 'paid';
     this.pricing.deposit = this.pricing.total;

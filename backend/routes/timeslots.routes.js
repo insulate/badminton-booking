@@ -3,6 +3,7 @@ const router = express.Router();
 const TimeSlot = require('../models/timeslot.model');
 const Booking = require('../models/booking.model');
 const { protect, admin } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validateObjectId');
 
 // @route   GET /api/timeslots
 // @desc    Get all timeslots with optional filters
@@ -109,7 +110,7 @@ router.patch('/bulk-update-pricing', protect, admin, async (req, res) => {
 // @route   GET /api/timeslots/:id
 // @desc    Get single timeslot by ID
 // @access  Private/Admin
-router.get('/:id', protect, admin, async (req, res) => {
+router.get('/:id', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const timeslot = await TimeSlot.findOne({
       _id: req.params.id,
@@ -186,7 +187,7 @@ router.post('/', protect, admin, async (req, res) => {
 // @route   PUT /api/timeslots/:id
 // @desc    Update timeslot
 // @access  Private/Admin
-router.put('/:id', protect, admin, async (req, res) => {
+router.put('/:id', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const timeslot = await TimeSlot.findOne({
       _id: req.params.id,
@@ -245,7 +246,7 @@ router.put('/:id', protect, admin, async (req, res) => {
 // @route   PATCH /api/timeslots/:id/pricing
 // @desc    Update timeslot pricing only
 // @access  Private/Admin
-router.patch('/:id/pricing', protect, admin, async (req, res) => {
+router.patch('/:id/pricing', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const timeslot = await TimeSlot.findOne({
       _id: req.params.id,
@@ -285,7 +286,7 @@ router.patch('/:id/pricing', protect, admin, async (req, res) => {
 // @route   DELETE /api/timeslots/:id
 // @desc    Delete timeslot (soft delete)
 // @access  Private/Admin
-router.delete('/:id', protect, admin, async (req, res) => {
+router.delete('/:id', protect, admin, validateObjectId(), async (req, res) => {
   try {
     const timeslot = await TimeSlot.findOne({
       _id: req.params.id,

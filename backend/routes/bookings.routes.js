@@ -5,6 +5,7 @@ const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
 const Setting = require('../models/setting.model');
 const { protect, authorize } = require('../middleware/auth');
+const validateObjectId = require('../middleware/validateObjectId');
 const {
   validateBookingRequest,
   validateBookingUpdate,
@@ -152,7 +153,7 @@ router.get('/schedule/daily', protect, async (req, res) => {
  * @desc    Get booking by ID
  * @access  Private
  */
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, validateObjectId(), async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('court', 'courtNumber name type')
@@ -230,6 +231,44 @@ router.post('/check-availability', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to check availability',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/bookings/calculate-price
+ * @desc    Calculate booking price
+ * @access  Private
+ */
+router.post('/calculate-price', protect, async (req, res) => {
+  try {
+    const { timeSlotId, duration, customerType, discountPercent, depositAmount } = req.body;
+
+    if (!timeSlotId) {
+      return res.status(400).json({
+        success: false,
+        message: 'TimeSlot ID is required',
+      });
+    }
+
+    const pricing = await calculatePrice({
+      timeSlotId,
+      duration: duration || 1,
+      customerType: customerType || 'normal',
+      discountPercent: discountPercent || 0,
+      depositAmount: depositAmount || 0,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: pricing,
+    });
+  } catch (error) {
+    console.error('Calculate price error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to calculate price',
       error: error.message,
     });
   }
@@ -319,7 +358,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
  * @desc    Update booking
  * @access  Private
  */
-router.patch('/:id', protect, validateBookingUpdate, async (req, res) => {
+router.patch('/:id', protect, validateObjectId(), validateBookingUpdate, async (req, res) => {
   try {
     const { customer, paymentMethod, notes, paymentStatus, bookingStatus } = req.body;
 
@@ -389,7 +428,7 @@ router.patch('/:id', protect, validateBookingUpdate, async (req, res) => {
  * @desc    Cancel booking
  * @access  Private
  */
-router.patch('/:id/cancel', protect, async (req, res) => {
+router.patch('/:id/cancel', protect, validateObjectId(), async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate(
       'timeSlot',
@@ -433,7 +472,7 @@ router.patch('/:id/cancel', protect, async (req, res) => {
  * @desc    Check-in booking
  * @access  Private
  */
-router.patch('/:id/checkin', protect, async (req, res) => {
+router.patch('/:id/checkin', protect, validateObjectId(), async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -468,7 +507,7 @@ router.patch('/:id/checkin', protect, async (req, res) => {
  * @desc    Check-out booking
  * @access  Private
  */
-router.patch('/:id/checkout', protect, async (req, res) => {
+router.patch('/:id/checkout', protect, validateObjectId(), async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
 
@@ -503,7 +542,7 @@ router.patch('/:id/checkout', protect, async (req, res) => {
  * @desc    Update payment
  * @access  Private
  */
-router.patch('/:id/payment', protect, async (req, res) => {
+router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
   try {
     const { amountPaid, paymentMethod } = req.body;
 

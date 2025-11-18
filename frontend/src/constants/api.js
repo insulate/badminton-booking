@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
     CREATE: '/bookings',
     UPDATE: (id) => `/bookings/${id}`,
     CHECK_AVAILABILITY: '/bookings/check-availability',
+    CALCULATE_PRICE: '/bookings/calculate-price',
     CHECKIN: (id) => `/bookings/${id}/checkin`,
     CHECKOUT: (id) => `/bookings/${id}/checkout`,
     CANCEL: (id) => `/bookings/${id}/cancel`,
