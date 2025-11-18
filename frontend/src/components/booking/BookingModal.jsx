@@ -165,7 +165,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-4 py-8">
         {/* Overlay */}
         <div
           className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
@@ -173,10 +173,10 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
         ></div>
 
         {/* Modal */}
-        <div className="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+        <div className="relative w-full max-w-3xl p-5 overflow-hidden bg-white shadow-xl rounded-lg max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">สร้างการจองใหม่</h3>
+          <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">สร้างการจองใหม่</h3>
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -194,7 +194,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
           </div>
 
           {/* Booking Info */}
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">สนาม:</span>
@@ -216,89 +216,92 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            {/* Customer Name */}
-            <div>
-              <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
-                ชื่อลูกค้า <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="customerName"
-                name="customerName"
-                value={formData.customerName}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-lg border ${
-                  errors.customerName ? 'border-red-300' : 'border-gray-300'
-                } px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                placeholder="กรอกชื่อลูกค้า"
-              />
-              {errors.customerName && (
-                <p className="mt-1 text-sm text-red-600">{errors.customerName}</p>
-              )}
+          {/* Form - Scrollable */}
+          <form id="booking-form" onSubmit={handleSubmit} className="mt-4 flex-1 overflow-y-auto">
+            <div className="space-y-3 pr-2">
+            {/* Row 1: Name & Phone */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+                  ชื่อลูกค้า <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="customerName"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full rounded-lg border ${
+                    errors.customerName ? 'border-red-300' : 'border-gray-300'
+                  } px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="กรอกชื่อลูกค้า"
+                />
+                {errors.customerName && (
+                  <p className="mt-1 text-xs text-red-600">{errors.customerName}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
+                  เบอร์โทรศัพท์ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  name="customerPhone"
+                  value={formData.customerPhone}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full rounded-lg border ${
+                    errors.customerPhone ? 'border-red-300' : 'border-gray-300'
+                  } px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="08XXXXXXXX"
+                />
+                {errors.customerPhone && (
+                  <p className="mt-1 text-xs text-red-600">{errors.customerPhone}</p>
+                )}
+              </div>
             </div>
 
-            {/* Customer Phone */}
-            <div>
-              <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
-                เบอร์โทรศัพท์ <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                id="customerPhone"
-                name="customerPhone"
-                value={formData.customerPhone}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-lg border ${
-                  errors.customerPhone ? 'border-red-300' : 'border-gray-300'
-                } px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                placeholder="08XXXXXXXX"
-              />
-              {errors.customerPhone && (
-                <p className="mt-1 text-sm text-red-600">{errors.customerPhone}</p>
-              )}
-            </div>
+            {/* Row 2: Email & Duration */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
+                  อีเมล (ไม่บังคับ)
+                </label>
+                <input
+                  type="email"
+                  id="customerEmail"
+                  name="customerEmail"
+                  value={formData.customerEmail}
+                  onChange={handleChange}
+                  className={`mt-1 block w-full rounded-lg border ${
+                    errors.customerEmail ? 'border-red-300' : 'border-gray-300'
+                  } px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="example@email.com"
+                />
+                {errors.customerEmail && (
+                  <p className="mt-1 text-xs text-red-600">{errors.customerEmail}</p>
+                )}
+              </div>
 
-            {/* Customer Email */}
-            <div>
-              <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
-                อีเมล (ไม่บังคับ)
-              </label>
-              <input
-                type="email"
-                id="customerEmail"
-                name="customerEmail"
-                value={formData.customerEmail}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-lg border ${
-                  errors.customerEmail ? 'border-red-300' : 'border-gray-300'
-                } px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                placeholder="example@email.com"
-              />
-              {errors.customerEmail && (
-                <p className="mt-1 text-sm text-red-600">{errors.customerEmail}</p>
-              )}
-            </div>
-
-            {/* Duration */}
-            <div>
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                ระยะเวลา (ชั่วโมง) <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
-                  <option key={hour} value={hour}>
-                    {hour} ชั่วโมง
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                  ระยะเวลา (ชั่วโมง) <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="duration"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour} ชั่วโมง
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Payment Method */}
@@ -311,7 +314,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 name="paymentMethod"
                 value={formData.paymentMethod}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="cash">เงินสด</option>
                 <option value="transfer">โอนเงิน</option>
@@ -322,22 +325,22 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
 
             {/* Payment Status Toggle */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 สถานะการชำระเงิน
               </label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'pending' }))}
-                  className={`flex-1 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                  className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                     formData.paymentStatus === 'pending'
                       ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
                   title="เลือกสถานะ: ยังไม่ชำระเงิน"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className={`w-4 h-4 rounded-full border-2 ${
+                  <div className="flex items-center justify-center gap-1.5">
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 ${
                       formData.paymentStatus === 'pending'
                         ? 'border-orange-500 bg-orange-500'
                         : 'border-gray-400'
@@ -352,15 +355,15 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'paid' }))}
-                  className={`flex-1 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                  className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                     formData.paymentStatus === 'paid'
                       ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
                   title="เลือกสถานะ: ชำระเงินแล้ว"
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className={`w-4 h-4 rounded-full border-2 ${
+                  <div className="flex items-center justify-center gap-1.5">
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 ${
                       formData.paymentStatus === 'paid'
                         ? 'border-green-500 bg-green-500'
                         : 'border-gray-400'
@@ -385,17 +388,17 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                rows={3}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={2}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"
               />
             </div>
 
             {/* Pricing Summary */}
             {pricing && (
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">สรุปราคา</h4>
-                <div className="space-y-1 text-sm">
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-700 mb-1.5">สรุปราคา</h4>
+                <div className="space-y-0.5 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">
                       ราคาต่อชั่วโมง × {formData.duration} ชม.
@@ -406,37 +409,39 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                     <span className="text-gray-600">ส่วนลด</span>
                     <span className="text-gray-900">{pricing.discount} บาท</span>
                   </div>
-                  <div className="pt-2 border-t border-gray-300 flex justify-between">
+                  <div className="pt-1.5 border-t border-gray-300 flex justify-between mt-1">
                     <span className="font-semibold text-gray-900">ยอดรวม</span>
-                    <span className="font-semibold text-blue-600 text-lg">
+                    <span className="font-semibold text-blue-600 text-base">
                       {pricing.total} บาท
                     </span>
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                disabled={loading}
-                title="ยกเลิกและปิดหน้าต่าง"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="บันทึกการจองใหม่"
-              >
-                {loading ? 'กำลังบันทึก...' : 'ยืนยันการจอง'}
-              </button>
             </div>
           </form>
+
+          {/* Actions - Fixed at bottom */}
+          <div className="flex justify-end gap-3 pt-3 mt-3 border-t border-gray-200 bg-white">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={loading}
+              title="ยกเลิกและปิดหน้าต่าง"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              form="booking-form"
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="บันทึกการจองใหม่"
+            >
+              {loading ? 'กำลังบันทึก...' : 'ยืนยันการจอง'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
