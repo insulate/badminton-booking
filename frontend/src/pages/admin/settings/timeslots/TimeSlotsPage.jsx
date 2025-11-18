@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, ArrowLeft, Clock } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Clock, DollarSign } from 'lucide-react';
 import { timeslotsAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
 import TimeSlotModal from '../../../../components/timeslots/TimeSlotModal';
+import BulkUpdatePricingModal from '../../../../components/timeslots/BulkUpdatePricingModal';
 
 const TimeSlotsPage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const TimeSlotsPage = () => {
   const [filterDayType, setFilterDayType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [selectedTimeslot, setSelectedTimeslot] = useState(null);
 
   useEffect(() => {
@@ -186,13 +188,22 @@ const TimeSlotsPage = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          เพิ่มช่วงเวลาใหม่
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBulkUpdateModal(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <DollarSign className="w-4 h-4" />
+            อัปเดตราคาทั้งหมด
+          </button>
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            เพิ่มช่วงเวลาใหม่
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -445,12 +456,23 @@ const TimeSlotsPage = () => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* TimeSlot Modal */}
       {showModal && (
         <TimeSlotModal
           timeslot={selectedTimeslot}
           onClose={handleModalClose}
           onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {/* Bulk Update Pricing Modal */}
+      {showBulkUpdateModal && (
+        <BulkUpdatePricingModal
+          onClose={() => setShowBulkUpdateModal(false)}
+          onSuccess={() => {
+            setShowBulkUpdateModal(false);
+            fetchTimeslots();
+          }}
         />
       )}
     </div>

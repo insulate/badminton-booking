@@ -200,6 +200,11 @@ export const timeslotsAPI = {
     const response = await api.delete(API_ENDPOINTS.TIMESLOTS.DELETE(id));
     return response.data;
   },
+
+  bulkUpdatePricing: async (data) => {
+    const response = await api.patch(API_ENDPOINTS.TIMESLOTS.BULK_UPDATE_PRICING, data);
+    return response.data;
+  },
 };
 
 export default api;

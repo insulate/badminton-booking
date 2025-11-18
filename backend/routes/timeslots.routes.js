@@ -190,6 +190,57 @@ router.put('/:id', protect, admin, async (req, res) => {
   }
 });
 
+// @route   PATCH /api/timeslots/bulk-update-pricing
+// @desc    Bulk update pricing for multiple timeslots
+// @access  Private/Admin
+router.patch('/bulk-update-pricing', protect, admin, async (req, res) => {
+  try {
+    const { dayType, pricing, peakPricing } = req.body;
+
+    // Build query
+    const query = { deletedAt: null };
+    if (dayType) query.dayType = dayType;
+
+    // Build update object
+    const updateFields = {};
+    if (pricing) {
+      if (pricing.normal !== undefined) updateFields['pricing.normal'] = pricing.normal;
+      if (pricing.member !== undefined) updateFields['pricing.member'] = pricing.member;
+    }
+    if (peakPricing) {
+      if (peakPricing.normal !== undefined)
+        updateFields['peakPricing.normal'] = peakPricing.normal;
+      if (peakPricing.member !== undefined)
+        updateFields['peakPricing.member'] = peakPricing.member;
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่มีข้อมูลราคาที่ต้องการอัปเดต',
+      });
+    }
+
+    // Update all matching timeslots
+    const result = await TimeSlot.updateMany(query, { $set: updateFields });
+
+    res.status(200).json({
+      success: true,
+      message: `อัปเดตราคา ${result.modifiedCount} ช่วงเวลาสำเร็จ`,
+      data: {
+        matched: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+      },
+    });
+  } catch (error) {
+    console.error('Error bulk updating pricing:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการอัปเดตราคา',
+    });
+  }
+});
+
 // @route   PATCH /api/timeslots/:id/pricing
 // @desc    Update timeslot pricing only
 // @access  Private/Admin

@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     CREATE: '/timeslots',
     UPDATE: (id) => `/timeslots/${id}`,
     UPDATE_PRICING: (id) => `/timeslots/${id}/pricing`,
+    BULK_UPDATE_PRICING: '/timeslots/bulk-update-pricing',
     DELETE: (id) => `/timeslots/${id}`,
   },
 };
