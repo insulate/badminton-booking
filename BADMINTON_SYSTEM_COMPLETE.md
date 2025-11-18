@@ -297,14 +297,24 @@ Session: ก๊วนจันทร์-ศุกร์ (Court A, 18:00-24:00)
 | PATCH | `/api/bookings/:id/payment` | อัพเดทการชำระเงิน |
 | GET | `/api/bookings/schedule/daily` | ตารางรายวัน |
 
+### Players (ผู้เล่นประจำ)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players` | ดูผู้เล่นทั้งหมด (filter by level, search by name/phone) |
+| POST | `/api/players` | เพิ่มผู้เล่นใหม่ |
+| GET | `/api/players/:id` | ดูรายละเอียดผู้เล่น |
+| PUT | `/api/players/:id` | แก้ไขข้อมูลผู้เล่น (ชื่อ, เบอร์, ระดับมือ) |
+| DELETE | `/api/players/:id` | ลบผู้เล่น |
+| GET | `/api/players/stats/:id` | ดูสถิติการเล่น (จำนวนเกม, ค่าใช้จ่ายรวม) |
+
 ### Group Play (ตีก๊วน)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/groupplay` | ดู Session ทั้งหมด (filter by date, court, status) |
 | POST | `/api/groupplay` | สร้าง Session ใหม่ (แบบวันเดียว หรือ recurring) + สร้าง booking ใน Calendar |
 | GET | `/api/groupplay/:id` | ดูรายละเอียด Session |
-| POST | `/api/groupplay/:id/checkin` | Check-in ผู้เล่น + เก็บค่าเข้าร่วม |
-| POST | `/api/groupplay/:id/game/start` | เริ่มเกมใหม่ (เลือกผู้เล่น 2-4 คน) |
+| POST | `/api/groupplay/:id/checkin` | Check-in ผู้เล่น (เลือกจาก database หรือสร้างใหม่) + เก็บค่าเข้าร่วม |
+| POST | `/api/groupplay/:id/game/start` | เริ่มเกมใหม่ (เลือกผู้เล่น 2-4 คน, แนะนำตามระดับมือ) |
 | PATCH | `/api/groupplay/:id/game/:gameId/finish` | จบเกม + บันทึกสินค้าที่ใช้ + คำนวณค่าใช้จ่าย |
 | POST | `/api/groupplay/:id/checkout` | Check-out ผู้เล่น + สรุปยอดเงิน |
 | DELETE | `/api/groupplay/:id` | ลบ Session + ลบ booking ใน Calendar |
@@ -371,6 +381,26 @@ Session: ก๊วนจันทร์-ศุกร์ (Court A, 18:00-24:00)
 }
 ```
 
+### Player (ผู้เล่นประจำ)
+```javascript
+{
+  name: String,                   // ชื่อผู้เล่น
+  phone: String,                  // เบอร์โทร (unique)
+  password: String,               // Password สำหรับอนาคต (login)
+  level: String,                  // ระดับมือ: "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" (optional)
+  levelName: String,              // ชื่อระดับ: "เปะ-แปะ", "หน้าบ้าน", "S-", "S", "N", "P-", "P", "P+", "C", "B", "A"
+  stats: {
+    totalGames: Number,           // จำนวนเกมรวมทั้งหมด
+    totalSpent: Number,           // ค่าใช้จ่ายรวมทั้งหมด
+    lastPlayed: Date              // เล่นครั้งล่าสุดเมื่อไหร่
+  },
+  notes: String,                  // หมายเหตุ (เช่น "ซ้ายมือ", "ชอบตบ")
+  status: String,                 // "active", "inactive"
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
 ### GroupPlay (ตีก๊วน)
 ```javascript
 {
@@ -383,9 +413,11 @@ Session: ก๊วนจันทร์-ศุกร์ (Court A, 18:00-24:00)
   entryFee: Number,                 // Default 30 บาท (configurable)
   recurring: Boolean,               // true ถ้าเป็น session ประจำ
   players: [{
-    name: String,
-    phone: String,
-    password: String,               // Default password สำหรับอนาคต
+    player: ObjectId,               // ref: Player (optional, null ถ้าเป็น walk-in)
+    name: String,                   // ชื่อ (copy จาก Player หรือกรอกใหม่)
+    phone: String,                  // เบอร์ (copy จาก Player หรือกรอกใหม่)
+    level: String,                  // ระดับมือ: "0"-"10" (optional, copy จาก Player)
+    levelName: String,              // ชื่อระดับ (optional, copy จาก Player)
     checkedIn: Boolean,
     checkInTime: Date,
     entryFeePaid: Boolean,          // จ่ายค่าเข้าร่วมแล้วหรือยัง
@@ -643,6 +675,34 @@ const response = await axios.patch(
   `/api/groupplay/${sessionId}/game/${gameId}/finish`,
   gameData
 );
+```
+
+### 5. Player Levels Constants (MK Badminton 2025)
+```javascript
+// backend/constants/playerLevels.js หรือ frontend/src/constants/playerLevels.js
+
+export const PLAYER_LEVELS = {
+  '0': { name: 'เปะ-แปะ', color: 'gray', bgColor: 'bg-gray-100', textColor: 'text-gray-800' },
+  '1': { name: 'หน้าบ้าน', color: 'gray', bgColor: 'bg-gray-200', textColor: 'text-gray-800' },
+  '2': { name: 'S-', color: 'orange', bgColor: 'bg-orange-100', textColor: 'text-orange-800' },
+  '3': { name: 'S', color: 'orange', bgColor: 'bg-orange-200', textColor: 'text-orange-800' },
+  '4': { name: 'N', color: 'blue', bgColor: 'bg-blue-100', textColor: 'text-blue-800' },
+  '5': { name: 'P-', color: 'yellow', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800' },
+  '6': { name: 'P', color: 'yellow', bgColor: 'bg-yellow-200', textColor: 'text-yellow-800' },
+  '7': { name: 'P+', color: 'yellow', bgColor: 'bg-yellow-300', textColor: 'text-yellow-900' },
+  '8': { name: 'C', color: 'green', bgColor: 'bg-green-200', textColor: 'text-green-900' },
+  '9': { name: 'B', color: 'purple', bgColor: 'bg-purple-200', textColor: 'text-purple-900' },
+  '10': { name: 'A', color: 'red', bgColor: 'bg-red-200', textColor: 'text-red-900' }
+};
+
+export const getLevelName = (level) => {
+  return PLAYER_LEVELS[level]?.name || '-';
+};
+
+export const getLevelBadgeClass = (level) => {
+  const l = PLAYER_LEVELS[level];
+  return l ? `${l.bgColor} ${l.textColor}` : 'bg-gray-100 text-gray-800';
+};
 ```
 
 ---
