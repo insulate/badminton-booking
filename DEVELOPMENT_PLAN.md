@@ -11,13 +11,14 @@
 - [x] Frontend: User Management (complete CRUD)
 - [x] Constants for routes and API endpoints
 - [x] Protected routes
-- [x] **Backend: Settings System (Phase 1.1)**
+- [x] **Phase 1: Settings System (Backend + Frontend)**
+- [x] **Phase 2: Court Management (Backend + Frontend)**
 
 ### 📊 สถิติ
-- **Backend APIs**: 14/40+ endpoints (Settings: 8, Users: 4, Auth: 2)
-- **Frontend Pages**: 3/12+ pages
-- **Database Models**: 2/8 models (User, Setting)
-- **Progress**: ~25%
+- **Backend APIs**: 19/40+ endpoints (Settings: 8, Courts: 5, Users: 4, Auth: 2)
+- **Frontend Pages**: 11/12+ pages (Settings: 5, Courts: 3, Users: 1, Dashboard: 1, Login: 1)
+- **Database Models**: 3/8 models (User, Setting, Court)
+- **Progress**: ~40%
 
 ---
 
@@ -27,7 +28,7 @@
 ---
 
 ## **PHASE 1: Settings System** ⚙️
-> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Status: Backend ✅ Frontend ⏳
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Status: ✅ COMPLETED
 
 ### 1.1 Backend - Settings API ✅
 **ไฟล์**:
@@ -51,9 +52,8 @@
 
 ---
 
-### 1.2 Frontend - Settings Pages ⏳
+### 1.2 Frontend - Settings Pages ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/SettingsPage.jsx` (Overview)
 - `frontend/src/pages/admin/settings/VenueSettingsPage.jsx`
 - `frontend/src/pages/admin/settings/OperatingHoursPage.jsx`
 - `frontend/src/pages/admin/settings/BookingSettingsPage.jsx`
@@ -61,31 +61,29 @@
 - `frontend/src/pages/admin/settings/GeneralSettingsPage.jsx`
 
 **Features**:
-- Tab-based settings interface หรือ Card-based navigation
-- Form validation ด้วย react-hook-form
-- Real-time preview (optional)
+- Form validation ด้วย useState
 - Save confirmation with toast notifications
 - Loading states
+- Back navigation buttons
 
 **Tasks**:
-- [ ] สร้าง Settings Overview (landing page with cards)
-- [ ] สร้างฟอร์มข้อมูลสนาม (Venue Settings)
-- [ ] สร้างฟอร์มเวลาทำการ (Operating Hours)
-- [ ] สร้างฟอร์มการตั้งค่าการจอง (Booking Settings)
-- [ ] สร้างฟอร์มวิธีการชำระเงิน (Payment Settings)
-- [ ] สร้างฟอร์มการตั้งค่าทั่วไป (General Settings)
-- [ ] Integrate ทุกฟอร์มกับ Settings API
-- [ ] เพิ่มใน Settings menu accordion
-- [ ] ทดสอบการบันทึกและแสดงผลครบทุก section
+- [x] สร้างฟอร์มข้อมูลสนาม (Venue Settings)
+- [x] สร้างฟอร์มเวลาทำการ (Operating Hours)
+- [x] สร้างฟอร์มการตั้งค่าการจอง (Booking Settings)
+- [x] สร้างฟอร์มวิธีการชำระเงิน (Payment Settings)
+- [x] สร้างฟอร์มการตั้งค่าทั่วไป (General Settings)
+- [x] Integrate ทุกฟอร์มกับ Settings API
+- [x] เพิ่มใน Settings menu accordion
+- [x] ทดสอบการบันทึกและแสดงผลครบทุก section
 
 **🎯 Milestone**: Settings System ครบทั้ง Backend + Frontend พร้อมใช้งาน 100%
 
 ---
 
 ## **PHASE 2: Court Management** 🏸
-> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Full-Stack Feature
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูงสุด | Status: ✅ COMPLETED
 
-### 2.1 Backend - Courts API
+### 2.1 Backend - Courts API ✅
 **ไฟล์**:
 - `backend/models/court.model.js`
 - `backend/routes/courts.routes.js`
@@ -94,17 +92,17 @@
 **Schema**:
 ```javascript
 {
-  courtNumber: String,     // "C01", "C02" (unique)
+  courtNumber: String,     // "C01", "C02" (unique, uppercase)
   name: String,            // "Court 1", "Court Premium"
   type: String,            // "normal", "premium", "tournament"
   status: String,          // "available", "maintenance", "inactive"
   description: String,
   hourlyRate: {
-    weekday: Number,
-    weekend: Number,
-    holiday: Number
+    weekday: Number,       // Default: 150
+    weekend: Number,       // Default: 180
+    holiday: Number        // Default: 200
   },
-  facilities: [String],    // ["AC", "ไฟ LED", "พื้นไม้"]
+  deletedAt: Date          // Soft delete
 }
 ```
 
@@ -116,34 +114,36 @@
 - `DELETE /api/courts/:id` - ลบสนาม (soft delete)
 
 **Tasks**:
-- [ ] สร้าง Court Model with validation
-- [ ] สร้าง Courts API routes
-- [ ] สร้าง default courts seeder (5-6 สนาม)
-- [ ] ทดสอบ API
+- [x] สร้าง Court Model with validation
+- [x] สร้าง Courts API routes (5 endpoints)
+- [x] สร้าง default courts seeder (6 สนาม)
+- [x] ทดสอบ API
 
 ---
 
-### 2.2 Frontend - Court Management
+### 2.2 Frontend - Court Management ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/CourtsPage.jsx`
-- `frontend/src/components/courts/CourtTable.jsx`
-- `frontend/src/components/courts/CourtModal.jsx`
+- `frontend/src/pages/admin/settings/courts/CourtsPage.jsx`
+- `frontend/src/pages/admin/settings/courts/CourtsAddPage.jsx`
+- `frontend/src/pages/admin/settings/courts/CourtsEditPage.jsx`
 
 **Features**:
-- Table แสดงรายการสนาม (courtNumber, name, type, status)
-- Modal สำหรับเพิ่ม/แก้ไขสนาม
-- Status toggle (available/maintenance/inactive)
-- Search & Filter
+- Table แสดงรายการสนาม (courtNumber, name, type, status, pricing)
+- Separate pages สำหรับเพิ่ม/แก้ไขสนาม
+- Search by courtNumber or name
+- Filter by type (ธรรมดา/พรีเมี่ยม/แข่งขัน) and status
 - Delete with confirmation
-- Badge สำหรับ type (normal/premium/tournament)
+- Color-coded badges สำหรับ type และ status
+- Form validation
+- Toast notifications
 
 **Tasks**:
-- [ ] สร้าง CourtsPage
-- [ ] สร้าง CourtTable component
-- [ ] สร้าง CourtModal component
-- [ ] Integrate กับ Courts API
-- [ ] เพิ่มใน Settings menu
-- [ ] ทดสอบ CRUD operations
+- [x] สร้าง CourtsPage (List with search/filter)
+- [x] สร้าง CourtsAddPage (Add form)
+- [x] สร้าง CourtsEditPage (Edit form)
+- [x] Integrate กับ Courts API
+- [x] เพิ่มใน Settings menu และ App routes
+- [x] ทดสอบ CRUD operations
 
 **🎯 Milestone**: Court Management System พร้อมใช้งานครบ 100%
 
