@@ -242,7 +242,7 @@ router.post('/check-availability', protect, async (req, res) => {
  */
 router.post('/', protect, validateBookingRequest, async (req, res) => {
   try {
-    const { customer, court, date, timeSlot, duration, paymentMethod, notes } = req.body;
+    const { customer, court, date, timeSlot, duration, paymentMethod, paymentStatus, notes } = req.body;
     const { court: courtDoc, timeSlot: timeSlotDoc, bookingDate } = req.validatedData;
 
     // Check availability
@@ -292,7 +292,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
       paymentMethod: paymentMethod || null,
       notes: notes || '',
       bookingStatus: 'confirmed',
-      paymentStatus: 'pending',
+      paymentStatus: paymentStatus || 'pending',
     });
 
     // Populate before sending response

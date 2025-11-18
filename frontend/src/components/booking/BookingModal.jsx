@@ -13,12 +13,23 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
     customerEmail: '',
     duration: 1,
     paymentMethod: 'cash',
+    paymentStatus: 'pending', // 'pending' or 'paid'
     notes: '',
   });
 
   const [pricing, setPricing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Calculate end time based on duration
+  const calculateEndTime = () => {
+    if (!bookingData?.timeSlot?.startTime) return '';
+
+    const [hours, minutes] = bookingData.timeSlot.startTime.split(':').map(Number);
+    const endHours = hours + parseInt(formData.duration);
+    const endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    return endTime;
+  };
 
   // Calculate price when duration changes
   useEffect(() => {
@@ -107,6 +118,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
         timeSlot: bookingData.timeSlot.timeSlotId,
         duration: parseInt(formData.duration),
         paymentMethod: formData.paymentMethod,
+        paymentStatus: formData.paymentStatus,
         notes: formData.notes,
       };
 
@@ -141,6 +153,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
       customerEmail: '',
       duration: 1,
       paymentMethod: 'cash',
+      paymentStatus: 'pending',
       notes: '',
     });
     setPricing(null);
@@ -191,7 +204,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
               <div>
                 <span className="text-gray-600">เวลา:</span>
                 <span className="ml-2 font-semibold text-gray-900">
-                  {bookingData?.timeSlot?.startTime} - {bookingData?.timeSlot?.endTime}
+                  {bookingData?.timeSlot?.startTime} - {calculateEndTime()}
                   {bookingData?.timeSlot?.peakHour && (
                     <span className="ml-2 inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-800">
                       Peak Hour
@@ -304,6 +317,59 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 <option value="qr">QR Code</option>
                 <option value="card">บัตรเครดิต</option>
               </select>
+            </div>
+
+            {/* Payment Status Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                สถานะการชำระเงิน
+              </label>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'pending' }))}
+                  className={`flex-1 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                    formData.paymentStatus === 'pending'
+                      ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={`w-4 h-4 rounded-full border-2 ${
+                      formData.paymentStatus === 'pending'
+                        ? 'border-orange-500 bg-orange-500'
+                        : 'border-gray-400'
+                    }`}>
+                      {formData.paymentStatus === 'pending' && (
+                        <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                      )}
+                    </div>
+                    <span>ยังไม่ชำระ</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'paid' }))}
+                  className={`flex-1 px-4 py-2.5 rounded-lg border-2 transition-all ${
+                    formData.paymentStatus === 'paid'
+                      ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={`w-4 h-4 rounded-full border-2 ${
+                      formData.paymentStatus === 'paid'
+                        ? 'border-green-500 bg-green-500'
+                        : 'border-gray-400'
+                    }`}>
+                      {formData.paymentStatus === 'paid' && (
+                        <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                      )}
+                    </div>
+                    <span>ชำระแล้ว</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Notes */}
