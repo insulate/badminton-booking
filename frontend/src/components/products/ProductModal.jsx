@@ -32,7 +32,7 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
       });
       // Set existing image preview
       if (product.image) {
-        setImagePreview(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${product.image}`);
+        setImagePreview(`${(import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '')}${product.image}`);
       }
     }
   }, [product]);
