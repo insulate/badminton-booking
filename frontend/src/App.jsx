@@ -3,10 +3,10 @@ import { Toaster } from 'react-hot-toast';
 import { ROUTES } from './constants';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/layout/AdminLayout';
-import Login from './pages/Login';
-import Dashboard from './pages/admin/Dashboard';
-import Users from './pages/admin/Users';
-import Settings from './pages/admin/Settings';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/admin/DashboardPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 function App() {
   return (
@@ -36,7 +36,7 @@ function App() {
 
       <Routes>
         {/* Public Routes */}
-        <Route path={ROUTES.LOGIN} element={<Login />} />
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
         {/* Redirect root to admin dashboard */}
         <Route path={ROUTES.ROOT} element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
@@ -51,9 +51,9 @@ function App() {
           }
         >
           <Route index element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}
