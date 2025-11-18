@@ -14,6 +14,11 @@ import BookingSettingsPage from './pages/admin/settings/BookingSettingsPage';
 import PaymentSettingsPage from './pages/admin/settings/PaymentSettingsPage';
 import GeneralSettingsPage from './pages/admin/settings/GeneralSettingsPage';
 
+// Courts Pages
+import CourtsPage from './pages/admin/settings/courts/CourtsPage';
+import CourtsAddPage from './pages/admin/settings/courts/CourtsAddPage';
+import CourtsEditPage from './pages/admin/settings/courts/CourtsEditPage';
+
 function App() {
   return (
     <Router>
@@ -66,6 +71,11 @@ function App() {
           <Route path="settings/booking" element={<BookingSettingsPage />} />
           <Route path="settings/payment" element={<PaymentSettingsPage />} />
           <Route path="settings/general" element={<GeneralSettingsPage />} />
+
+          {/* Courts Routes */}
+          <Route path="settings/courts" element={<CourtsPage />} />
+          <Route path="settings/courts/add" element={<CourtsAddPage />} />
+          <Route path="settings/courts/edit/:id" element={<CourtsEditPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}

@@ -17,6 +17,7 @@ import {
   Calendar,
   CreditCard,
   Settings as SettingsIcon,
+  LayoutGrid,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -46,6 +47,11 @@ export default function AdminLayout() {
           name: 'จัดการผู้ใช้งาน',
           path: ROUTES.ADMIN.USERS,
           icon: Users,
+        },
+        {
+          name: 'จัดการสนาม',
+          path: ROUTES.ADMIN.COURTS,
+          icon: LayoutGrid,
         },
         {
           name: 'ข้อมูลสนาม',
