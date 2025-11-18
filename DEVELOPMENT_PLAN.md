@@ -13,12 +13,13 @@
 - [x] Protected routes
 - [x] **Phase 1: Settings System (Backend + Frontend)**
 - [x] **Phase 2: Court Management (Backend + Frontend)**
+- [x] **Phase 3: Time Slot & Pricing (Backend + Frontend)**
 
 ### 📊 สถิติ
-- **Backend APIs**: 19/40+ endpoints (Settings: 8, Courts: 5, Users: 4, Auth: 2)
-- **Frontend Pages**: 11/12+ pages (Settings: 5, Courts: 3, Users: 1, Dashboard: 1, Login: 1)
-- **Database Models**: 3/8 models (User, Setting, Court)
-- **Progress**: ~40%
+- **Backend APIs**: 27/40+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Users: 4, Auth: 2)
+- **Frontend Pages**: 12/12+ pages (Settings: 6, Courts: 3, Users: 1, Dashboard: 1, Login: 1)
+- **Database Models**: 4/8 models (User, Setting, Court, TimeSlot)
+- **Progress**: ~50%
 
 ---
 
@@ -150,7 +151,7 @@
 ---
 
 ## **PHASE 3: Time Slot & Pricing** ⏰
-> ระยะเวลา: 1 วัน | ความสำคัญ: สูง | Full-Stack Feature
+> ระยะเวลา: 1 วัน | ความสำคัญ: สูง | Status: ✅ COMPLETED
 
 ### 3.1 Backend - Time Slots API
 **ไฟล์**:
@@ -161,58 +162,75 @@
 **Schema**:
 ```javascript
 {
-  startTime: String,       // "06:00"
-  endTime: String,         // "07:00"
-  dayType: String,         // "weekday", "weekend", "holiday"
+  startTime: String,       // "09:00"
+  endTime: String,         // "10:00"
+  dayType: String,         // "weekday", "weekend" (removed "holiday")
   pricing: {
     normal: Number,        // ราคาสนามปกติ
     member: Number,        // ราคาสมาชิก
-    walkIn: Number,        // ราคา Walk-in
   },
-  peakHour: Boolean,       // ช่วงเวลา Peak
+  peakPricing: {
+    normal: Number,        // ราคา Peak Hour ปกติ
+    member: Number,        // ราคา Peak Hour สมาชิก
+  },
+  peakHour: Boolean,       // ช่วงเวลา Peak (toggle switch)
   status: String,          // "active", "inactive"
 }
 ```
 
-**API Endpoints**: 6 endpoints
-- `GET /api/timeslots` - ดูช่วงเวลาทั้งหมด
-- `GET /api/timeslots/active` - ดูช่วงเวลาที่เปิดใช้งาน
-- `POST /api/timeslots` - เพิ่มช่วงเวลาใหม่
-- `PUT /api/timeslots/:id` - แก้ไขช่วงเวลา
-- `PATCH /api/timeslots/:id/pricing` - แก้ไขราคาเฉพาะ
-- `DELETE /api/timeslots/:id` - ลบช่วงเวลา
+**API Endpoints**: 8 endpoints
+- `GET /api/timeslots` - ดูช่วงเวลาทั้งหมด ✅
+- `GET /api/timeslots/active` - ดูช่วงเวลาที่เปิดใช้งาน ✅
+- `GET /api/timeslots/:id` - ดูรายละเอียดช่วงเวลา ✅
+- `POST /api/timeslots` - เพิ่มช่วงเวลาใหม่ ✅
+- `PUT /api/timeslots/:id` - แก้ไขช่วงเวลา ✅
+- `PATCH /api/timeslots/:id/pricing` - แก้ไขราคาเฉพาะ ✅
+- `PATCH /api/timeslots/bulk-update-pricing` - อัปเดตราคาหลายช่วงเวลาพร้อมกัน ✅
+- `DELETE /api/timeslots/:id` - ลบช่วงเวลา ✅
 
 **Tasks**:
-- [ ] สร้าง TimeSlot Model
-- [ ] สร้าง TimeSlots API routes
-- [ ] สร้าง default timeslots seeder (06:00-22:00)
-- [ ] เพิ่ม validation (เวลาไม่ซ้อนทับกัน)
-- [ ] ทดสอบ API
+- [x] สร้าง TimeSlot Model
+- [x] สร้าง TimeSlots API routes (8 endpoints)
+- [x] สร้าง dynamic timeslots seeder (อิงตาม Settings operating hours)
+- [x] เพิ่ม validation (เวลาไม่ซ้อนทับกัน)
+- [x] ลบ holiday day type (เหลือแค่ weekday/weekend)
+- [x] เพิ่ม bulk update pricing endpoint
+- [x] ทดสอบ API
+
+**Status**: ✅ Backend API พร้อมใช้งาน 100%
 
 ---
 
-### 3.2 Frontend - Time Slot Management
+### 3.2 Frontend - Time Slot Management ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/TimeSlotsPage.jsx`
-- `frontend/src/components/timeslots/TimeSlotTable.jsx`
+- `frontend/src/pages/admin/settings/timeslots/TimeSlotsPage.jsx`
 - `frontend/src/components/timeslots/TimeSlotModal.jsx`
+- `frontend/src/components/timeslots/BulkUpdatePricingModal.jsx`
 
 **Features**:
-- Table แสดงช่วงเวลาและราคา
-- แยกแสดงตาม weekday/weekend/holiday
-- แสดง Peak hours (highlight)
-- Quick edit pricing (inline edit)
-- Bulk operations (เปิด/ปิดหลายช่วงเวลา)
+- Table แสดงช่วงเวลาและราคา grouped by weekday/weekend
+- Toggle switch สำหรับ Peak Hour (in modal และ table)
+- Optimistic UI updates (ไม่ reload table เมื่อกด toggle)
+- Bulk update pricing modal (อัปเดตราคาหลายช่วงเวลาพร้อมกัน)
+- Search และ filter ตาม dayType, status, peak hour
+- Color-coded badges สำหรับ status และ peak hour
+- Form validation และ overlap checking
 
 **Tasks**:
-- [ ] สร้าง TimeSlotsPage
-- [ ] สร้าง TimeSlotTable grouped by dayType
-- [ ] สร้าง TimeSlotModal (with pricing form)
-- [ ] Quick edit inline สำหรับราคา
-- [ ] Integrate กับ API
-- [ ] เพิ่มใน Settings menu
+- [x] สร้าง TimeSlotsPage with grouped display
+- [x] สร้าง TimeSlotModal (with toggle switch for Peak Hour)
+- [x] สร้าง BulkUpdatePricingModal (อัปเดตราคาหลายช่วงเวลา)
+- [x] Quick toggle Peak Hour ใน table (with optimistic updates)
+- [x] ลบ holiday day type options
+- [x] Integrate กับ TimeSlots API
+- [x] เพิ่มใน Settings menu (จัดการช่วงเวลาและราคา)
+- [x] ทดสอบ CRUD operations
 
-**🎯 Milestone**: Time Slot & Pricing System พร้อมใช้งานครบ 100%
+**Status**: ✅ Frontend พร้อมใช้งาน 100%
+
+---
+
+**🎯 Milestone**: Time Slot & Pricing System พร้อมใช้งานครบ 100% ✅
 
 ---
 
@@ -638,8 +656,8 @@
 
 ## 🎯 Milestones
 
-- **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100%
-- **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ
+- **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100% ✅ **COMPLETED**
+- **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ ⏳ **NEXT**
 - **Milestone 3** (Week 2 Day 2): Group Play พร้อมใช้งาน
 - **Milestone 4** (Week 2 Day 5): ระบบครบทุกฟีเจอร์
 - **Milestone 5** (Week 2 Day 7): Production Ready!
