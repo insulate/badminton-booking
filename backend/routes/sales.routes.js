@@ -162,6 +162,8 @@ router.get('/:id', protect, async (req, res) => {
  * @access  Private (Admin/Staff)
  */
 router.post('/', protect, async (req, res) => {
+  let saleId = null;
+
   try {
     const { items, customer, paymentMethod, relatedBooking } = req.body;
 
@@ -220,11 +222,33 @@ router.post('/', protect, async (req, res) => {
       createdBy: req.user._id,
     });
 
-    // Update product stock
+    saleId = sale._id;
+
+    // Update product stock atomically with stock check
+    // This prevents race condition by using atomic operation
     for (const item of processedItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+      const updated = await Product.findOneAndUpdate(
+        {
+          _id: item.product,
+          stock: { $gte: item.quantity }, // Only update if stock is sufficient
+        },
+        {
+          $inc: { stock: -item.quantity },
+        },
+        { new: true }
+      );
+
+      // If update failed, it means stock is insufficient (race condition occurred)
+      if (!updated) {
+        // Rollback: Delete the sale
+        await Sale.findByIdAndDelete(saleId);
+
+        const product = await Product.findById(item.product);
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for ${product?.name || 'product'}. Someone else purchased it. Please try again.`,
+        });
+      }
     }
 
     // Populate sale before sending response
@@ -239,6 +263,15 @@ router.post('/', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating sale:', error);
+
+    // Rollback sale if it was created
+    if (saleId) {
+      try {
+        await Sale.findByIdAndDelete(saleId);
+      } catch (rollbackError) {
+        console.error('Error rolling back sale:', rollbackError);
+      }
+    }
 
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((err) => err.message);

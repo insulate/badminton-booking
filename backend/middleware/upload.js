@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, '../uploads/products');
@@ -14,8 +15,8 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename: timestamp-randomstring.ext
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    // Generate unique filename using crypto for security
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
     const ext = path.extname(file.originalname);
     cb(null, 'product-' + uniqueSuffix + ext);
   },
@@ -44,12 +45,36 @@ const upload = multer({
 });
 
 // Helper function to delete old image file
-const deleteImage = (imagePath) => {
-  if (imagePath) {
-    const fullPath = path.join(__dirname, '../', imagePath);
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
+const deleteImage = async (imagePath) => {
+  if (!imagePath) {
+    return;
+  }
+
+  try {
+    // Validate that path starts with /uploads to prevent path traversal
+    if (!imagePath.startsWith('/uploads/')) {
+      console.error('Invalid image path - must start with /uploads/:', imagePath);
+      return;
     }
+
+    // Normalize path to prevent path traversal attacks
+    const normalizedPath = path.normalize(imagePath);
+    if (normalizedPath.includes('..')) {
+      console.error('Path traversal attempt detected:', imagePath);
+      return;
+    }
+
+    const fullPath = path.join(__dirname, '../', normalizedPath);
+
+    // Check if file exists
+    if (fs.existsSync(fullPath)) {
+      // Use async unlink with promises
+      await fs.promises.unlink(fullPath);
+      console.log('Image deleted successfully:', imagePath);
+    }
+  } catch (error) {
+    // Log error but don't throw - file deletion failure shouldn't crash the server
+    console.error('Error deleting image:', imagePath, error.message);
   }
 };
 

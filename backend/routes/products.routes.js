@@ -229,7 +229,7 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
     if (req.file) {
       // Delete old image if exists
       if (product.image) {
-        deleteImage(product.image);
+        await deleteImage(product.image);
       }
       updateData.image = `/uploads/products/${req.file.filename}`;
     }
@@ -336,7 +336,7 @@ router.delete('/:id', protect, admin, async (req, res) => {
 
     // Delete product image if exists
     if (product.image) {
-      deleteImage(product.image);
+      await deleteImage(product.image);
     }
 
     await Product.findByIdAndDelete(req.params.id);
