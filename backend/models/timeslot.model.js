@@ -14,7 +14,7 @@ const timeslotSchema = new mongoose.Schema(
     },
     dayType: {
       type: String,
-      enum: ['weekday', 'weekend', 'holiday'],
+      enum: ['weekday', 'weekend'],
       required: [true, 'Please provide day type'],
     },
     pricing: {

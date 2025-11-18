@@ -1,12 +1,19 @@
 const mongoose = require('mongoose');
 const TimeSlot = require('../models/timeslot.model');
+const Setting = require('../models/setting.model');
 require('dotenv').config();
 
-const generateTimeslots = () => {
+const generateTimeslots = (openTime, closeTime) => {
   const timeslots = [];
-  const hours = Array.from({ length: 16 }, (_, i) => i + 6); // 6-21 (06:00-22:00)
 
-  const dayTypes = ['weekday', 'weekend', 'holiday'];
+  // Parse open and close times
+  const openHour = parseInt(openTime.split(':')[0]);
+  const closeHour = parseInt(closeTime.split(':')[0]);
+
+  // Generate hours array based on operating hours
+  const hours = Array.from({ length: closeHour - openHour }, (_, i) => i + openHour);
+
+  const dayTypes = ['weekday', 'weekend'];
 
   dayTypes.forEach((dayType) => {
     hours.forEach((hour) => {
@@ -38,15 +45,6 @@ const generateTimeslots = () => {
           normal: 250,
           member: 210,
         };
-      } else if (dayType === 'holiday') {
-        pricing = {
-          normal: 250,
-          member: 200,
-        };
-        peakPricing = {
-          normal: 300,
-          member: 250,
-        };
       }
 
       timeslots.push({
@@ -76,43 +74,55 @@ const seedTimeslots = async () => {
     );
     console.log('MongoDB Connected');
 
+    // Get or create settings
+    const settings = await Setting.getSettings();
+    const { openTime, closeTime } = settings.operating;
+
+    console.log(`Operating hours: ${openTime} - ${closeTime}`);
+
     // Clear existing timeslots
     await TimeSlot.deleteMany({});
     console.log('Cleared existing timeslots');
 
-    // Generate and insert timeslots
-    const timeslots = generateTimeslots();
+    // Generate and insert timeslots based on operating hours
+    const timeslots = generateTimeslots(openTime, closeTime);
     const createdTimeslots = await TimeSlot.insertMany(timeslots);
 
     console.log(`\nCreated ${createdTimeslots.length} timeslots successfully`);
     console.log('\nBreakdown:');
     console.log(`- Weekday timeslots: ${createdTimeslots.filter((t) => t.dayType === 'weekday').length}`);
     console.log(`- Weekend timeslots: ${createdTimeslots.filter((t) => t.dayType === 'weekend').length}`);
-    console.log(`- Holiday timeslots: ${createdTimeslots.filter((t) => t.dayType === 'holiday').length}`);
     console.log(`- Peak hour slots: ${createdTimeslots.filter((t) => t.peakHour).length}`);
 
     console.log('\nSample timeslots:');
-    console.log('Weekday (Normal):');
-    console.log(
-      `  06:00-07:00: ฿${createdTimeslots.find((t) => t.dayType === 'weekday' && t.startTime === '06:00').pricing.normal}`
-    );
-    console.log(
-      `  18:00-19:00 (Peak): ฿${createdTimeslots.find((t) => t.dayType === 'weekday' && t.startTime === '18:00').pricing.normal}`
-    );
-    console.log('\nWeekend (Normal):');
-    console.log(
-      `  06:00-07:00: ฿${createdTimeslots.find((t) => t.dayType === 'weekend' && t.startTime === '06:00').pricing.normal}`
-    );
-    console.log(
-      `  18:00-19:00 (Peak): ฿${createdTimeslots.find((t) => t.dayType === 'weekend' && t.startTime === '18:00').pricing.normal}`
-    );
-    console.log('\nHoliday (Normal):');
-    console.log(
-      `  06:00-07:00: ฿${createdTimeslots.find((t) => t.dayType === 'holiday' && t.startTime === '06:00').pricing.normal}`
-    );
-    console.log(
-      `  18:00-19:00 (Peak): ฿${createdTimeslots.find((t) => t.dayType === 'holiday' && t.startTime === '18:00').pricing.normal}`
-    );
+    const weekdaySlots = createdTimeslots.filter((t) => t.dayType === 'weekday');
+    const weekendSlots = createdTimeslots.filter((t) => t.dayType === 'weekend');
+
+    if (weekdaySlots.length > 0) {
+      console.log('Weekday:');
+      console.log(
+        `  ${weekdaySlots[0].startTime}-${weekdaySlots[0].endTime}: ฿${weekdaySlots[0].pricing.normal} (Normal), ฿${weekdaySlots[0].pricing.member} (Member)`
+      );
+      const weekdayPeak = weekdaySlots.find((t) => t.peakHour);
+      if (weekdayPeak) {
+        console.log(
+          `  ${weekdayPeak.startTime}-${weekdayPeak.endTime} (Peak): ฿${weekdayPeak.peakPricing.normal} (Normal), ฿${weekdayPeak.peakPricing.member} (Member)`
+        );
+      }
+    }
+
+    if (weekendSlots.length > 0) {
+      console.log('\nWeekend:');
+      console.log(
+        `  ${weekendSlots[0].startTime}-${weekendSlots[0].endTime}: ฿${weekendSlots[0].pricing.normal} (Normal), ฿${weekendSlots[0].pricing.member} (Member)`
+      );
+      const weekendPeak = weekendSlots.find((t) => t.peakHour);
+      if (weekendPeak) {
+        console.log(
+          `  ${weekendPeak.startTime}-${weekendPeak.endTime} (Peak): ฿${weekendPeak.peakPricing.normal} (Normal), ฿${weekendPeak.peakPricing.member} (Member)`
+        );
+      }
+    }
 
     console.log('\n✅ TimeSlot seeding completed!');
 

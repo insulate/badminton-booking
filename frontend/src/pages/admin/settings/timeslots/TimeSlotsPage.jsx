@@ -119,7 +119,6 @@ const TimeSlotsPage = () => {
   const groupedTimeslots = {
     weekday: filteredTimeslots.filter((t) => t.dayType === 'weekday'),
     weekend: filteredTimeslots.filter((t) => t.dayType === 'weekend'),
-    holiday: filteredTimeslots.filter((t) => t.dayType === 'holiday'),
   };
 
   // Day type label
@@ -127,7 +126,6 @@ const TimeSlotsPage = () => {
     const labels = {
       weekday: 'วันจันทร์-ศุกร์',
       weekend: 'วันเสาร์-อาทิตย์',
-      holiday: 'วันหยุดนักขัตฤกษ์',
     };
     return labels[dayType] || dayType;
   };
@@ -137,7 +135,6 @@ const TimeSlotsPage = () => {
     const badges = {
       weekday: 'bg-blue-100 text-blue-800',
       weekend: 'bg-purple-100 text-purple-800',
-      holiday: 'bg-red-100 text-red-800',
     };
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[dayType]}`}>
@@ -210,7 +207,6 @@ const TimeSlotsPage = () => {
             <option value="">ประเภทวันทั้งหมด</option>
             <option value="weekday">วันจันทร์-ศุกร์</option>
             <option value="weekend">วันเสาร์-อาทิตย์</option>
-            <option value="holiday">วันหยุดนักขัตฤกษ์</option>
           </select>
 
           {/* Filter by Status */}
@@ -230,7 +226,7 @@ const TimeSlotsPage = () => {
       {!filterDayType ? (
         // Show all day types grouped
         <div className="space-y-6">
-          {['weekday', 'weekend', 'holiday'].map((dayType) => (
+          {['weekday', 'weekend'].map((dayType) => (
             <div key={dayType}>
               <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
                 <Clock className="w-5 h-5" />

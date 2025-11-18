@@ -205,7 +205,6 @@ const TimeSlotModal = ({ timeslot, onClose, onSuccess }) => {
             >
               <option value="weekday">วันจันทร์-ศุกร์</option>
               <option value="weekend">วันเสาร์-อาทิตย์</option>
-              <option value="holiday">วันหยุดนักขัตฤกษ์</option>
             </select>
           </div>
 
