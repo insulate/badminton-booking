@@ -186,7 +186,7 @@ router.get('/:id', protect, async (req, res) => {
  */
 router.post('/check-availability', protect, async (req, res) => {
   try {
-    const { courtId, date, timeSlotId } = req.body;
+    const { courtId, date, timeSlotId, duration } = req.body;
 
     if (!courtId && !date && !timeSlotId) {
       return res.status(400).json({
@@ -197,7 +197,12 @@ router.post('/check-availability', protect, async (req, res) => {
 
     // If all parameters provided, check specific slot
     if (courtId && date && timeSlotId) {
-      const availability = await checkAvailability({ courtId, date, timeSlotId });
+      const availability = await checkAvailability({
+        courtId,
+        date,
+        timeSlotId,
+        duration: duration || 1,
+      });
       return res.status(200).json({
         success: true,
         data: availability,
@@ -245,6 +250,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
       courtId: court,
       date: bookingDate,
       timeSlotId: timeSlot,
+      duration: duration || 1,
     });
 
     if (!availability.available) {

@@ -58,6 +58,20 @@ export const API_ENDPOINTS = {
     BULK_UPDATE_PRICING: '/timeslots/bulk-update-pricing',
     DELETE: (id) => `/timeslots/${id}`,
   },
+
+  // Bookings Management (Admin)
+  BOOKINGS: {
+    LIST: '/bookings',
+    DAILY_SCHEDULE: '/bookings/schedule/daily',
+    GET: (id) => `/bookings/${id}`,
+    CREATE: '/bookings',
+    UPDATE: (id) => `/bookings/${id}`,
+    CHECK_AVAILABILITY: '/bookings/check-availability',
+    CHECKIN: (id) => `/bookings/${id}/checkin`,
+    CHECKOUT: (id) => `/bookings/${id}/checkout`,
+    CANCEL: (id) => `/bookings/${id}/cancel`,
+    UPDATE_PAYMENT: (id) => `/bookings/${id}/payment`,
+  },
 };
 
 export default API_ENDPOINTS;

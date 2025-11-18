@@ -288,13 +288,15 @@
 - Validation ตามกฎการจอง (advanceBookingDays, maxBookingHours)
 
 **Tasks**:
-- [ ] สร้าง Booking Model
-- [ ] สร้าง Booking API routes
-- [ ] สร้าง booking validation middleware
-- [ ] สร้าง availability check logic
-- [ ] สร้าง price calculation logic
-- [ ] สร้าง booking code generator
-- [ ] ทดสอบ API ทุก endpoint
+- [x] สร้าง Booking Model
+- [x] สร้าง Booking API routes (10 endpoints)
+- [x] สร้าง booking validation middleware
+- [x] สร้าง availability check logic
+- [x] สร้าง price calculation logic
+- [x] สร้าง booking code generator
+- [x] ทดสอบ API ทุก endpoint
+
+**Status**: ✅ Backend API พร้อมใช้งาน 100%
 
 ---
 

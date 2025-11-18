@@ -15,10 +15,12 @@ import {
   Building2,
   Clock,
   Calendar,
+  CalendarDays,
   CreditCard,
   Settings as SettingsIcon,
   LayoutGrid,
   Timer,
+  ClipboardList,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -39,6 +41,16 @@ export default function AdminLayout() {
       name: 'Dashboard',
       path: ROUTES.ADMIN.DASHBOARD,
       icon: LayoutDashboard,
+    },
+    {
+      name: 'จองสนาม',
+      path: '/admin/booking',
+      icon: CalendarDays,
+    },
+    {
+      name: 'รายการจอง',
+      path: '/admin/bookings',
+      icon: ClipboardList,
     },
     {
       name: 'ตั้งค่า',

@@ -9,10 +9,11 @@ const TimeSlot = require('../models/timeslot.model');
  * @param {ObjectId} params.courtId - Court ID
  * @param {Date} params.date - Booking date
  * @param {ObjectId} params.timeSlotId - TimeSlot ID
+ * @param {Number} params.duration - Duration in hours (default: 1)
  * @param {ObjectId} params.excludeBookingId - Exclude this booking ID (for updates)
  * @returns {Promise<Object>} { available: Boolean, conflictingBooking: Object }
  */
-const checkAvailability = async ({ courtId, date, timeSlotId, excludeBookingId = null }) => {
+const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excludeBookingId = null }) => {
   try {
     // Validate inputs
     if (!courtId || !date || !timeSlotId) {
@@ -23,29 +24,89 @@ const checkAvailability = async ({ courtId, date, timeSlotId, excludeBookingId =
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
 
-    // Build query
-    const query = {
-      court: courtId,
-      date: bookingDate,
-      timeSlot: timeSlotId,
-      deletedAt: null,
-      bookingStatus: { $ne: 'cancelled' }, // Exclude cancelled bookings
-    };
-
-    // Exclude specific booking (for update operations)
-    if (excludeBookingId) {
-      query._id = { $ne: excludeBookingId };
+    // Get the starting timeslot
+    const startTimeSlot = await TimeSlot.findById(timeSlotId);
+    if (!startTimeSlot) {
+      throw new Error('TimeSlot not found');
     }
 
-    // Check for conflicting bookings
-    const conflictingBooking = await Booking.findOne(query)
+    // Get all timeslots for this day type sorted by time
+    const allTimeSlots = await TimeSlot.find({
+      deletedAt: null,
+      status: 'active',
+      dayType: startTimeSlot.dayType,
+    }).sort({ startTime: 1 });
+
+    // Find the starting index
+    const startIndex = allTimeSlots.findIndex((ts) => ts._id.equals(timeSlotId));
+    if (startIndex === -1) {
+      throw new Error('TimeSlot not found in active slots');
+    }
+
+    // Check if we have enough consecutive slots
+    if (startIndex + duration > allTimeSlots.length) {
+      return {
+        available: false,
+        conflictingBooking: null,
+        message: 'Not enough consecutive time slots available',
+      };
+    }
+
+    // Get the timeslot IDs we need to check
+    const timeSlotsToCheck = allTimeSlots.slice(startIndex, startIndex + duration).map((ts) => ts._id);
+
+    // Get all bookings for this court and date
+    const endOfDay = new Date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const bookings = await Booking.find({
+      court: courtId,
+      date: { $gte: bookingDate, $lte: endOfDay },
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+      ...(excludeBookingId && { _id: { $ne: excludeBookingId } }),
+    })
       .populate('court', 'courtNumber name')
-      .populate('timeSlot', 'startTime endTime')
-      .populate('customer.name customer.phone');
+      .populate('timeSlot', 'startTime endTime');
+
+    // Create a set of all occupied timeslot IDs (considering duration)
+    const occupiedSlots = new Set();
+    bookings.forEach((booking) => {
+      const bookingStartIndex = allTimeSlots.findIndex((ts) => ts._id.equals(booking.timeSlot._id));
+      if (bookingStartIndex !== -1) {
+        // Mark all slots covered by this booking's duration
+        for (let i = 0; i < booking.duration && bookingStartIndex + i < allTimeSlots.length; i++) {
+          occupiedSlots.add(allTimeSlots[bookingStartIndex + i]._id.toString());
+        }
+      }
+    });
+
+    // Check if any of our required slots are occupied
+    const conflictingSlotId = timeSlotsToCheck.find((slotId) => occupiedSlots.has(slotId.toString()));
+
+    if (conflictingSlotId) {
+      // Find the booking that conflicts
+      const conflictingBooking = bookings.find((booking) => {
+        const bookingStartIndex = allTimeSlots.findIndex((ts) => ts._id.equals(booking.timeSlot._id));
+        if (bookingStartIndex !== -1) {
+          for (let i = 0; i < booking.duration; i++) {
+            if (allTimeSlots[bookingStartIndex + i]._id.equals(conflictingSlotId)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      });
+
+      return {
+        available: false,
+        conflictingBooking: conflictingBooking || null,
+      };
+    }
 
     return {
-      available: !conflictingBooking,
-      conflictingBooking: conflictingBooking || null,
+      available: true,
+      conflictingBooking: null,
     };
   } catch (error) {
     console.error('Error checking availability:', error);
@@ -118,6 +179,9 @@ const getCourtSchedule = async (date, dayType) => {
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
 
+    const endOfDay = new Date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     // Get all active courts
     const courts = await Court.find({
       deletedAt: null,
@@ -133,22 +197,39 @@ const getCourtSchedule = async (date, dayType) => {
 
     // Get all bookings for this date
     const bookings = await Booking.find({
-      date: bookingDate,
+      date: { $gte: bookingDate, $lte: endOfDay },
       deletedAt: null,
       bookingStatus: { $ne: 'cancelled' },
     })
       .populate('court', 'courtNumber name')
-      .populate('timeSlot', 'startTime endTime')
-      .populate('customer.name customer.phone');
+      .populate('timeSlot', 'startTime endTime');
 
     // Build schedule grid
     const schedule = courts.map((court) => {
+      // Create a map to track which timeslots are booked for this court
+      const bookedSlots = new Map(); // key: timeSlotId, value: booking
+
+      // Process all bookings for this court
+      bookings
+        .filter((b) => b.court._id.equals(court._id))
+        .forEach((booking) => {
+          // Find the starting timeslot index
+          const startIndex = timeSlots.findIndex((ts) =>
+            ts._id.equals(booking.timeSlot._id)
+          );
+
+          if (startIndex !== -1) {
+            // Mark the starting slot and all consecutive slots based on duration
+            for (let i = 0; i < booking.duration && startIndex + i < timeSlots.length; i++) {
+              const slot = timeSlots[startIndex + i];
+              bookedSlots.set(slot._id.toString(), booking);
+            }
+          }
+        });
+
+      // Map each timeslot with availability info
       const courtSlots = timeSlots.map((timeSlot) => {
-        // Find booking for this court and timeslot
-        const booking = bookings.find(
-          (b) =>
-            b.court._id.equals(court._id) && b.timeSlot._id.equals(timeSlot._id)
-        );
+        const booking = bookedSlots.get(timeSlot._id.toString());
 
         return {
           timeSlotId: timeSlot._id,
@@ -161,6 +242,7 @@ const getCourtSchedule = async (date, dayType) => {
                 bookingId: booking._id,
                 bookingCode: booking.bookingCode,
                 customerName: booking.customer.name,
+                customerPhone: booking.customer.phone,
                 bookingStatus: booking.bookingStatus,
                 paymentStatus: booking.paymentStatus,
               }

@@ -22,6 +22,10 @@ import CourtsEditPage from './pages/admin/settings/courts/CourtsEditPage';
 // TimeSlots Pages
 import TimeSlotsPage from './pages/admin/settings/timeslots/TimeSlotsPage';
 
+// Booking Pages
+import BookingPage from './pages/admin/BookingPage';
+import BookingsPage from './pages/admin/BookingsPage';
+
 function App() {
   return (
     <Router>
@@ -67,6 +71,10 @@ function App() {
           <Route index element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
+
+          {/* Booking Routes */}
+          <Route path="booking" element={<BookingPage />} />
+          <Route path="bookings" element={<BookingsPage />} />
 
           {/* Settings Routes */}
           <Route path="settings/venue" element={<VenueSettingsPage />} />
