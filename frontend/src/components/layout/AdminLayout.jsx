@@ -9,11 +9,14 @@ import {
   Menu,
   X,
   LogOut,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMenu, setExpandedMenu] = useState({});
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -31,19 +34,32 @@ export default function AdminLayout() {
       icon: LayoutDashboard,
     },
     {
-      name: 'จัดการผู้ใช้งาน',
-      path: ROUTES.ADMIN.USERS,
-      icon: Users,
-    },
-    {
       name: 'ตั้งค่า',
-      path: ROUTES.ADMIN.SETTINGS,
       icon: Settings,
+      children: [
+        {
+          name: 'จัดการผู้ใช้งาน',
+          path: ROUTES.ADMIN.USERS,
+          icon: Users,
+        },
+      ],
     },
   ];
 
   const isActivePath = (path) => {
     return location.pathname === path;
+  };
+
+  const isParentActive = (item) => {
+    if (!item.children) return false;
+    return item.children.some(child => isActivePath(child.path));
+  };
+
+  const toggleMenu = (menuName) => {
+    setExpandedMenu(prev => ({
+      ...prev,
+      [menuName]: !prev[menuName]
+    }));
   };
 
   return (
@@ -100,25 +116,78 @@ export default function AdminLayout() {
           <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto scrollbar-thin">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = isActivePath(item.path);
+              const hasChildren = item.children && item.children.length > 0;
+              const isExpanded = expandedMenu[item.name] || isParentActive(item);
+              const isActive = !hasChildren && isActivePath(item.path);
 
               return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg
-                    transition-all duration-200
-                    ${isActive
-                      ? 'bg-primary-blue text-white shadow-blue'
-                      : 'text-slate-300 hover:bg-bg-sidebar-hover hover:text-white'
-                    }
-                  `}
-                >
-                  <Icon size={20} />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
+                <div key={item.name}>
+                  {/* Parent Menu */}
+                  {hasChildren ? (
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`
+                        w-full flex items-center justify-between px-4 py-3 rounded-lg
+                        transition-all duration-200
+                        ${isParentActive(item)
+                          ? 'bg-primary-blue/20 text-white'
+                          : 'text-slate-300 hover:bg-bg-sidebar-hover hover:text-white'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon size={20} />
+                        <span className="font-medium">{item.name}</span>
+                      </div>
+                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-lg
+                        transition-all duration-200
+                        ${isActive
+                          ? 'bg-primary-blue text-white shadow-blue'
+                          : 'text-slate-300 hover:bg-bg-sidebar-hover hover:text-white'
+                        }
+                      `}
+                    >
+                      <Icon size={20} />
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  )}
+
+                  {/* Children Menu */}
+                  {hasChildren && isExpanded && (
+                    <div className="mt-1 ml-3 space-y-1">
+                      {item.children.map((child) => {
+                        const ChildIcon = child.icon;
+                        const isChildActive = isActivePath(child.path);
+
+                        return (
+                          <Link
+                            key={child.path}
+                            to={child.path}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`
+                              flex items-center gap-3 px-4 py-2.5 rounded-lg
+                              transition-all duration-200
+                              ${isChildActive
+                                ? 'bg-primary-blue text-white shadow-blue'
+                                : 'text-slate-300 hover:bg-bg-sidebar-hover hover:text-white'
+                              }
+                            `}
+                          >
+                            <ChildIcon size={18} />
+                            <span className="font-medium text-sm">{child.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
