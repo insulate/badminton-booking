@@ -57,7 +57,7 @@ test.describe('Settings System E2E Tests', () => {
 
       // Verify form fields are visible
       await expect(page.locator('input[name="name"]')).toBeVisible();
-      await expect(page.locator('input[name="address"]')).toBeVisible();
+      await expect(page.locator('textarea[name="address"]')).toBeVisible();
       await expect(page.locator('input[name="phone"]')).toBeVisible();
       await expect(page.locator('input[name="email"]')).toBeVisible();
     });
@@ -328,8 +328,8 @@ test.describe('Settings System E2E Tests', () => {
       await page.goto(`${BASE_URL}/admin/settings/venue`);
       await page.waitForSelector('h1:has-text("ข้อมูลสนาม")');
 
-      // Click back button
-      await page.click('button[aria-label="back"], button:has(svg)');
+      // Click cancel button to navigate back to dashboard
+      await page.getByRole('button', { name: 'ยกเลิก' }).click();
 
       // Should navigate to dashboard
       await expect(page).toHaveURL(`${BASE_URL}/admin/dashboard`);
