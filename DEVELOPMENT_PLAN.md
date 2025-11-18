@@ -15,13 +15,14 @@
 - [x] **Phase 2: Court Management (Backend + Frontend)**
 - [x] **Phase 3: Time Slot & Pricing (Backend + Frontend)**
 - [x] **Phase 4: Booking System (Backend + Frontend)**
+- [x] **Phase 5.1: Products & Sales API (Backend)**
 
 ### 📊 สถิติ
-- **Backend APIs**: 37/40+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Bookings: 10, Users: 4, Auth: 2)
-- **Frontend Pages**: 14/15+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Users: 1, Dashboard: 1, Login: 1)
-- **Frontend Components**: 11 components (Booking: 6, TimeSlots: 2, Common: 1, Layout: 1, ProtectedRoute: 1)
-- **Database Models**: 6/8 models (User, Setting, Court, TimeSlot, Booking, Counter)
-- **Progress**: ~75%
+- **Backend APIs**: 45/50+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Bookings: 10, Products: 5, Sales: 4, Users: 4, Auth: 2)
+- **Frontend Pages**: 14/17+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Products: 1, POS: 1, Users: 1, Dashboard: 1, Login: 1)
+- **Frontend Components**: 11+ components (Booking: 6, TimeSlots: 2, Products: 2+, POS: 4+, Common: 1, Layout: 1, ProtectedRoute: 1)
+- **Database Models**: 8/10 models (User, Setting, Court, TimeSlot, Booking, Counter, Product, Sale)
+- **Progress**: ~80%
 
 ---
 
@@ -365,14 +366,16 @@
 ---
 
 ## **PHASE 5: POS & Products** 🛒
-> ระยะเวลา: 1-2 วัน | ความสำคัญ: สูง | Full-Stack Feature
+> ระยะเวลา: 1-2 วัน | ความสำคัญ: สูง | Full-Stack Feature | Status: 🔄 IN PROGRESS
 
-### 5.1 Backend - Products & Sales API
+### 5.1 Backend - Products & Sales API ✅
 **ไฟล์**:
-- `backend/models/product.model.js`
-- `backend/models/sale.model.js`
-- `backend/routes/products.routes.js`
-- `backend/routes/sales.routes.js`
+- `backend/models/product.model.js` ✅
+- `backend/models/sale.model.js` ✅
+- `backend/routes/products.routes.js` ✅
+- `backend/routes/sales.routes.js` ✅
+- `backend/utils/saleCodeGenerator.js` ✅
+- `backend/seeders/products.seeder.js` ✅
 
 **Products Schema**:
 ```javascript
@@ -408,26 +411,30 @@
 }
 ```
 
-**API Endpoints**:
-**Products**:
-- `GET /api/products` - ดูสินค้าทั้งหมด
-- `POST /api/products` - เพิ่มสินค้า
-- `PUT /api/products/:id` - แก้ไขสินค้า
-- `PATCH /api/products/:id/stock` - อัพเดทสต็อก
-- `DELETE /api/products/:id` - ลบสินค้า
+**API Endpoints**: 9 endpoints
+**Products** (5 endpoints):
+- `GET /api/products` - ดูสินค้าทั้งหมด (with filters) ✅
+- `POST /api/products` - เพิ่มสินค้า ✅
+- `PUT /api/products/:id` - แก้ไขสินค้า ✅
+- `PATCH /api/products/:id/stock` - อัพเดทสต็อก ✅
+- `DELETE /api/products/:id` - ลบสินค้า (soft delete) ✅
 
-**Sales**:
-- `POST /api/sales` - บันทึกการขาย
-- `GET /api/sales` - ดูประวัติการขาย
-- `GET /api/sales/daily?date=2025-01-18` - รายงานรายวัน
-- `GET /api/sales/:id` - ดูรายละเอียดบิล
+**Sales** (4 endpoints):
+- `POST /api/sales` - บันทึกการขาย (auto-generate sale code) ✅
+- `GET /api/sales` - ดูประวัติการขาย (with filters) ✅
+- `GET /api/sales/daily?date=2025-01-18` - รายงานรายวัน ✅
+- `GET /api/sales/:id` - ดูรายละเอียดบิล ✅
 
 **Tasks**:
-- [ ] สร้าง Product & Sale Models
-- [ ] สร้าง Products API routes
-- [ ] สร้าง Sales API routes
-- [ ] สร้าง products seeder
-- [ ] ทดสอบ API
+- [x] สร้าง Product & Sale Models
+- [x] สร้าง Products API routes (5 endpoints)
+- [x] สร้าง Sales API routes (4 endpoints)
+- [x] สร้าง sale code generator (SL202501180001)
+- [x] สร้าง products seeder (10 สินค้าตัวอย่าง)
+- [x] Integrate กับ app.js
+- [x] ทดสอบ API
+
+**Status**: ✅ Backend API พร้อมใช้งาน 100%
 
 ---
 
@@ -819,8 +826,8 @@
 **Day 7**: Testing Phase 1-4
 
 ### สัปดาห์ที่ 2: Advanced Features
-**Day 1-2**: Phase 5 - Group Play System (Full-stack)
-**Day 3-4**: Phase 6 - POS & Products (Full-stack)
+**Day 1-2**: Phase 5 - POS & Products (Full-stack) ✅ Backend done, 🔄 Frontend in progress
+**Day 3-4**: Phase 6 - Group Play System (Full-stack)
 **Day 5**: Phase 7 - Reports & Analytics (Full-stack)
 **Day 6**: Phase 8 - Enhancement & Polish
 **Day 7**: Final Testing + Bug Fixes
@@ -831,19 +838,21 @@
 
 - **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100% ✅ **COMPLETED**
 - **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ ✅ **COMPLETED**
-- **Milestone 3** (Week 2 Day 2): Group Play พร้อมใช้งาน ⏳ **NEXT**
-- **Milestone 4** (Week 2 Day 5): ระบบครบทุกฟีเจอร์
-- **Milestone 5** (Week 2 Day 7): Production Ready!
+- **Milestone 3** (Week 2 Day 2): POS & Products พร้อมใช้งาน 🔄 **IN PROGRESS** (Backend ✅, Frontend ⏳)
+- **Milestone 4** (Week 2 Day 4): Group Play พร้อมใช้งาน ⏳ **NEXT**
+- **Milestone 5** (Week 2 Day 5): Reports & Analytics พร้อมใช้งาน
+- **Milestone 6** (Week 2 Day 7): Production Ready!
 
 ---
 
 ## 📝 หมายเหตุ
 
 ### Priority
-- 🔴 สูงสุด: Settings, Courts, TimeSlots, Bookings
-- 🟡 สูง: Group Play
-- 🟢 ปานกลาง: POS, Products
-- 🔵 ต่ำ: Reports, Enhancement
+- ✅ ~~สูงสุด: Settings, Courts, TimeSlots, Bookings~~ **COMPLETED**
+- 🔴 สูงสุด (กำลังทำ): POS & Products (Backend ✅, Frontend 🔄)
+- 🟡 สูง (ถัดไป): Group Play System
+- 🟢 ปานกลาง: Reports & Analytics
+- 🔵 ต่ำ: Enhancement & Polish
 
 ### ข้อควรระวัง
 1. **Time Zone**: ใช้ date-fns หรือ dayjs สำหรับจัดการเวลา
