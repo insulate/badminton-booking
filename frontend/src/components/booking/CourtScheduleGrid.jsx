@@ -58,13 +58,23 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   // Get slot status color
   const getSlotColor = (slot) => {
+    // Booked slots
     if (!slot.available) {
+      // Booked and paid = green
+      if (slot.booking?.paymentStatus === 'paid') {
+        return 'bg-green-100 border-green-400 hover:bg-green-200 hover:shadow-md cursor-pointer';
+      }
+      // Booked but not paid = red
       return 'bg-red-100 border-red-300 hover:bg-red-200 hover:shadow-md cursor-pointer';
     }
+
+    // Available slots
+    // Available + Peak Hour = orange/yellow
     if (slot.peakHour) {
       return 'bg-orange-50 border-orange-300 hover:bg-orange-100 cursor-pointer';
     }
-    return 'bg-green-50 border-green-300 hover:bg-green-100 cursor-pointer';
+    // Available + Normal = blue
+    return 'bg-blue-50 border-blue-300 hover:bg-blue-100 cursor-pointer';
   };
 
   // Handle slot click
@@ -121,7 +131,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
         <h3 className="text-lg font-semibold text-gray-800">ตารางสนาม</h3>
         <div className="mt-3 flex flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-50 border-2 border-green-300 rounded"></div>
+            <div className="w-4 h-4 bg-blue-50 border-2 border-blue-300 rounded"></div>
             <span className="text-sm text-gray-600">ว่าง</span>
           </div>
           <div className="flex items-center gap-2">
@@ -129,8 +139,12 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
             <span className="text-sm text-gray-600">ว่าง (Peak Hour)</span>
           </div>
           <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 border-2 border-green-400 rounded"></div>
+            <span className="text-sm text-gray-600">จองแล้ว (ชำระแล้ว)</span>
+          </div>
+          <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-100 border-2 border-red-300 rounded"></div>
-            <span className="text-sm text-gray-600">จองแล้ว</span>
+            <span className="text-sm text-gray-600">จองแล้ว (ยังไม่ชำระ)</span>
           </div>
         </div>
       </div>
@@ -184,10 +198,18 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
                         }
                       >
                         {slot.available ? (
-                          <div className="text-xs font-semibold text-green-700">ว่าง</div>
+                          <div className={`text-xs font-semibold ${
+                            slot.peakHour ? 'text-orange-700' : 'text-blue-700'
+                          }`}>
+                            ว่าง
+                          </div>
                         ) : (
                           <div className="text-xs">
-                            <div className="font-semibold text-red-700">
+                            <div className={`font-semibold ${
+                              slot.booking?.paymentStatus === 'paid'
+                                ? 'text-green-700'
+                                : 'text-red-700'
+                            }`}>
                               {slot.booking?.customerName || 'N/A'}
                             </div>
                           </div>
