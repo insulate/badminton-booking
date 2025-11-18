@@ -22,6 +22,9 @@ import CourtsEditPage from './pages/admin/settings/courts/CourtsEditPage';
 // TimeSlots Pages
 import TimeSlotsPage from './pages/admin/settings/timeslots/TimeSlotsPage';
 
+// Products Pages
+import ProductsPage from './pages/admin/settings/products/ProductsPage';
+
 // Booking Pages
 import BookingPage from './pages/admin/BookingPage';
 import BookingsPage from './pages/admin/BookingsPage';
@@ -90,6 +93,9 @@ function App() {
 
           {/* TimeSlots Routes */}
           <Route path="settings/timeslots" element={<TimeSlotsPage />} />
+
+          {/* Products Routes */}
+          <Route path="settings/products" element={<ProductsPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}

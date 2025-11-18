@@ -3,7 +3,7 @@ const router = express.Router();
 const Sale = require('../models/sale.model');
 const Product = require('../models/product.model');
 const { generateSaleCode } = require('../utils/saleCodeGenerator');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
 
 /**
  * @route   GET /api/sales

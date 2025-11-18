@@ -16,6 +16,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // If data is FormData, remove Content-Type header to let axios set it automatically
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -263,6 +267,71 @@ export const bookingsAPI = {
 
   updatePayment: async (id, data) => {
     const response = await api.patch(API_ENDPOINTS.BOOKINGS.UPDATE_PAYMENT(id), data);
+    return response.data;
+  },
+};
+
+// Products API (Admin only)
+export const productsAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.PRODUCTS.LIST, { params });
+    return response.data;
+  },
+
+  generateSKU: async (category) => {
+    const response = await api.get(API_ENDPOINTS.PRODUCTS.GENERATE_SKU, {
+      params: { category },
+    });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.PRODUCTS.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.PRODUCTS.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.PRODUCTS.UPDATE(id), data);
+    return response.data;
+  },
+
+  updateStock: async (id, stock) => {
+    const response = await api.patch(API_ENDPOINTS.PRODUCTS.UPDATE_STOCK(id), { stock });
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(API_ENDPOINTS.PRODUCTS.DELETE(id));
+    return response.data;
+  },
+};
+
+// Sales API (Admin only)
+export const salesAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.SALES.LIST, { params });
+    return response.data;
+  },
+
+  getDaily: async (date) => {
+    const response = await api.get(API_ENDPOINTS.SALES.DAILY, {
+      params: { date },
+    });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.SALES.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.SALES.CREATE, data);
     return response.data;
   },
 };

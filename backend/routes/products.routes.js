@@ -1,7 +1,72 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/product.model');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
+const { upload, deleteImage } = require('../middleware/upload');
+
+/**
+ * @route   GET /api/products/generate-sku
+ * @desc    Generate next SKU for a category
+ * @access  Private (Admin/Staff)
+ */
+router.get('/generate-sku', protect, async (req, res) => {
+  try {
+    const { category } = req.query;
+
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category is required',
+      });
+    }
+
+    // Category prefix mapping
+    const prefixes = {
+      shuttlecock: 'SHT',
+      drink: 'DRK',
+      snack: 'SNK',
+      equipment: 'EQP',
+      other: 'OTH',
+    };
+
+    const prefix = prefixes[category];
+    if (!prefix) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid category',
+      });
+    }
+
+    // Find the latest SKU with this prefix
+    const latestProduct = await Product.findOne({
+      sku: { $regex: `^${prefix}-` },
+    }).sort({ sku: -1 });
+
+    let nextNumber = 1;
+    if (latestProduct) {
+      // Extract number from SKU (e.g., "SHT-001" -> 1)
+      const match = latestProduct.sku.match(/-(\d+)$/);
+      if (match) {
+        nextNumber = parseInt(match[1]) + 1;
+      }
+    }
+
+    // Format: PREFIX-XXX (e.g., SHT-001)
+    const sku = `${prefix}-${String(nextNumber).padStart(3, '0')}`;
+
+    res.status(200).json({
+      success: true,
+      data: { sku },
+    });
+  } catch (error) {
+    console.error('Error generating SKU:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate SKU',
+      error: error.message,
+    });
+  }
+});
 
 /**
  * @route   GET /api/products
@@ -75,7 +140,7 @@ router.get('/:id', protect, async (req, res) => {
  * @desc    Create new product
  * @access  Private (Admin only)
  */
-router.post('/', protect, authorize('admin'), async (req, res) => {
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
     const { sku, name, category, price, stock, lowStockAlert, status } = req.body;
 
@@ -88,6 +153,9 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
       });
     }
 
+    // Get image path if uploaded
+    const imagePath = req.file ? `/uploads/products/${req.file.filename}` : null;
+
     const product = await Product.create({
       sku,
       name,
@@ -95,6 +163,7 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
       price,
       stock,
       lowStockAlert,
+      image: imagePath,
       status,
     });
 
@@ -129,7 +198,7 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
  * @desc    Update product
  * @access  Private (Admin only)
  */
-router.put('/:id', protect, authorize('admin'), async (req, res) => {
+router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
     const { sku, name, category, price, stock, lowStockAlert, status } = req.body;
 
@@ -153,9 +222,21 @@ router.put('/:id', protect, authorize('admin'), async (req, res) => {
       }
     }
 
+    // Prepare update data
+    const updateData = { sku, name, category, price, stock, lowStockAlert, status };
+
+    // Handle image update
+    if (req.file) {
+      // Delete old image if exists
+      if (product.image) {
+        deleteImage(product.image);
+      }
+      updateData.image = `/uploads/products/${req.file.filename}`;
+    }
+
     product = await Product.findByIdAndUpdate(
       req.params.id,
-      { sku, name, category, price, stock, lowStockAlert, status },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -242,7 +323,7 @@ router.patch('/:id/stock', protect, async (req, res) => {
  * @desc    Delete product
  * @access  Private (Admin only)
  */
-router.delete('/:id', protect, authorize('admin'), async (req, res) => {
+router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
@@ -251,6 +332,11 @@ router.delete('/:id', protect, authorize('admin'), async (req, res) => {
         success: false,
         message: 'Product not found',
       });
+    }
+
+    // Delete product image if exists
+    if (product.image) {
+      deleteImage(product.image);
     }
 
     await Product.findByIdAndDelete(req.params.id);

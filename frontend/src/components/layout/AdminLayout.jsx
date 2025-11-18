@@ -21,6 +21,7 @@ import {
   LayoutGrid,
   Timer,
   ClipboardList,
+  Package,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -70,6 +71,11 @@ export default function AdminLayout() {
           name: 'ช่วงเวลาและราคา',
           path: ROUTES.ADMIN.TIMESLOTS,
           icon: Timer,
+        },
+        {
+          name: 'จัดการสินค้า',
+          path: ROUTES.ADMIN.PRODUCTS,
+          icon: Package,
         },
         {
           name: 'ข้อมูลสนาม',

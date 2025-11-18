@@ -73,6 +73,25 @@ export const API_ENDPOINTS = {
     CANCEL: (id) => `/bookings/${id}/cancel`,
     UPDATE_PAYMENT: (id) => `/bookings/${id}/payment`,
   },
+
+  // Products Management (Admin)
+  PRODUCTS: {
+    LIST: '/products',
+    GENERATE_SKU: '/products/generate-sku',
+    GET: (id) => `/products/${id}`,
+    CREATE: '/products',
+    UPDATE: (id) => `/products/${id}`,
+    UPDATE_STOCK: (id) => `/products/${id}/stock`,
+    DELETE: (id) => `/products/${id}`,
+  },
+
+  // Sales Management (Admin)
+  SALES: {
+    LIST: '/sales',
+    DAILY: '/sales/daily',
+    GET: (id) => `/sales/${id}`,
+    CREATE: '/sales',
+  },
 };
 
 export default API_ENDPOINTS;

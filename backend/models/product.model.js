@@ -36,6 +36,10 @@ const productSchema = new mongoose.Schema(
       min: [0, 'Low stock alert cannot be negative'],
       default: 10,
     },
+    image: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: ['active', 'inactive'],
