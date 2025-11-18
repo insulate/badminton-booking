@@ -18,6 +18,7 @@ import {
   CreditCard,
   Settings as SettingsIcon,
   LayoutGrid,
+  Timer,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -52,6 +53,11 @@ export default function AdminLayout() {
           name: 'จัดการสนาม',
           path: ROUTES.ADMIN.COURTS,
           icon: LayoutGrid,
+        },
+        {
+          name: 'ช่วงเวลาและราคา',
+          path: ROUTES.ADMIN.TIMESLOTS,
+          icon: Timer,
         },
         {
           name: 'ข้อมูลสนาม',

@@ -46,6 +46,17 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/courts/${id}`,
     DELETE: (id) => `/courts/${id}`,
   },
+
+  // TimeSlots Management (Admin)
+  TIMESLOTS: {
+    LIST: '/timeslots',
+    ACTIVE: '/timeslots/active',
+    GET: (id) => `/timeslots/${id}`,
+    CREATE: '/timeslots',
+    UPDATE: (id) => `/timeslots/${id}`,
+    UPDATE_PRICING: (id) => `/timeslots/${id}/pricing`,
+    DELETE: (id) => `/timeslots/${id}`,
+  },
 };
 
 export default API_ENDPOINTS;

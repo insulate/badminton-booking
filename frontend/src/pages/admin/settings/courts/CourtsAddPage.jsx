@@ -11,14 +11,8 @@ const CourtsAddPage = () => {
   const [formData, setFormData] = useState({
     courtNumber: '',
     name: '',
-    type: 'normal',
     status: 'available',
     description: '',
-    hourlyRate: {
-      weekday: 150,
-      weekend: 180,
-      holiday: 200,
-    },
   });
 
   const handleChange = (e) => {
@@ -26,17 +20,6 @@ const CourtsAddPage = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  const handleRateChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      hourlyRate: {
-        ...prev.hourlyRate,
-        [name]: Number(value),
-      },
     }));
   };
 
@@ -123,43 +106,22 @@ const CourtsAddPage = () => {
               />
             </div>
 
-            {/* Type & Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ประเภทสนาม <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="normal">ธรรมดา</option>
-                  <option value="premium">พรีเมี่ยม</option>
-                  <option value="tournament">แข่งขัน</option>
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  สถานะ <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="available">พร้อมใช้งาน</option>
-                  <option value="maintenance">ปิดปรับปรุง</option>
-                  <option value="inactive">ปิดใช้งาน</option>
-                </select>
-              </div>
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                สถานะ <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="available">พร้อมใช้งาน</option>
+                <option value="maintenance">ปิดปรับปรุง</option>
+                <option value="inactive">ปิดใช้งาน</option>
+              </select>
             </div>
 
             {/* Description */}
@@ -173,63 +135,6 @@ const CourtsAddPage = () => {
                 placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับสนาม (ถ้ามี)"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
-
-            {/* Divider */}
-            <hr className="border-gray-200" />
-
-            {/* Hourly Rates */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">อัตราค่าบริการ (บาท/ชั่วโมง)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Weekday */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    วันธรรมดา (จ.-ศ.) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="weekday"
-                    value={formData.hourlyRate.weekday}
-                    onChange={handleRateChange}
-                    required
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Weekend */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    วันเสาร์-อาทิตย์ <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="weekend"
-                    value={formData.hourlyRate.weekend}
-                    onChange={handleRateChange}
-                    required
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Holiday */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    วันหยุดนักขัตฤกษ์ <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="holiday"
-                    value={formData.hourlyRate.holiday}
-                    onChange={handleRateChange}
-                    required
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 

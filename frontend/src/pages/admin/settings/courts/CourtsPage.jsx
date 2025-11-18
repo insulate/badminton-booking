@@ -10,7 +10,6 @@ const CourtsPage = () => {
   const [courts, setCourts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
   useEffect(() => {
@@ -54,29 +53,9 @@ const CourtsPage = () => {
     const matchSearch =
       court.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       court.courtNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = !filterType || court.type === filterType;
     const matchStatus = !filterStatus || court.status === filterStatus;
-    return matchSearch && matchType && matchStatus;
+    return matchSearch && matchStatus;
   });
-
-  // Type badge color
-  const getTypeBadge = (type) => {
-    const badges = {
-      normal: 'bg-blue-100 text-blue-800',
-      premium: 'bg-yellow-100 text-yellow-800',
-      tournament: 'bg-purple-100 text-purple-800',
-    };
-    const labels = {
-      normal: 'ธรรมดา',
-      premium: 'พรีเมี่ยม',
-      tournament: 'แข่งขัน',
-    };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[type]}`}>
-        {labels[type]}
-      </span>
-    );
-  };
 
   // Status badge color
   const getStatusBadge = (status) => {
@@ -134,7 +113,7 @@ const CourtsPage = () => {
 
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -146,18 +125,6 @@ const CourtsPage = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-
-          {/* Filter by Type */}
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">ประเภททั้งหมด</option>
-            <option value="normal">ธรรมดา</option>
-            <option value="premium">พรีเมี่ยม</option>
-            <option value="tournament">แข่งขัน</option>
-          </select>
 
           {/* Filter by Status */}
           <select
@@ -186,13 +153,10 @@ const CourtsPage = () => {
                   ชื่อสนาม
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ประเภท
+                  คำอธิบาย
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   สถานะ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ราคา (บาท/ชม.)
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   จัดการ
@@ -202,8 +166,8 @@ const CourtsPage = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCourts.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                    {searchTerm || filterType || filterStatus
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                    {searchTerm || filterStatus
                       ? 'ไม่พบข้อมูลสนามที่ตรงกับเงื่อนไขการค้นหา'
                       : 'ยังไม่มีข้อมูลสนาม'}
                   </td>
@@ -216,19 +180,11 @@ const CourtsPage = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{court.name}</div>
-                      {court.description && (
-                        <div className="text-sm text-gray-500">{court.description}</div>
-                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getTypeBadge(court.type)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(court.status)}</td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        <div>จ.-ศ.: {court.hourlyRate.weekday} ฿</div>
-                        <div>ส.-อา.: {court.hourlyRate.weekend} ฿</div>
-                        <div>หยุด: {court.hourlyRate.holiday} ฿</div>
-                      </div>
+                      <div className="text-sm text-gray-500">{court.description || '-'}</div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(court.status)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <button

@@ -11,6 +11,7 @@ const usersRouter = require('./routes/users.routes');
 const authRouter = require('./routes/auth.routes');
 const settingsRouter = require('./routes/settings.routes');
 const courtsRouter = require('./routes/courts.routes');
+const timeslotsRouter = require('./routes/timeslots.routes');
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/courts', courtsRouter);
+app.use('/api/timeslots', timeslotsRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {

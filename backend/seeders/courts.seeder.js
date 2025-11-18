@@ -5,75 +5,39 @@ const Court = require('../models/court.model');
 const courts = [
   {
     courtNumber: 'C01',
-    name: 'Court 1',
-    type: 'normal',
+    name: 'สนาม 1',
     status: 'available',
-    description: 'สนามธรรมดา เหมาะสำหรับการเล่นทั่วไป',
-    hourlyRate: {
-      weekday: 150,
-      weekend: 180,
-      holiday: 200,
-    },
+    description: 'สนามมาตรฐาน เหมาะสำหรับการเล่นทั่วไป',
   },
   {
     courtNumber: 'C02',
-    name: 'Court 2',
-    type: 'normal',
+    name: 'สนาม 2',
     status: 'available',
-    description: 'สนามธรรมดา เหมาะสำหรับการเล่นทั่วไป',
-    hourlyRate: {
-      weekday: 150,
-      weekend: 180,
-      holiday: 200,
-    },
+    description: 'สนามมาตรฐาน เหมาะสำหรับการเล่นทั่วไป',
   },
   {
     courtNumber: 'C03',
-    name: 'Court 3',
-    type: 'normal',
+    name: 'สนาม 3',
     status: 'available',
-    description: 'สนามธรรมดา เหมาะสำหรับการเล่นทั่วไป',
-    hourlyRate: {
-      weekday: 150,
-      weekend: 180,
-      holiday: 200,
-    },
+    description: 'สนามมาตรฐาน เหมาะสำหรับการเล่นทั่วไป',
   },
   {
     courtNumber: 'C04',
-    name: 'Court Premium 1',
-    type: 'premium',
+    name: 'สนาม 4',
     status: 'available',
-    description: 'สนามพรีเมี่ยม มีระบบแสงสว่างและพื้นที่ดีกว่า',
-    hourlyRate: {
-      weekday: 200,
-      weekend: 250,
-      holiday: 300,
-    },
+    description: 'สนามมาตรฐาน พร้อมระบบแสงสว่างที่ดี',
   },
   {
     courtNumber: 'C05',
-    name: 'Court Premium 2',
-    type: 'premium',
+    name: 'สนาม 5',
     status: 'available',
-    description: 'สนามพรีเมี่ยม มีระบบแสงสว่างและพื้นที่ดีกว่า',
-    hourlyRate: {
-      weekday: 200,
-      weekend: 250,
-      holiday: 300,
-    },
+    description: 'สนามมาตรฐาน พร้อมระบบแสงสว่างที่ดี',
   },
   {
     courtNumber: 'C06',
-    name: 'Court Tournament',
-    type: 'tournament',
+    name: 'สนาม 6',
     status: 'available',
-    description: 'สนามมาตรฐานการแข่งขัน เหมาะสำหรับการจัดทัวร์นาเมนต์',
-    hourlyRate: {
-      weekday: 250,
-      weekend: 300,
-      holiday: 350,
-    },
+    description: 'สนามมาตรฐานการแข่งขัน',
   },
 ];
 
@@ -93,9 +57,7 @@ const seedCourts = async () => {
 
     // Display created courts
     createdCourts.forEach((court) => {
-      console.log(
-        `- ${court.courtNumber}: ${court.name} (${court.type}) - ${court.hourlyRate.weekday} บาท/ชม.`
-      );
+      console.log(`- ${court.courtNumber}: ${court.name} - ${court.status}`);
     });
 
     process.exit(0);

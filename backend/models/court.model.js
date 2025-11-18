@@ -14,15 +14,6 @@ const courtSchema = new mongoose.Schema(
       required: [true, 'กรุณาระบุชื่อสนาม'],
       trim: true,
     },
-    type: {
-      type: String,
-      required: [true, 'กรุณาระบุประเภทสนาม'],
-      enum: {
-        values: ['normal', 'premium', 'tournament'],
-        message: 'ประเภทสนามต้องเป็น normal, premium หรือ tournament',
-      },
-      default: 'normal',
-    },
     status: {
       type: String,
       required: [true, 'กรุณาระบุสถานะสนาม'],
@@ -35,26 +26,6 @@ const courtSchema = new mongoose.Schema(
     description: {
       type: String,
       default: '',
-    },
-    hourlyRate: {
-      weekday: {
-        type: Number,
-        required: [true, 'กรุณาระบุราคาวันธรรมดา'],
-        min: [0, 'ราคาต้องไม่ติดลบ'],
-        default: 150,
-      },
-      weekend: {
-        type: Number,
-        required: [true, 'กรุณาระบุราคาวันเสาร์-อาทิตย์'],
-        min: [0, 'ราคาต้องไม่ติดลบ'],
-        default: 150,
-      },
-      holiday: {
-        type: Number,
-        required: [true, 'กรุณาระบุราคาวันหยุดนักขัตฤกษ์'],
-        min: [0, 'ราคาต้องไม่ติดลบ'],
-        default: 150,
-      },
     },
     deletedAt: {
       type: Date,
@@ -69,7 +40,6 @@ const courtSchema = new mongoose.Schema(
 // Index for better query performance
 courtSchema.index({ courtNumber: 1 });
 courtSchema.index({ status: 1 });
-courtSchema.index({ type: 1 });
 courtSchema.index({ deletedAt: 1 });
 
 // Query helper to exclude soft-deleted documents

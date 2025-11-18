@@ -1,0 +1,265 @@
+const express = require('express');
+const router = express.Router();
+const TimeSlot = require('../models/timeslot.model');
+const { protect, admin } = require('../middleware/auth');
+
+// @route   GET /api/timeslots
+// @desc    Get all timeslots with optional filters
+// @access  Private/Admin
+router.get('/', protect, admin, async (req, res) => {
+  try {
+    const { dayType, status, peakHour } = req.query;
+
+    // Build query
+    const query = { deletedAt: null };
+    if (dayType) query.dayType = dayType;
+    if (status) query.status = status;
+    if (peakHour !== undefined) query.peakHour = peakHour === 'true';
+
+    const timeslots = await TimeSlot.find(query).sort({ dayType: 1, startTime: 1 });
+
+    res.status(200).json({
+      success: true,
+      count: timeslots.length,
+      data: timeslots,
+    });
+  } catch (error) {
+    console.error('Error fetching timeslots:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลช่วงเวลา',
+    });
+  }
+});
+
+// @route   GET /api/timeslots/active
+// @desc    Get active timeslots only
+// @access  Private/Admin
+router.get('/active', protect, admin, async (req, res) => {
+  try {
+    const { dayType } = req.query;
+    const timeslots = await TimeSlot.getActiveTimeslots(dayType);
+
+    res.status(200).json({
+      success: true,
+      count: timeslots.length,
+      data: timeslots,
+    });
+  } catch (error) {
+    console.error('Error fetching active timeslots:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลช่วงเวลาที่เปิดใช้งาน',
+    });
+  }
+});
+
+// @route   GET /api/timeslots/:id
+// @desc    Get single timeslot by ID
+// @access  Private/Admin
+router.get('/:id', protect, admin, async (req, res) => {
+  try {
+    const timeslot = await TimeSlot.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+
+    if (!timeslot) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลช่วงเวลา',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: timeslot,
+    });
+  } catch (error) {
+    console.error('Error fetching timeslot:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลช่วงเวลา',
+    });
+  }
+});
+
+// @route   POST /api/timeslots
+// @desc    Create new timeslot
+// @access  Private/Admin
+router.post('/', protect, admin, async (req, res) => {
+  try {
+    const { startTime, endTime, dayType, pricing, peakHour, status } = req.body;
+
+    // Check for overlapping timeslots
+    const existingTimeslots = await TimeSlot.find({
+      dayType,
+      deletedAt: null,
+    });
+
+    const newTimeslot = new TimeSlot({
+      startTime,
+      endTime,
+      dayType,
+      pricing,
+      peakHour,
+      status,
+    });
+
+    // Check for overlaps
+    for (const existing of existingTimeslots) {
+      if (newTimeslot.overlaps(existing)) {
+        return res.status(400).json({
+          success: false,
+          message: `ช่วงเวลาซ้อนทับกับช่วงเวลา ${existing.startTime}-${existing.endTime} (${existing.dayType})`,
+        });
+      }
+    }
+
+    const timeslot = await TimeSlot.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: timeslot,
+    });
+  } catch (error) {
+    console.error('Error creating timeslot:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'เกิดข้อผิดพลาดในการสร้างช่วงเวลา',
+    });
+  }
+});
+
+// @route   PUT /api/timeslots/:id
+// @desc    Update timeslot
+// @access  Private/Admin
+router.put('/:id', protect, admin, async (req, res) => {
+  try {
+    const timeslot = await TimeSlot.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+
+    if (!timeslot) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลช่วงเวลา',
+      });
+    }
+
+    // Check for overlaps if time or dayType is being updated
+    if (req.body.startTime || req.body.endTime || req.body.dayType) {
+      const updatedTimeslot = {
+        ...timeslot.toObject(),
+        ...req.body,
+      };
+
+      const existingTimeslots = await TimeSlot.find({
+        _id: { $ne: req.params.id },
+        dayType: updatedTimeslot.dayType,
+        deletedAt: null,
+      });
+
+      const testTimeslot = new TimeSlot(updatedTimeslot);
+
+      for (const existing of existingTimeslots) {
+        if (testTimeslot.overlaps(existing)) {
+          return res.status(400).json({
+            success: false,
+            message: `ช่วงเวลาซ้อนทับกับช่วงเวลา ${existing.startTime}-${existing.endTime} (${existing.dayType})`,
+          });
+        }
+      }
+    }
+
+    // Update fields
+    Object.assign(timeslot, req.body);
+    await timeslot.save();
+
+    res.status(200).json({
+      success: true,
+      data: timeslot,
+    });
+  } catch (error) {
+    console.error('Error updating timeslot:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'เกิดข้อผิดพลาดในการแก้ไขช่วงเวลา',
+    });
+  }
+});
+
+// @route   PATCH /api/timeslots/:id/pricing
+// @desc    Update timeslot pricing only
+// @access  Private/Admin
+router.patch('/:id/pricing', protect, admin, async (req, res) => {
+  try {
+    const timeslot = await TimeSlot.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+
+    if (!timeslot) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลช่วงเวลา',
+      });
+    }
+
+    // Update pricing
+    if (req.body.pricing) {
+      timeslot.pricing = {
+        ...timeslot.pricing,
+        ...req.body.pricing,
+      };
+    }
+
+    await timeslot.save();
+
+    res.status(200).json({
+      success: true,
+      data: timeslot,
+    });
+  } catch (error) {
+    console.error('Error updating pricing:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการแก้ไขราคา',
+    });
+  }
+});
+
+// @route   DELETE /api/timeslots/:id
+// @desc    Delete timeslot (soft delete)
+// @access  Private/Admin
+router.delete('/:id', protect, admin, async (req, res) => {
+  try {
+    const timeslot = await TimeSlot.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+
+    if (!timeslot) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลช่วงเวลา',
+      });
+    }
+
+    await timeslot.softDelete();
+
+    res.status(200).json({
+      success: true,
+      message: 'ลบช่วงเวลาสำเร็จ',
+    });
+  } catch (error) {
+    console.error('Error deleting timeslot:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการลบช่วงเวลา',
+    });
+  }
+});
+
+module.exports = router;

@@ -164,4 +164,42 @@ export const courtsAPI = {
   },
 };
 
+// TimeSlots API (Admin only)
+export const timeslotsAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.TIMESLOTS.LIST, { params });
+    return response.data;
+  },
+
+  getActive: async (params) => {
+    const response = await api.get(API_ENDPOINTS.TIMESLOTS.ACTIVE, { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.TIMESLOTS.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.TIMESLOTS.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.TIMESLOTS.UPDATE(id), data);
+    return response.data;
+  },
+
+  updatePricing: async (id, pricing) => {
+    const response = await api.patch(API_ENDPOINTS.TIMESLOTS.UPDATE_PRICING(id), { pricing });
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(API_ENDPOINTS.TIMESLOTS.DELETE(id));
+    return response.data;
+  },
+};
+
 export default api;

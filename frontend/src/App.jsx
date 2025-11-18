@@ -19,6 +19,9 @@ import CourtsPage from './pages/admin/settings/courts/CourtsPage';
 import CourtsAddPage from './pages/admin/settings/courts/CourtsAddPage';
 import CourtsEditPage from './pages/admin/settings/courts/CourtsEditPage';
 
+// TimeSlots Pages
+import TimeSlotsPage from './pages/admin/settings/timeslots/TimeSlotsPage';
+
 function App() {
   return (
     <Router>
@@ -76,6 +79,9 @@ function App() {
           <Route path="settings/courts" element={<CourtsPage />} />
           <Route path="settings/courts/add" element={<CourtsAddPage />} />
           <Route path="settings/courts/edit/:id" element={<CourtsEditPage />} />
+
+          {/* TimeSlots Routes */}
+          <Route path="settings/timeslots" element={<TimeSlotsPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}
