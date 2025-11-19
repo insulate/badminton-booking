@@ -17,6 +17,7 @@ import PlayerCheckInModal from '../../components/groupplay/PlayerCheckInModal';
 import StartGameModal from '../../components/groupplay/StartGameModal';
 import FinishGameModal from '../../components/groupplay/FinishGameModal';
 import EditGamePlayersModal from '../../components/groupplay/EditGamePlayersModal';
+import PlayerCostDetailModal from '../../components/groupplay/PlayerCostDetailModal';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -41,6 +42,8 @@ export default function GroupPlayPage() {
   const [showEditPlayersModal, setShowEditPlayersModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [selectedGameForEdit, setSelectedGameForEdit] = useState(null);
+  const [showPlayerCostModal, setShowPlayerCostModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -333,38 +336,65 @@ export default function GroupPlayPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {checkedInPlayers.map((player, index) => (
-                  <div
-                    key={index}
-                    className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-medium text-text-primary">{player.name}</p>
-                        <p className="text-sm text-text-secondary">{player.phone}</p>
+                {checkedInPlayers.map((player, index) => {
+                  const playingGame = player.games?.find(g => g.status === 'playing');
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        setSelectedPlayer(player);
+                        setShowPlayerCostModal(true);
+                      }}
+                      className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer hover:border-primary-blue"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-medium text-text-primary">{player.name}</p>
+                          <p className="text-sm text-text-secondary">{player.phone}</p>
+                        </div>
+                        {player.level && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                            {player.levelName || `Level ${player.level}`}
+                          </span>
+                        )}
                       </div>
-                      {player.level && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                          {player.levelName || `Level ${player.level}`}
+
+                      {/* Playing Status */}
+                      <div className="mb-2 pb-2 border-b border-slate-200">
+                        {playingGame ? (
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span className="text-xs font-medium text-green-600">
+                              กำลังเล่น - {playingGame.court?.name || `สนาม ${playingGame.court?.courtNumber || playingGame.gameNumber}`}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                            <span className="text-xs font-medium text-slate-500">
+                              ว่าง
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm mt-3 pt-3 border-t border-slate-200">
+                        <span className="text-text-secondary">เกม:</span>
+                        <span className="font-medium">{player.games?.length || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="text-text-secondary">ค่าใช้จ่าย:</span>
+                        <span className="font-medium text-green-600">฿{player.totalCost || 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="text-text-secondary">สถานะ:</span>
+                        <span className={`font-medium ${player.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-600'}`}>
+                          {player.paymentStatus === 'paid' ? 'จ่ายแล้ว' : 'ยังไม่จ่าย'}
                         </span>
-                      )}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm mt-3 pt-3 border-t border-slate-200">
-                      <span className="text-text-secondary">เกม:</span>
-                      <span className="font-medium">{player.games?.length || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm mt-1">
-                      <span className="text-text-secondary">ค่าใช้จ่าย:</span>
-                      <span className="font-medium text-green-600">฿{player.totalCost || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm mt-1">
-                      <span className="text-text-secondary">สถานะ:</span>
-                      <span className={`font-medium ${player.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-600'}`}>
-                        {player.paymentStatus === 'paid' ? 'จ่ายแล้ว' : 'ยังไม่จ่าย'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -384,13 +414,8 @@ export default function GroupPlayPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex-1">
                         <span className="font-medium text-text-primary">
-                          เกมที่ {game.gameNumber}
+                          {game.court?.name || `สนาม ${game.court?.courtNumber || game.gameNumber}`}
                         </span>
-                        {game.court && (
-                          <span className="ml-2 text-sm text-blue-600">
-                            • {game.court.name || `สนาม ${game.court.courtNumber}`}
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
@@ -512,6 +537,18 @@ export default function GroupPlayPage() {
           onSuccess={async (sessionId, gameNumber, data) => {
             await groupPlayAPI.updateGamePlayers(sessionId, gameNumber, data);
             await refreshRule();
+          }}
+        />
+      )}
+
+      {showPlayerCostModal && selectedPlayer && (
+        <PlayerCostDetailModal
+          player={selectedPlayer}
+          entryFee={selectedRule?.entryFee || 0}
+          sessionPlayers={selectedRule?.players || []}
+          onClose={() => {
+            setShowPlayerCostModal(false);
+            setSelectedPlayer(null);
           }}
         />
       )}
