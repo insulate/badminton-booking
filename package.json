@@ -12,7 +12,15 @@
     "test": "npm run test:backend && npm run test:e2e",
     "test:backend": "cd backend && npm test",
     "test:e2e": "cd frontend && npm run test:e2e",
-    "test:all": "npm run test:backend && npm run test:e2e"
+    "test:all": "npm run test:backend && npm run test:e2e",
+    "seed": "cd backend && npm run seed:all",
+    "seed:all": "cd backend && npm run seed:all",
+    "seed:clear": "cd backend && npm run seed:clear",
+    "seed:users": "cd backend && npm run seed:users",
+    "seed:settings": "cd backend && npm run seed:settings",
+    "seed:courts": "cd backend && npm run seed:courts",
+    "seed:timeslots": "cd backend && npm run seed:timeslots",
+    "seed:players": "cd backend && npm run seed:players"
   },
   "keywords": [
     "badminton",
