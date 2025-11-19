@@ -1,5 +1,21 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Search, Trash2, Plus, Minus, X, DollarSign } from 'lucide-react';
+import {
+  ShoppingCart,
+  Search,
+  Trash2,
+  Plus,
+  Minus,
+  X,
+  DollarSign,
+  Package,
+  Coffee,
+  Cookie,
+  Dumbbell,
+  Grid3x3,
+  Zap,
+  TrendingUp,
+  Sparkles
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { productsAPI, salesAPI } from '../../lib/api';
 
@@ -131,18 +147,30 @@ const POSPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-          <div className="flex justify-between items-center">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
+          {/* Decorative circles */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+          <div className="flex justify-between items-center relative z-10">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">POS - ขายสินค้า</h1>
-              <p className="text-gray-600 text-sm mt-1">เลือกสินค้าเพื่อเพิ่มลงตะกร้า</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-white">POS - ขายสินค้า</h1>
+              </div>
+              <p className="text-blue-100 text-sm ml-14">เลือกสินค้าเพื่อเพิ่มลงตะกร้า • ระบบขายสินค้าอัจฉริยะ</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
-              <ShoppingCart className="w-5 h-5" />
-              <span className="font-semibold">{cart.length} รายการ</span>
+            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30">
+              <ShoppingCart className="w-6 h-6 text-white" />
+              <div className="text-right">
+                <div className="text-white/80 text-xs">รายการในตะกร้า</div>
+                <div className="text-white font-bold text-xl">{cart.length}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -150,17 +178,17 @@ const POSPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Products Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-100">
               {/* Search */}
-              <div className="mb-4">
+              <div className="mb-5">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="ค้นหาสินค้า (ชื่อ หรือ SKU)..."
+                    placeholder="🔍 ค้นหาสินค้า (ชื่อ หรือ SKU)..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
                   />
                 </div>
               </div>
@@ -169,108 +197,135 @@ const POSPage = () => {
               <div className="flex flex-wrap gap-2 mb-6">
                 <button
                   onClick={() => setCategoryFilter('')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === ''
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                   }`}
                 >
+                  <Grid3x3 className="w-4 h-4" />
                   ทั้งหมด
                 </button>
                 <button
                   onClick={() => setCategoryFilter('shuttlecock')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === 'shuttlecock'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
+                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200 hover:scale-105'
                   }`}
                 >
+                  <Zap className="w-4 h-4" />
                   ลูกแบด
                 </button>
                 <button
                   onClick={() => setCategoryFilter('drink')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === 'drink'
-                      ? 'bg-green-600 text-white shadow-md'
-                      : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-500/50 scale-105'
+                      : 'bg-green-100 text-green-800 hover:bg-green-200 hover:scale-105'
                   }`}
                 >
+                  <Coffee className="w-4 h-4" />
                   เครื่องดื่ม
                 </button>
                 <button
                   onClick={() => setCategoryFilter('snack')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === 'snack'
-                      ? 'bg-yellow-600 text-white shadow-md'
-                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                      ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 text-white shadow-lg shadow-yellow-500/50 scale-105'
+                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:scale-105'
                   }`}
                 >
+                  <Cookie className="w-4 h-4" />
                   ขนม
                 </button>
                 <button
                   onClick={() => setCategoryFilter('equipment')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === 'equipment'
-                      ? 'bg-purple-600 text-white shadow-md'
-                      : 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50 scale-105'
+                      : 'bg-purple-100 text-purple-800 hover:bg-purple-200 hover:scale-105'
                   }`}
                 >
+                  <Dumbbell className="w-4 h-4" />
                   อุปกรณ์
                 </button>
                 <button
                   onClick={() => setCategoryFilter('other')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                     categoryFilter === 'other'
-                      ? 'bg-gray-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-gray-600 to-gray-500 text-white shadow-lg shadow-gray-500/50 scale-105'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:scale-105'
                   }`}
                 >
+                  <Package className="w-4 h-4" />
                   อื่นๆ
                 </button>
               </div>
 
               {/* Product Grid */}
               {loading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-600 mt-4">กำลังโหลดสินค้า...</p>
+                <div className="text-center py-16">
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">กำลังโหลดสินค้า...</p>
                 </div>
               ) : filteredProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">ไม่พบสินค้า</p>
+                <div className="text-center py-16">
+                  <Package className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium text-lg">ไม่พบสินค้า</p>
+                  <p className="text-gray-400 text-sm mt-2">ลองค้นหาด้วยคำอื่นหรือเปลี่ยนหมวดหมู่</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2">
                   {filteredProducts.map((product) => (
                     <div
                       key={product._id}
                       onClick={() => addToCart(product)}
-                      className="border border-gray-200 rounded-lg p-3 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer"
+                      className="group relative bg-white border-2 border-gray-100 rounded-2xl p-3 hover:border-blue-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
                     >
-                      {/* Product Image */}
-                      {product.image ? (
-                        <img
-                          src={`${API_URL.replace('/api', '')}${product.image}`}
-                          alt={product.name}
-                          className="w-full h-24 object-cover rounded-lg mb-2"
-                        />
-                      ) : (
-                        <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
-                          <ShoppingCart className="w-8 h-8 text-gray-400" />
+                      {/* Stock Badge */}
+                      {product.stock <= 10 && (
+                        <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                          <TrendingUp className="w-3 h-3" />
+                          เหลือน้อย
                         </div>
                       )}
 
+                      {/* Product Image */}
+                      <div className="relative overflow-hidden rounded-xl mb-3">
+                        {product.image ? (
+                          <img
+                            src={`${API_URL.replace('/api', '')}${product.image}`}
+                            alt={product.name}
+                            className="w-full h-28 object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-28 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center group-hover:from-blue-50 group-hover:to-purple-50 transition-all">
+                            <ShoppingCart className="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                          </div>
+                        )}
+                        {/* Gradient overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+
                       {/* Product Info */}
-                      <div className="text-xs text-gray-500 mb-1">{product.sku}</div>
-                      <div className="font-semibold text-sm text-gray-800 mb-1 line-clamp-2">
+                      <div className="text-xs text-gray-400 mb-1 font-medium">{product.sku}</div>
+                      <div className="font-bold text-sm text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem]">
                         {product.name}
                       </div>
-                      <div className={`text-xs px-2 py-0.5 rounded-full inline-block mb-2 ${getCategoryColor(product.category)}`}>
+                      <div className={`text-xs px-2.5 py-1 rounded-full inline-block mb-3 font-medium ${getCategoryColor(product.category)}`}>
                         {getCategoryLabel(product.category)}
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-600 font-bold">฿{product.price.toFixed(2)}</span>
-                        <span className="text-xs text-gray-500">คงเหลือ: {product.stock}</span>
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                        <span className="text-blue-600 font-bold text-lg">฿{product.price.toFixed(2)}</span>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                          คงเหลือ {product.stock}
+                        </span>
+                      </div>
+
+                      {/* Click indicator */}
+                      <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Plus className="w-6 h-6 text-blue-600 bg-blue-100 rounded-full p-1" />
                       </div>
                     </div>
                   ))}
@@ -281,70 +336,79 @@ const POSPage = () => {
 
           {/* Cart Section */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800">ตะกร้าสินค้า</h2>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl p-6 sticky top-4 border-2 border-gray-100">
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                    <ShoppingCart className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    ตะกร้าสินค้า
+                  </h2>
+                </div>
                 {cart.length > 0 && (
                   <button
                     onClick={clearCart}
-                    className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                    className="text-red-600 hover:text-red-800 hover:bg-red-50 text-sm flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
-                    ล้าง
+                    ล้างทั้งหมด
                   </button>
                 )}
               </div>
 
               {/* Cart Items */}
               {cart.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">ตะกร้าว่างเปล่า</p>
-                  <p className="text-gray-400 text-sm">เลือกสินค้าเพื่อเริ่มขาย</p>
+                <div className="text-center py-16">
+                  <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShoppingCart className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 font-medium text-lg">ตะกร้าว่างเปล่า</p>
+                  <p className="text-gray-400 text-sm mt-2">เลือกสินค้าเพื่อเริ่มขาย</p>
                 </div>
               ) : (
                 <>
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto mb-4">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto mb-5 pr-2">
                     {cart.map((item) => (
                       <div
                         key={item.product._id}
-                        className="border border-gray-200 rounded-lg p-3"
+                        className="bg-white border-2 border-gray-100 rounded-xl p-4 hover:border-blue-200 hover:shadow-md transition-all"
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
-                            <div className="font-semibold text-sm text-gray-800">
+                            <div className="font-bold text-sm text-gray-800 mb-1">
                               {item.product.name}
                             </div>
-                            <div className="text-xs text-gray-500">{item.product.sku}</div>
-                            <div className="text-blue-600 font-semibold mt-1">
-                              ฿{item.price.toFixed(2)}
+                            <div className="text-xs text-gray-400 font-medium">{item.product.sku}</div>
+                            <div className="text-blue-600 font-bold mt-1.5">
+                              ฿{item.price.toFixed(2)} <span className="text-gray-400 text-xs font-normal">/ ชิ้น</span>
                             </div>
                           </div>
                           <button
                             onClick={() => removeFromCart(item.product._id)}
-                            className="text-red-600 hover:text-red-800 p-1"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-all"
                           >
                             <X className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                          <div className="flex items-center gap-3">
                             <button
                               onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                              className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                              className="w-8 h-8 rounded-lg bg-white hover:bg-blue-50 hover:text-blue-600 border border-gray-200 flex items-center justify-center transition-all shadow-sm"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                            <span className="w-10 text-center font-bold text-lg">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                              className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                              className="w-8 h-8 rounded-lg bg-white hover:bg-blue-50 hover:text-blue-600 border border-gray-200 flex items-center justify-center transition-all shadow-sm"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
                           </div>
-                          <div className="font-bold text-gray-800">
+                          <div className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             ฿{item.subtotal.toFixed(2)}
                           </div>
                         </div>
@@ -353,19 +417,21 @@ const POSPage = () => {
                   </div>
 
                   {/* Total */}
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-bold text-gray-800">ยอดรวม</span>
-                      <span className="text-2xl font-bold text-blue-600">
-                        ฿{total.toFixed(2)}
-                      </span>
+                  <div className="border-t-2 border-gray-200 pt-5">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-semibold text-gray-700">ยอดรวมทั้งหมด</span>
+                        <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          ฿{total.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
 
                     <button
                       onClick={() => setShowPaymentModal(true)}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg"
                     >
-                      <DollarSign className="w-5 h-5" />
+                      <DollarSign className="w-6 h-6" />
                       ชำระเงิน
                     </button>
                   </div>
