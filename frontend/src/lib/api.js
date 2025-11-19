@@ -434,6 +434,11 @@ export const groupPlayAPI = {
     return response.data;
   },
 
+  updateGamePlayers: async (sessionId, gameNumber, data) => {
+    const response = await api.patch(`/groupplay/${sessionId}/game/${gameNumber}/players`, data);
+    return response.data;
+  },
+
   checkOut: async (id, playerId) => {
     const response = await api.post(API_ENDPOINTS.GROUPPLAY.CHECKOUT(id, playerId));
     return response.data;

@@ -362,6 +362,54 @@ router.post('/:id/game/start', async (req, res) => {
 });
 
 /**
+ * @route   PATCH /api/groupplay/:id/game/:gameNumber/players
+ * @desc    Update players in an active game
+ * @access  Private
+ * @body    playerIds (array of session player _ids)
+ */
+router.patch('/:id/game/:gameNumber/players', async (req, res) => {
+  try {
+    const { playerIds } = req.body;
+    const { gameNumber } = req.params;
+
+    if (!playerIds || playerIds.length < 2 || playerIds.length > 4) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกผู้เล่น 2-4 คน',
+      });
+    }
+
+    const session = await GroupPlay.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบ session',
+      });
+    }
+
+    // Update game players
+    await session.updateGamePlayers(parseInt(gameNumber), playerIds);
+
+    const updatedSession = await GroupPlay.findById(session._id)
+      .populate('players.player', 'name level levelName')
+      .populate('players.games.court', 'name courtNumber');
+
+    res.json({
+      success: true,
+      message: 'อัปเดตผู้เล่นสำเร็จ',
+      data: updatedSession,
+    });
+  } catch (error) {
+    console.error('Error updating game players:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'เกิดข้อผิดพลาดในการอัปเดตผู้เล่น',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   PATCH /api/groupplay/:id/game/:playerId/:gameNumber/finish
  * @desc    Finish a game and add items used
  * @access  Private

@@ -7,7 +7,8 @@ import {
   UserPlus,
   Plus,
   RefreshCw,
-  CheckCircle
+  CheckCircle,
+  Edit
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -15,6 +16,7 @@ import CreateSessionModal from '../../components/groupplay/CreateSessionModal';
 import PlayerCheckInModal from '../../components/groupplay/PlayerCheckInModal';
 import StartGameModal from '../../components/groupplay/StartGameModal';
 import FinishGameModal from '../../components/groupplay/FinishGameModal';
+import EditGamePlayersModal from '../../components/groupplay/EditGamePlayersModal';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -36,7 +38,9 @@ export default function GroupPlayPage() {
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [showStartGameModal, setShowStartGameModal] = useState(false);
   const [showFinishGameModal, setShowFinishGameModal] = useState(false);
+  const [showEditPlayersModal, setShowEditPlayersModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
+  const [selectedGameForEdit, setSelectedGameForEdit] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -394,6 +398,16 @@ export default function GroupPlayPage() {
                         </span>
                         <button
                           onClick={() => {
+                            setSelectedGameForEdit(game);
+                            setShowEditPlayersModal(true);
+                          }}
+                          className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+                        >
+                          <Edit size={14} />
+                          แก้ไข
+                        </button>
+                        <button
+                          onClick={() => {
                             setSelectedGameId({ playerId: game.playerId, gameNumber: game.gameNumber });
                             setShowFinishGameModal(true);
                           }}
@@ -482,6 +496,21 @@ export default function GroupPlayPage() {
           }}
           onSuccess={async (sessionId, gameId, gameData) => {
             await groupPlayAPI.finishGame(sessionId, gameId.playerId, gameId.gameNumber, gameData);
+            await refreshRule();
+          }}
+        />
+      )}
+
+      {showEditPlayersModal && selectedGameForEdit && (
+        <EditGamePlayersModal
+          session={selectedRule}
+          game={selectedGameForEdit}
+          onClose={() => {
+            setShowEditPlayersModal(false);
+            setSelectedGameForEdit(null);
+          }}
+          onSuccess={async (sessionId, gameNumber, data) => {
+            await groupPlayAPI.updateGamePlayers(sessionId, gameNumber, data);
             await refreshRule();
           }}
         />

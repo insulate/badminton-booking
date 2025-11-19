@@ -301,6 +301,71 @@ groupPlaySchema.methods.startGame = function (playerIds, courtId, teammates = []
   return this.save();
 };
 
+// Method to update game players
+groupPlaySchema.methods.updateGamePlayers = function (gameNumber, newPlayerIds) {
+  // Find all players currently in this game
+  const currentPlayers = [];
+  this.players.forEach(p => {
+    const playerGame = p.games.find(g => g.gameNumber === gameNumber && g.status === 'playing');
+    if (playerGame) {
+      currentPlayers.push({ player: p, game: playerGame });
+    }
+  });
+
+  if (currentPlayers.length === 0) {
+    throw new Error('ไม่พบเกมที่กำลังเล่น');
+  }
+
+  // Get game details from first player (court, startTime)
+  const firstGame = currentPlayers[0].game;
+  const courtId = firstGame.court;
+  const startTime = firstGame.startTime;
+  const teammates = firstGame.teammates;
+  const opponents = firstGame.opponents;
+
+  // Validate all new player IDs exist and are checked in
+  const newPlayers = [];
+  for (const playerId of newPlayerIds) {
+    const player = this.players.id(playerId);
+    if (!player) {
+      throw new Error(`ไม่พบผู้เล่น ID: ${playerId}`);
+    }
+    if (!player.checkedIn || player.checkedOut) {
+      throw new Error(`ผู้เล่น ${player.name} ยังไม่ได้ check-in หรือ check-out ไปแล้ว`);
+    }
+    // Check if player is in another active game
+    const isPlayingOtherGame = player.games.some(
+      g => g.status === 'playing' && g.gameNumber !== gameNumber
+    );
+    if (isPlayingOtherGame) {
+      throw new Error(`ผู้เล่น ${player.name} กำลังเล่นอยู่ในเกมอื่น`);
+    }
+    newPlayers.push(player);
+  }
+
+  // Remove game from current players
+  currentPlayers.forEach(({ player }) => {
+    player.games = player.games.filter(g => g.gameNumber !== gameNumber);
+  });
+
+  // Add game to new players
+  newPlayers.forEach(player => {
+    player.games.push({
+      gameNumber,
+      court: courtId,
+      teammates: teammates || [],
+      opponents: opponents || [],
+      status: 'playing',
+      startTime,
+      items: [],
+      totalItemsCost: 0,
+      costPerPlayer: 0,
+    });
+  });
+
+  return this.save();
+};
+
 // Method to finish a game and add items
 groupPlaySchema.methods.finishGame = function (playerId, gameNumber, items) {
   const player = this.players.id(playerId);
