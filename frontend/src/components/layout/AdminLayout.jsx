@@ -22,6 +22,7 @@ import {
   Timer,
   ClipboardList,
   Package,
+  ShoppingCart,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -52,6 +53,11 @@ export default function AdminLayout() {
       name: 'รายการจอง',
       path: '/admin/bookings',
       icon: ClipboardList,
+    },
+    {
+      name: 'POS - ขายสินค้า',
+      path: ROUTES.ADMIN.POS,
+      icon: ShoppingCart,
     },
     {
       name: 'ตั้งค่า',

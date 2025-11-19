@@ -25,6 +25,9 @@ import TimeSlotsPage from './pages/admin/settings/timeslots/TimeSlotsPage';
 // Products Pages
 import ProductsPage from './pages/admin/settings/products/ProductsPage';
 
+// POS Page
+import POSPage from './pages/admin/POSPage';
+
 // Booking Pages
 import BookingPage from './pages/admin/BookingPage';
 import BookingsPage from './pages/admin/BookingsPage';
@@ -78,6 +81,9 @@ function App() {
           {/* Booking Routes */}
           <Route path="booking" element={<BookingPage />} />
           <Route path="bookings" element={<BookingsPage />} />
+
+          {/* POS Route */}
+          <Route path="pos" element={<POSPage />} />
 
           {/* Settings Routes */}
           <Route path="settings/venue" element={<VenueSettingsPage />} />

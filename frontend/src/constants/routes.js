@@ -13,6 +13,7 @@ export const ROUTES = {
     ROOT: '/admin',
     DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
+    POS: '/admin/pos',
     COURTS: '/admin/settings/courts',
     COURTS_ADD: '/admin/settings/courts/add',
     COURTS_EDIT: (id) => `/admin/settings/courts/edit/${id}`,

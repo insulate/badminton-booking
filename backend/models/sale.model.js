@@ -54,7 +54,7 @@ const saleSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['cash', 'transfer', 'credit_card'],
+      enum: ['cash', 'promptpay', 'transfer', 'credit_card'],
       required: [true, 'Payment method is required'],
       default: 'cash',
     },

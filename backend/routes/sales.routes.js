@@ -222,6 +222,9 @@ router.post('/', protect, async (req, res) => {
     // Generate sale code
     const saleCode = await generateSaleCode();
 
+    // Calculate total
+    const total = processedItems.reduce((sum, item) => sum + item.subtotal, 0);
+
     // Create sale
     const sale = await Sale.create({
       saleCode,
@@ -230,6 +233,7 @@ router.post('/', protect, async (req, res) => {
       paymentMethod,
       relatedBooking,
       createdBy: req.user._id,
+      total,
     });
 
     saleId = sale._id;
