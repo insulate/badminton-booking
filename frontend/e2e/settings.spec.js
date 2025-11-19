@@ -91,15 +91,14 @@ test.describe('Settings System E2E Tests', () => {
       // Clear name field
       await page.fill('input[name="name"]', '');
 
-      // Try to submit
-      await page.click('button[type="submit"]');
+      // Blur to trigger validation
+      await page.locator('input[name="name"]').blur();
 
-      // Verify HTML5 validation (form should not submit)
-      const isValid = await page.evaluate(() => {
-        const form = document.querySelector('form');
-        return form.checkValidity();
+      // Check if validation message appears or input is invalid
+      const isInvalid = await page.locator('input[name="name"]').evaluate(el => {
+        return !el.validity.valid;
       });
-      expect(isValid).toBe(false);
+      expect(isInvalid).toBe(true);
     });
   });
 
