@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, ArrowLeft, Search, AlertTriangle, Package } from 'lucide-react';
-import { productsAPI } from '../../../../lib/api';
+import { Plus, Pencil, Trash2, ArrowLeft, Search, AlertTriangle, Package, Sparkles, TrendingUp } from 'lucide-react';
+import { productsAPI, categoriesAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
 import ProductModal from '../../../../components/products/ProductModal';
@@ -9,6 +9,7 @@ import ProductModal from '../../../../components/products/ProductModal';
 const ProductsPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -18,6 +19,7 @@ const ProductsPage = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -32,6 +34,17 @@ const ProductsPage = () => {
       toast.error('ไม่สามารถโหลดข้อมูลสินค้าได้');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await categoriesAPI.getAll({ isActive: true });
+      if (response.success) {
+        setCategories(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -87,29 +100,29 @@ const ProductsPage = () => {
   });
 
   // Category labels
-  const getCategoryLabel = (category) => {
-    const labels = {
-      shuttlecock: 'ลูกแบดมินตัน',
-      drink: 'เครื่องดื่ม',
-      snack: 'ขนม',
-      equipment: 'อุปกรณ์',
-      other: 'อื่นๆ',
-    };
-    return labels[category] || category;
+  const getCategoryLabel = (categoryName) => {
+    const category = categories.find((c) => c.name === categoryName);
+    return category?.label || categoryName;
   };
 
-  // Category badge color
-  const getCategoryBadge = (category) => {
-    const badges = {
-      shuttlecock: 'bg-blue-100 text-blue-800',
-      drink: 'bg-cyan-100 text-cyan-800',
-      snack: 'bg-orange-100 text-orange-800',
-      equipment: 'bg-purple-100 text-purple-800',
-      other: 'bg-gray-100 text-gray-800',
+  // Category badge style
+  const getCategoryStyle = (categoryName) => {
+    const category = categories.find((c) => c.name === categoryName);
+    const color = category?.color || '#6B7280';
+    return {
+      backgroundColor: color,
+      color: '#FFFFFF',
     };
+  };
+
+  // Category badge
+  const getCategoryBadge = (categoryName) => {
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[category]}`}>
-        {getCategoryLabel(category)}
+      <span
+        className="px-2 py-1 rounded-full text-xs font-medium"
+        style={getCategoryStyle(categoryName)}
+      >
+        {getCategoryLabel(categoryName)}
       </span>
     );
   };
@@ -138,126 +151,135 @@ const ProductsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">กำลังโหลดข้อมูล...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
-            className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">จัดการสินค้า</h1>
-            <p className="text-gray-600 text-sm">
-              จัดการสินค้าและสต็อกทั้งหมด ({filteredProducts.length} รายการ)
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
+          {/* Decorative circles */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+          <div className="flex justify-between items-center relative z-10">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <Package className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-white">จัดการสินค้า</h1>
+              </div>
+              <p className="text-blue-100 text-sm ml-14">
+                จัดการสินค้าและสต็อกทั้งหมด • {filteredProducts.length} รายการ
+              </p>
+            </div>
+            <button
+              onClick={handleAdd}
+              className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-semibold flex items-center gap-2 shadow-lg border border-white/30"
+            >
+              <Plus className="w-5 h-5" />
+              เพิ่มสินค้าใหม่
+            </button>
           </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          เพิ่มสินค้าใหม่
-        </button>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="ค้นหาสินค้า (ชื่อ หรือ SKU)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+        {/* Search and Filters */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="🔍 ค้นหาสินค้า (ชื่อ หรือ SKU)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+              />
+            </div>
 
-          {/* Filter by Category */}
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">หมวดหมู่ทั้งหมด</option>
-            <option value="shuttlecock">ลูกแบดมินตัน</option>
-            <option value="drink">เครื่องดื่ม</option>
-            <option value="snack">ขนม</option>
-            <option value="equipment">อุปกรณ์</option>
-            <option value="other">อื่นๆ</option>
-          </select>
+            {/* Filter by Category */}
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+            >
+              <option value="">หมวดหมู่ทั้งหมด</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category.name}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
 
-          {/* Filter by Status */}
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">สถานะทั้งหมด</option>
-            <option value="active">เปิดขาย</option>
-            <option value="inactive">ปิดขาย</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Low Stock Alert */}
-      {products.filter(isLowStock).length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-medium text-yellow-800">แจ้งเตือนสต็อกต่ำ</h3>
-            <p className="text-sm text-yellow-700 mt-1">
-              มีสินค้า {products.filter(isLowStock).length} รายการที่สต็อกต่ำกว่าจำนวนที่กำหนด
-            </p>
+            {/* Filter by Status */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+            >
+              <option value="">สถานะทั้งหมด</option>
+              <option value="active">เปิดขาย</option>
+              <option value="inactive">ปิดขาย</option>
+            </select>
           </div>
         </div>
-      )}
 
-      {/* Products Table */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  รูปภาพ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  SKU
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ชื่อสินค้า
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  หมวดหมู่
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ราคา
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  สต็อก
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  สถานะ
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  จัดการ
-                </th>
-              </tr>
-            </thead>
+        {/* Low Stock Alert */}
+        {products.filter(isLowStock).length > 0 && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-5 mb-6 flex items-start gap-3 shadow-lg">
+            <div className="bg-yellow-500 p-2 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-yellow-800">แจ้งเตือนสต็อกต่ำ</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                มีสินค้า <span className="font-bold">{products.filter(isLowStock).length}</span> รายการที่สต็อกต่ำกว่าจำนวนที่กำหนด
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Products Table */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gradient-to-r from-blue-600 to-purple-600">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    รูปภาพ
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    SKU
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    ชื่อสินค้า
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    หมวดหมู่
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                    ราคา
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                    สต็อก
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    สถานะ
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                    จัดการ
+                  </th>
+                </tr>
+              </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProducts.length === 0 ? (
                 <tr>
@@ -329,14 +351,14 @@ const ProductsPage = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
+                          className="text-blue-600 hover:text-blue-700 p-2.5 hover:bg-blue-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
                           title="แก้ไข"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
+                          className="text-red-600 hover:text-red-700 p-2.5 hover:bg-red-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
                           title="ลบ"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -346,21 +368,23 @@ const ProductsPage = () => {
                   </tr>
                 ))
               )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Product Modal */}
-      {showModal && (
-        <ProductModal
-          product={selectedProduct}
-          onClose={handleModalClose}
-          onSuccess={handleModalSuccess}
-        />
-      )}
+        {/* Product Modal */}
+        {showModal && (
+          <ProductModal
+            product={selectedProduct}
+            onClose={handleModalClose}
+            onSuccess={handleModalSuccess}
+          />
+        )}
+      </div>
     </div>
   );
 };
 
 export default ProductsPage;
+
