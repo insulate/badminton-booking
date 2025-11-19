@@ -16,13 +16,14 @@
 - [x] **Phase 3: Time Slot & Pricing (Backend + Frontend)**
 - [x] **Phase 4: Booking System (Backend + Frontend)**
 - [x] **Phase 5.1: Products & Sales API (Backend)**
+- [x] **Phase 5.2: Product Management (Frontend)**
 
 ### 📊 สถิติ
 - **Backend APIs**: 45/50+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Bookings: 10, Products: 5, Sales: 4, Users: 4, Auth: 2)
-- **Frontend Pages**: 14/17+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Products: 1, POS: 1, Users: 1, Dashboard: 1, Login: 1)
-- **Frontend Components**: 11+ components (Booking: 6, TimeSlots: 2, Products: 2+, POS: 4+, Common: 1, Layout: 1, ProtectedRoute: 1)
+- **Frontend Pages**: 15/17+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Products: 1, POS: 1, Users: 1, Dashboard: 1, Login: 1)
+- **Frontend Components**: 13+ components (Booking: 6, TimeSlots: 2, Products: 2, POS: 4+, Common: 1, Layout: 1, ProtectedRoute: 1)
 - **Database Models**: 8/10 models (User, Setting, Court, TimeSlot, Booking, Counter, Product, Sale)
-- **Progress**: ~80%
+- **Progress**: ~85%
 
 ---
 
@@ -366,7 +367,7 @@
 ---
 
 ## **PHASE 5: POS & Products** 🛒
-> ระยะเวลา: 1-2 วัน | ความสำคัญ: สูง | Full-Stack Feature | Status: 🔄 IN PROGRESS
+> ระยะเวลา: 1-2 วัน | ความสำคัญ: สูง | Full-Stack Feature | Status: 🔄 IN PROGRESS (Backend ✅, Product Management ✅, POS Page ⏳)
 
 ### 5.1 Backend - Products & Sales API ✅
 **ไฟล์**:
@@ -438,26 +439,34 @@
 
 ---
 
-### 5.2 Frontend - Product Management
+### 5.2 Frontend - Product Management ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/ProductsPage.jsx`
-- `frontend/src/components/products/ProductTable.jsx`
-- `frontend/src/components/products/ProductModal.jsx`
+- `frontend/src/pages/admin/settings/products/ProductsPage.jsx` ✅
+- `frontend/src/components/products/ProductModal.jsx` ✅
 
 **Features**:
-- Table แสดงรายการสินค้า
-- CRUD operations
-- จัดหมวดหมู่สินค้า
-- จัดการสต็อก
-- Low stock alert
+- Table แสดงรายการสินค้า (with image column)
+- CRUD operations (Add, Edit, Delete)
+- จัดหมวดหมู่สินค้า (shuttlecock, drink, snack, equipment, other)
+- จัดการสต็อก (with low stock indicators)
+- Low stock alert (visual warnings with AlertTriangle icon)
+- Auto-generate SKU based on category (SHT-xxx, DRK-xxx, SNK-xxx, EQP-xxx, OTH-xxx)
+- Image upload support (max 5MB, JPG/PNG/GIF)
+- Search by name or SKU
+- Filter by category and status
+- Color-coded badges for status and categories
+- Toast notifications for success/error
 
 **Tasks**:
-- [ ] สร้าง ProductsPage
-- [ ] สร้าง ProductTable component
-- [ ] สร้าง ProductModal component
-- [ ] Stock Management UI
-- [ ] Integrate กับ API
-- [ ] เพิ่มใน Settings menu
+- [x] สร้าง ProductsPage (with table, search, filters)
+- [x] สร้าง ProductModal component (with image upload)
+- [x] Auto SKU generation on category selection
+- [x] Stock Management UI (with low stock alerts)
+- [x] Integrate กับ Products API
+- [x] เพิ่มใน Settings menu
+- [x] Tested with Playwright MCP (all features working)
+
+**Status**: ✅ Frontend Product Management พร้อมใช้งาน 100%
 
 ---
 
@@ -838,7 +847,7 @@
 
 - **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100% ✅ **COMPLETED**
 - **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ ✅ **COMPLETED**
-- **Milestone 3** (Week 2 Day 2): POS & Products พร้อมใช้งาน 🔄 **IN PROGRESS** (Backend ✅, Frontend ⏳)
+- **Milestone 3** (Week 2 Day 2): POS & Products พร้อมใช้งาน 🔄 **IN PROGRESS** (Backend ✅, Product Management ✅, POS Page ⏳)
 - **Milestone 4** (Week 2 Day 4): Group Play พร้อมใช้งาน ⏳ **NEXT**
 - **Milestone 5** (Week 2 Day 5): Reports & Analytics พร้อมใช้งาน
 - **Milestone 6** (Week 2 Day 7): Production Ready!
@@ -849,7 +858,7 @@
 
 ### Priority
 - ✅ ~~สูงสุด: Settings, Courts, TimeSlots, Bookings~~ **COMPLETED**
-- 🔴 สูงสุด (กำลังทำ): POS & Products (Backend ✅, Frontend 🔄)
+- 🔴 สูงสุด (กำลังทำ): POS & Products (Backend ✅, Product Management ✅, POS Page ⏳)
 - 🟡 สูง (ถัดไป): Group Play System
 - 🟢 ปานกลาง: Reports & Analytics
 - 🔵 ต่ำ: Enhancement & Polish
