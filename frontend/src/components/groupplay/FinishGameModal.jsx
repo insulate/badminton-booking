@@ -14,7 +14,7 @@ export default function FinishGameModal({ session, gameId, onClose, onSuccess })
 
   const fetchProducts = async () => {
     try {
-      const response = await productsAPI.getAll({ status: 'active' });
+      const response = await productsAPI.getAll({ status: 'active', category: 'shuttlecock' });
       setProducts(response.data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -57,7 +57,7 @@ export default function FinishGameModal({ session, gameId, onClose, onSuccess })
 
   const handleFinishGame = async () => {
     if (selectedItems.length === 0) {
-      toast.error('กรุณาเลือกสินค้าอย่างน้อย 1 รายการ');
+      toast.error('กรุณาเลือกลูกขนไก่อย่างน้อย 1 รายการ');
       return;
     }
 
@@ -88,7 +88,7 @@ export default function FinishGameModal({ session, gameId, onClose, onSuccess })
           <div>
             <h2 className="text-xl font-semibold text-text-primary">จบเกม</h2>
             <p className="text-sm text-text-secondary mt-1">
-              เลือกสินค้าที่ใช้ในเกมนี้
+              เลือกลูกขนไก่ที่ใช้ในเกมนี้ (ถ้ามี)
             </p>
           </div>
           <button
@@ -103,9 +103,16 @@ export default function FinishGameModal({ session, gameId, onClose, onSuccess })
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Product List */}
             <div>
-              <h3 className="font-medium text-text-primary mb-3">สินค้า</h3>
+              <h3 className="font-medium text-text-primary mb-3">ลูกขนไก่</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {products.map(product => (
+                {products.length === 0 ? (
+                  <div className="text-center py-8 text-text-secondary">
+                    ไม่มีลูกขนไก่ในระบบ
+                  </div>
+                ) : (
+                  products
+                    .sort((a, b) => a.price - b.price)
+                    .map(product => (
                   <button
                     key={product._id}
                     onClick={() => addItem(product)}
@@ -122,18 +129,19 @@ export default function FinishGameModal({ session, gameId, onClose, onSuccess })
                       </div>
                     </div>
                   </button>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
             {/* Selected Items */}
             <div>
               <h3 className="font-medium text-text-primary mb-3">
-                สินค้าที่เลือก ({selectedItems.length})
+                ลูกขนไก่ที่เลือก ({selectedItems.length})
               </h3>
               {selectedItems.length === 0 ? (
                 <div className="text-center py-8 text-text-secondary">
-                  ยังไม่ได้เลือกสินค้า
+                  ยังไม่ได้เลือกลูกขนไก่
                 </div>
               ) : (
                 <div className="space-y-3">

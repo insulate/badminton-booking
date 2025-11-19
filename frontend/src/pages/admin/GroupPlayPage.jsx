@@ -5,10 +5,9 @@ import {
   Users,
   Play,
   UserPlus,
-  LogOut,
-  Calendar,
   Plus,
-  RefreshCw
+  RefreshCw,
+  CheckCircle
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -16,7 +15,6 @@ import CreateSessionModal from '../../components/groupplay/CreateSessionModal';
 import PlayerCheckInModal from '../../components/groupplay/PlayerCheckInModal';
 import StartGameModal from '../../components/groupplay/StartGameModal';
 import FinishGameModal from '../../components/groupplay/FinishGameModal';
-import CheckOutModal from '../../components/groupplay/CheckOutModal';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -38,7 +36,6 @@ export default function GroupPlayPage() {
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [showStartGameModal, setShowStartGameModal] = useState(false);
   const [showFinishGameModal, setShowFinishGameModal] = useState(false);
-  const [showCheckOutModal, setShowCheckOutModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
 
   useEffect(() => {
@@ -127,13 +124,6 @@ export default function GroupPlayPage() {
     setShowStartGameModal(true);
   };
 
-  const handleCheckOut = () => {
-    if (!selectedRule) {
-      toast.error('กรุณาเลือกกฎก๊วนสนามก่อน');
-      return;
-    }
-    setShowCheckOutModal(true);
-  };
 
   if (loading) {
     return (
@@ -232,7 +222,7 @@ export default function GroupPlayPage() {
         </div>
         {rules.length === 0 ? (
           <div className="text-center py-8 text-text-secondary">
-            <Calendar size={48} className="mx-auto mb-3 opacity-50" />
+            <Users size={48} className="mx-auto mb-3 opacity-50" />
             <p>ยังไม่มีกฎก๊วนสนาม</p>
             <button
               onClick={handleCreateRule}
@@ -266,7 +256,7 @@ export default function GroupPlayPage() {
       {selectedRule && (
         <>
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <button
               onClick={handleCheckIn}
               className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
@@ -281,29 +271,6 @@ export default function GroupPlayPage() {
             >
               <Play size={20} />
               เริ่มเกม
-            </button>
-            <button
-              onClick={() => {
-                if (currentGames.length > 0) {
-                  // Select first playing game
-                  const game = currentGames[0];
-                  setSelectedGameId({ playerId: game.playerId, gameNumber: game.gameNumber });
-                  setShowFinishGameModal(true);
-                }
-              }}
-              disabled={currentGames.length === 0}
-              className="px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Calendar size={20} />
-              จบเกม
-            </button>
-            <button
-              onClick={handleCheckOut}
-              disabled={checkedInPlayers.length === 0}
-              className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LogOut size={20} />
-              Check-out
             </button>
           </div>
 
@@ -339,7 +306,7 @@ export default function GroupPlayPage() {
                     ฿{selectedRule.entryFee || 0}
                   </p>
                 </div>
-                <Calendar className="text-yellow-500" size={32} />
+                <Users className="text-yellow-500" size={32} />
               </div>
             </div>
           </div>
@@ -405,7 +372,7 @@ export default function GroupPlayPage() {
                     className="border border-green-200 bg-green-50 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <div>
+                      <div className="flex-1">
                         <span className="font-medium text-text-primary">
                           เกมที่ {game.gameNumber}
                         </span>
@@ -415,9 +382,21 @@ export default function GroupPlayPage() {
                           </span>
                         )}
                       </div>
-                      <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
-                        กำลังเล่น
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
+                          กำลังเล่น
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedGameId({ playerId: game.playerId, gameNumber: game.gameNumber });
+                            setShowFinishGameModal(true);
+                          }}
+                          className="px-3 py-1 bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-600 transition-colors flex items-center gap-1"
+                        >
+                          <CheckCircle size={14} />
+                          จบเกม
+                        </button>
+                      </div>
                     </div>
 
                     {/* Players List */}
@@ -497,17 +476,6 @@ export default function GroupPlayPage() {
           }}
           onSuccess={async (sessionId, gameId, gameData) => {
             await groupPlayAPI.finishGame(sessionId, gameId.playerId, gameId.gameNumber, gameData);
-            await refreshRule();
-          }}
-        />
-      )}
-
-      {showCheckOutModal && (
-        <CheckOutModal
-          session={selectedRule}
-          onClose={() => setShowCheckOutModal(false)}
-          onSuccess={async (sessionId, playerPhone) => {
-            await groupPlayAPI.checkOut(sessionId, playerPhone);
             await refreshRule();
           }}
         />
