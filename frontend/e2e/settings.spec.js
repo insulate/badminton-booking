@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 const TEST_USER = {
   admin: {
     username: 'admin',
-    password: 'Admin123!', // Must match backend password validation
+    password: 'admin123', // Must match backend password validation
   },
   regular: {
     username: 'testuser',
