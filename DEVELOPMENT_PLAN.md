@@ -17,13 +17,16 @@
 - [x] **Phase 4: Booking System (Backend + Frontend)**
 - [x] **Phase 5.1: Products & Sales API (Backend)**
 - [x] **Phase 5.2: Product Management (Frontend)**
+- [x] **Phase 5.3: POS System (Frontend)**
+- [x] **Phase 6.2: Players API (Backend)**
+- [x] **Phase 6.3: Player Management (Frontend)**
 
 ### 📊 สถิติ
-- **Backend APIs**: 45/50+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Bookings: 10, Products: 5, Sales: 4, Users: 4, Auth: 2)
-- **Frontend Pages**: 15/17+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Products: 1, POS: 1, Users: 1, Dashboard: 1, Login: 1)
-- **Frontend Components**: 13+ components (Booking: 6, TimeSlots: 2, Products: 2, POS: 4+, Common: 1, Layout: 1, ProtectedRoute: 1)
-- **Database Models**: 8/10 models (User, Setting, Court, TimeSlot, Booking, Counter, Product, Sale)
-- **Progress**: ~85%
+- **Backend APIs**: 51/55+ endpoints (Settings: 8, Courts: 5, TimeSlots: 8, Bookings: 10, Products: 5, Sales: 4, Players: 6, Users: 4, Auth: 2, Categories: 1)
+- **Frontend Pages**: 17/19+ pages (Settings: 6, Courts: 3, Bookings: 2, TimeSlots: 1, Products: 1, POS: 1, Players: 1, Categories: 1, Users: 1, Dashboard: 1, Login: 1)
+- **Frontend Components**: 18+ components (Booking: 6, TimeSlots: 2, Products: 2, POS: 4+, Players: 3, Common: 1, Layout: 1, ProtectedRoute: 1)
+- **Database Models**: 10/11 models (User, Setting, Court, TimeSlot, Booking, Counter, Product, Sale, Player, Category)
+- **Progress**: ~90%
 
 ---
 
@@ -470,11 +473,11 @@
 
 ---
 
-### 5.3 Frontend - POS Page
+### 5.3 Frontend - POS Page ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/POSPage.jsx` (single-file with integrated components)
-- `frontend/src/constants/routes.js`
-- `frontend/src/components/layout/AdminLayout.jsx`
+- `frontend/src/pages/admin/POSPage.jsx` ✅ (single-file with integrated components)
+- `frontend/src/constants/routes.js` ✅
+- `frontend/src/components/layout/AdminLayout.jsx` ✅
 
 **Features**:
 - ✅ Product Grid with category filtering and search
@@ -503,38 +506,18 @@
 
 ---
 
-## **PHASE 6: Group Play System** 👥
-> ระยะเวลา: 2-3 วัน | ความสำคัญ: สูง | Full-Stack Feature | **ต้องทำหลัง POS (Phase 5)**
+## **PHASE 6: Players & Group Play System** 👥
+> ระยะเวลา: 2-3 วัน | ความสำคัญ: สูง | Full-Stack Feature | Status: 🔄 IN PROGRESS (Phase 6.2 Player Management ✅ COMPLETED)
 
 ⚠️ **หมายเหตุ**: Phase นี้ต้องทำหลังจาก Phase 5 (POS) เสร็จแล้ว เพราะต้องใช้ข้อมูลสินค้าในการคำนวณค่าใช้จ่าย
 
-### 6.1 Backend - Players & Group Play API
+### 6.1 Backend - Group Play API
 **ไฟล์**:
 - `backend/models/player.model.js`
 - `backend/models/groupplay.model.js`
 - `backend/routes/players.routes.js`
 - `backend/routes/groupplay.routes.js`
 - `backend/constants/playerLevels.js`
-
-**Player Schema**:
-```javascript
-{
-  name: String,                   // ชื่อผู้เล่น
-  phone: String,                  // เบอร์โทร (unique)
-  password: String,               // Password สำหรับอนาคต
-  level: String,                  // "0"-"10" (optional)
-  levelName: String,              // "เปะ-แปะ", "หน้าบ้าน", "S-", ..., "A" (auto-generated)
-  stats: {
-    totalGames: Number,           // จำนวนเกมรวม (auto-update)
-    totalSpent: Number,           // ค่าใช้จ่ายรวม (auto-update)
-    lastPlayed: Date              // เล่นครั้งล่าสุด (auto-update)
-  },
-  notes: String,                  // หมายเหตุ
-  status: String,                 // "active", "inactive"
-  createdAt: Date,
-  updatedAt: Date
-}
-```
 
 **GroupPlay Schema**:
 ```javascript
@@ -583,17 +566,7 @@
 }
 ```
 
-**API Endpoints**:
-
-**Players API** (6 endpoints):
-- `GET /api/players` - ดูผู้เล่นทั้งหมด (filter by level, search by name/phone)
-- `POST /api/players` - เพิ่มผู้เล่นใหม่ (ชื่อ, เบอร์, ระดับมือ)
-- `GET /api/players/:id` - ดูรายละเอียดผู้เล่น
-- `PUT /api/players/:id` - แก้ไขข้อมูลผู้เล่น (ชื่อ, เบอร์, ระดับมือ, หมายเหตุ)
-- `DELETE /api/players/:id` - ลบผู้เล่น
-- `GET /api/players/stats/:id` - ดูสถิติการเล่น (จำนวนเกม, ค่าใช้จ่ายรวม)
-
-**Group Play API** (8 endpoints):
+**API Endpoints** (8 endpoints):
 - `GET /api/groupplay` - ดู Session ทั้งหมด (filter by date, court, status)
 - `POST /api/groupplay` - สร้าง Session ใหม่ (แบบวันเดียว หรือ recurring)
   - ตรวจสอบว่าสนามว่างหรือไม่
@@ -623,19 +596,13 @@
   - ลบ booking ใน Calendar ด้วย
 
 **Logic**:
-- **Player Management**: CRUD players, auto-generate levelName จาก level
-- **Player Stats**: Auto-update totalGames, totalSpent, lastPlayed หลัง checkout
-- **Level System**: 11 ระดับ (Level 0-10) ตามมาตรฐาน MK Badminton 2025
 - **Check-in**: เลือกจาก Player database หรือสร้างใหม่ (walk-in), copy ข้อมูลระดับมือ
 - **Match Recommendation**: แนะนำการจับคู่ตามระดับมือ (แต่พนักงานตัดสินใจเอง)
 - **Cost Calculation**: คำนวณค่าใช้จ่ายต่อคนในแต่ละเกม (ค่าสินค้า ÷ จำนวนผู้เล่น)
 - **Payment Tracking**: ตรวจสอบว่าผู้เล่นจ่ายค่าเข้าร่วมแล้วหรือยัง (ครั้งเดียวต่อวัน)
-- **Integration**: Booking Calendar (block court) + POS (product selection)
+- **Integration**: Booking Calendar (block court) + POS (product selection) + Player Management
 
 **Tasks**:
-- [ ] สร้าง playerLevels.js constants (11 ระดับ + helper functions)
-- [ ] สร้าง Player Model (schema + validation)
-- [ ] สร้าง Players API routes (6 endpoints)
 - [ ] สร้าง GroupPlay Model (schema ใหม่ตามด้านบน + ref Player)
 - [ ] สร้าง Group Play API routes (8 endpoints)
 - [ ] สร้าง level-based match recommendation logic
@@ -643,41 +610,106 @@
 - [ ] สร้าง player stats auto-update logic
 - [ ] Integrate กับ Booking Calendar API
 - [ ] Integrate กับ POS/Product API
+- [ ] Integrate กับ Players API
 - [ ] ทดสอบ API (Postman/curl)
 - [ ] ทดสอบ calculation scenarios ต่างๆ
 
 ---
 
-### 6.2 Frontend - Player Management
+### 6.2 Backend - Players API ✅
 **ไฟล์**:
-- `frontend/src/pages/admin/settings/PlayersPage.jsx`
-- `frontend/src/components/players/PlayerTable.jsx`
-- `frontend/src/components/players/PlayerModal.jsx`
-- `frontend/src/components/players/PlayerLevelBadge.jsx`
-- `frontend/src/constants/playerLevels.js`
+- `backend/models/player.model.js` ✅
+- `backend/routes/players.routes.js` ✅
+- `backend/constants/playerLevels.js` ✅
 
-**Features**:
-- **Player List**: Table แสดงผู้เล่นทั้งหมด (ชื่อ, เบอร์, ระดับมือ, สถิติ)
-- **Filter by Level**: กรอง/ค้นหาตามระดับมือ (dropdown: Level 0-10)
-- **Search**: ค้นหาด้วยชื่อหรือเบอร์โทร
-- **Add Player**: เพิ่มผู้เล่นใหม่ (ชื่อ, เบอร์, ระดับมือ optional, หมายเหตุ)
-- **Edit Player**: แก้ไขข้อมูล (ชื่อ, เบอร์, ระดับมือ, หมายเหตุ)
-- **Delete Player**: ลบผู้เล่น
-- **View Stats**: ดูสถิติ (จำนวนเกม, ค่าใช้จ่ายรวม, เล่นครั้งล่าสุด)
-- **Level Badge**: แสดง badge สีของระดับมือ (Level 0-10)
+**Player Schema**:
+```javascript
+{
+  name: String,                   // ชื่อผู้เล่น
+  phone: String,                  // เบอร์โทร (unique)
+  password: String,               // Password (hashed with bcryptjs)
+  level: String,                  // "0"-"10" (optional)
+  stats: {
+    totalGames: Number,           // จำนวนเกมรวม (auto-update)
+    totalSpent: Number,           // ค่าใช้จ่ายรวม (auto-update)
+    lastPlayed: Date              // เล่นครั้งล่าสุด (auto-update)
+  },
+  notes: String,                  // หมายเหตุ
+  status: String,                 // "active", "inactive"
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+**API Endpoints** (6 endpoints):
+- `GET /api/players` - ดูผู้เล่นทั้งหมด (filter by level, status; search by name/phone) ✅
+- `POST /api/players` - เพิ่มผู้เล่นใหม่ (ชื่อ, เบอร์, password, ระดับมือ) ✅
+- `GET /api/players/:id` - ดูรายละเอียดผู้เล่น ✅
+- `PUT /api/players/:id` - แก้ไขข้อมูลผู้เล่น (ชื่อ, เบอร์, ระดับมือ, หมายเหตุ, password optional) ✅
+- `DELETE /api/players/:id` - ลบผู้เล่น ✅
+- `GET /api/players/stats/:id` - ดูสถิติการเล่น (จำนวนเกม, ค่าใช้จ่ายรวม) ✅
+
+**Level System**:
+- 11 ระดับ (Level 0-10): เปาะแปะ, หน้าบ้าน, S-, S, S+, A-, A, A+, B, B+, Pro
+- Color coding สำหรับแต่ละระดับ
+- Helper functions: getLevelInfo, getLevelName, getAllLevels, isValidLevel
 
 **Tasks**:
-- [ ] สร้าง playerLevels.js constants (11 ระดับ + colors)
-- [ ] สร้าง PlayersPage (main page)
-- [ ] สร้าง PlayerTable component (with filter & search)
-- [ ] สร้าง PlayerModal component (add/edit form)
-- [ ] สร้าง PlayerLevelBadge component
-- [ ] Integrate กับ Players API
-- [ ] เพิ่มใน Settings menu
+- [x] สร้าง playerLevels.js constants (11 ระดับ + helper functions)
+- [x] สร้าง Player Model (schema + validation)
+- [x] สร้าง Players API routes (6 endpoints)
+- [x] Phone number validation และ unique index
+- [x] Password hashing ด้วย bcryptjs
+- [x] ทดสอบ API
+
+**Status**: ✅ Backend Players API พร้อมใช้งาน 100%
 
 ---
 
-### 6.3 Frontend - Group Play
+### 6.3 Frontend - Player Management ✅
+**ไฟล์**:
+- `frontend/src/pages/admin/PlayersPage.jsx` ✅
+- `frontend/src/components/players/PlayerForm.jsx` ✅
+- `frontend/src/components/players/PlayerLevelBadge.jsx` ✅
+- `frontend/src/components/players/PlayerStatsCard.jsx` ✅
+- `frontend/src/constants/playerLevels.js` ✅
+- `frontend/src/lib/api.js` (playersAPI) ✅
+- `frontend/src/constants/api.js` (PLAYERS endpoints) ✅
+- `frontend/src/constants/routes.js` (ADMIN.PLAYERS) ✅
+
+**Features**:
+- ✅ **Player List**: Table แสดงผู้เล่นทั้งหมด (ชื่อ, เบอร์, ระดับมือ, สถิติ)
+- ✅ **Search**: ค้นหาด้วยชื่อหรือเบอร์โทร (with bug fix: prevent empty string matching)
+- ✅ **Filter**: กรองตามระดับมือ (dropdown: เปาะแปะ-Pro) และสถานะ (ใช้งาน/ระงับ)
+- ✅ **Add Player**: เพิ่มผู้เล่นใหม่ (ชื่อ, เบอร์, password, ระดับมือ optional, หมายเหตุ)
+- ✅ **Edit Player**: แก้ไขข้อมูล (ชื่อ, เบอร์, ระดับมือ, สถานะ, หมายเหตุ, password optional)
+- ✅ **Delete Player**: ลบผู้เล่น (with confirmation)
+- ✅ **View Stats**: แสดงสถิติในตาราง (จำนวนเกม, ค่าใช้จ่ายรวม, เล่นครั้งล่าสุด)
+- ✅ **Level Badge**: แสดง badge สีของระดับมือ (11 ระดับ)
+- ✅ **Form Validation**: Phone number format, password length, required fields
+- ✅ **Toast Notifications**: Success/error messages
+- ✅ **Responsive Table**: Mobile-friendly design
+
+**Tasks**:
+- [x] สร้าง playerLevels.js constants (11 ระดับ + colors + helper functions)
+- [x] สร้าง PlayersPage (main page with table, search, filters)
+- [x] สร้าง PlayerForm component (add/edit modal with validation)
+- [x] สร้าง PlayerLevelBadge component (color-coded badges)
+- [x] สร้าง PlayerStatsCard component (stats display)
+- [x] Integrate กับ Players API (CRUD operations)
+- [x] เพิ่มใน Admin menu (ข้อมูลลูกค้า)
+- [x] เพิ่มใน App routes (/admin/players)
+- [x] แก้บั๊กฟังก์ชันค้นหา (empty string matching)
+- [x] อัพเดตชื่อระดับมือ: "เปะ-แปะ" → "เปาะแปะ"
+- [x] ทดสอบการใช้งานครบทุกฟีเจอร์
+
+**Status**: ✅ Frontend Player Management พร้อมใช้งาน 100%
+
+**🎯 Milestone**: Player Management System พร้อมใช้งานครบ 100% ✅
+
+---
+
+### 6.4 Frontend - Group Play
 **ไฟล์**:
 - `frontend/src/pages/admin/GroupPlayPage.jsx`
 - `frontend/src/components/groupplay/SessionManager.jsx`
@@ -758,6 +790,8 @@
 - [ ] ทดสอบ flow ทั้งหมด (check-in → start game → finish → checkout)
 
 **🎯 Milestone**: Group Play System พร้อมใช้งานครบ 100% (รองรับ player database, level system, recurring sessions, POS integration, cost calculation)
+
+**⚠️ Note**: ต้องทำ Phase 6.1 (Group Play Backend) และ 6.4 (Group Play Frontend) ต่อไป
 
 ---
 
@@ -849,8 +883,9 @@
 
 - **Milestone 1** (Day 3): Settings, Courts, TimeSlots พร้อมใช้งาน 100% ✅ **COMPLETED**
 - **Milestone 2** (Day 7): Booking System ใช้งานได้เต็มรูปแบบ ✅ **COMPLETED**
-- **Milestone 3** (Week 2 Day 2): POS & Products พร้อมใช้งาน 🔄 **IN PROGRESS** (Backend ✅, Product Management ✅, POS Page ⏳)
-- **Milestone 4** (Week 2 Day 4): Group Play พร้อมใช้งาน ⏳ **NEXT**
+- **Milestone 3** (Week 2 Day 2): POS & Products พร้อมใช้งาน ✅ **COMPLETED** (Backend ✅, Product Management ✅, POS Page ✅)
+- **Milestone 3.5** (Week 2 Day 3): Player Management พร้อมใช้งาน ✅ **COMPLETED** (Backend ✅, Frontend ✅)
+- **Milestone 4** (Week 2 Day 4): Group Play พร้อมใช้งาน 🔄 **IN PROGRESS** (Players ✅, Group Play ⏳ NEXT)
 - **Milestone 5** (Week 2 Day 5): Reports & Analytics พร้อมใช้งาน
 - **Milestone 6** (Week 2 Day 7): Production Ready!
 
@@ -860,8 +895,9 @@
 
 ### Priority
 - ✅ ~~สูงสุด: Settings, Courts, TimeSlots, Bookings~~ **COMPLETED**
-- 🔴 สูงสุด (กำลังทำ): POS & Products (Backend ✅, Product Management ✅, POS Page ⏳)
-- 🟡 สูง (ถัดไป): Group Play System
+- ✅ ~~สูงสุด: POS & Products~~ **COMPLETED** (Backend ✅, Product Management ✅, POS Page ✅)
+- ✅ ~~สูง: Player Management~~ **COMPLETED** (Backend ✅, Frontend ✅)
+- 🔴 สูง (กำลังทำ): Group Play System (Players ✅, Group Play ⏳ NEXT)
 - 🟢 ปานกลาง: Reports & Analytics
 - 🔵 ต่ำ: Enhancement & Polish
 
