@@ -17,8 +17,8 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: false,
   // Skip failed requests
   skipFailedRequests: false,
-  // Skip rate limiting in test environment
-  skip: () => process.env.NODE_ENV === 'test',
+  // Skip rate limiting in test and development environments
+  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -34,8 +34,8 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting in test environment
-  skip: () => process.env.NODE_ENV === 'test',
+  // Skip rate limiting in test and development environments
+  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -51,8 +51,8 @@ const strictLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting in test environment
-  skip: () => process.env.NODE_ENV === 'test',
+  // Skip rate limiting in test and development environments
+  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 module.exports = {

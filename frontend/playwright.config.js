@@ -21,8 +21,10 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // Run both frontend and backend using root package.json script
+    command: 'cd .. && npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
 });
