@@ -2,6 +2,16 @@ const mongoose = require('mongoose');
 const Product = require('../models/product.model');
 require('dotenv').config();
 
+// Helper function to create SVG placeholder as data URL
+const createPlaceholder = (color, text) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+    <rect width="400" height="400" fill="${color}"/>
+    <text x="50%" y="50%" font-size="32" font-family="Arial" fill="white" text-anchor="middle" dominant-baseline="middle">${text}</text>
+  </svg>`;
+  const base64 = Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
+};
+
 const products = [
   // Shuttlecocks
   {
@@ -12,6 +22,7 @@ const products = [
     stock: 50,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#4A90E2', 'Yonex AS-50'),
   },
   {
     sku: 'SHT002',
@@ -21,6 +32,7 @@ const products = [
     stock: 30,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#E24A4A', 'Victor Master'),
   },
   {
     sku: 'SHT003',
@@ -30,6 +42,17 @@ const products = [
     stock: 40,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#50C878', 'RSL Classic'),
+  },
+  {
+    sku: 'SHT004',
+    name: 'ลูกขนไก่ VICTOR CHAMPION NO.1',
+    category: 'shuttlecock',
+    price: 80,
+    stock: 60,
+    lowStockAlert: 15,
+    status: 'active',
+    imageUrl: createPlaceholder('#E24A4A', 'VICTOR CHAMPION'),
   },
 
   // Beverages
@@ -41,6 +64,7 @@ const products = [
     stock: 100,
     lowStockAlert: 20,
     status: 'active',
+    imageUrl: createPlaceholder('#3498DB', 'Water'),
   },
   {
     sku: 'BEV002',
@@ -50,6 +74,7 @@ const products = [
     stock: 80,
     lowStockAlert: 15,
     status: 'active',
+    imageUrl: createPlaceholder('#E74C3C', 'Red Bull'),
   },
   {
     sku: 'BEV003',
@@ -59,6 +84,7 @@ const products = [
     stock: 60,
     lowStockAlert: 15,
     status: 'active',
+    imageUrl: createPlaceholder('#3498DB', 'Pocari'),
   },
   {
     sku: 'BEV004',
@@ -68,6 +94,7 @@ const products = [
     stock: 50,
     lowStockAlert: 15,
     status: 'active',
+    imageUrl: createPlaceholder('#F39C12', 'Juice'),
   },
   {
     sku: 'BEV005',
@@ -77,6 +104,7 @@ const products = [
     stock: 40,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#6F4E37', 'Coffee'),
   },
 
   // Snacks
@@ -88,6 +116,7 @@ const products = [
     stock: 50,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#F4A460', 'Bread'),
   },
   {
     sku: 'SNK002',
@@ -97,6 +126,7 @@ const products = [
     stock: 60,
     lowStockAlert: 15,
     status: 'active',
+    imageUrl: createPlaceholder('#FFD700', 'Mama'),
   },
   {
     sku: 'SNK003',
@@ -106,6 +136,7 @@ const products = [
     stock: 100,
     lowStockAlert: 20,
     status: 'active',
+    imageUrl: createPlaceholder('#FF69B4', 'Candy'),
   },
   {
     sku: 'SNK004',
@@ -115,6 +146,7 @@ const products = [
     stock: 40,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#8B4513', 'Chocolate'),
   },
   {
     sku: 'SNK005',
@@ -124,6 +156,7 @@ const products = [
     stock: 30,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#DDA0DD', 'Cake Bar'),
   },
 
   // Equipment
@@ -135,6 +168,7 @@ const products = [
     stock: 40,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#87CEEB', 'Towel'),
   },
   {
     sku: 'EQP002',
@@ -144,6 +178,7 @@ const products = [
     stock: 25,
     lowStockAlert: 5,
     status: 'active',
+    imageUrl: createPlaceholder('#9370DB', 'Wristband'),
   },
   {
     sku: 'EQP003',
@@ -153,6 +188,7 @@ const products = [
     stock: 35,
     lowStockAlert: 10,
     status: 'active',
+    imageUrl: createPlaceholder('#20B2AA', 'Grip'),
   },
   {
     sku: 'EQP004',
@@ -162,6 +198,7 @@ const products = [
     stock: 20,
     lowStockAlert: 5,
     status: 'active',
+    imageUrl: createPlaceholder('#696969', 'Gloves'),
   },
   {
     sku: 'EQP005',
@@ -171,6 +208,7 @@ const products = [
     stock: 15,
     lowStockAlert: 5,
     status: 'active',
+    imageUrl: createPlaceholder('#4682B4', 'Insole'),
   },
 ];
 
@@ -178,15 +216,27 @@ const seedProducts = async () => {
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/badminton-system');
-    console.log('MongoDB Connected');
+    console.log('✅ MongoDB Connected');
 
     // Clear existing products
     await Product.deleteMany({});
-    console.log('Cleared existing products');
+    console.log('✅ Cleared existing products');
+
+    // Prepare product data with image URLs
+    const productsWithImages = products.map((product) => {
+      if (product.imageUrl) {
+        return {
+          ...product,
+          image: product.imageUrl, // Use URL directly
+          imageUrl: undefined, // Remove imageUrl from final data
+        };
+      }
+      return product;
+    });
 
     // Insert products
-    const createdProducts = await Product.create(products);
-    console.log(`Created ${createdProducts.length} products successfully`);
+    const createdProducts = await Product.create(productsWithImages);
+    console.log(`\n✅ Created ${createdProducts.length} products successfully`);
 
     // Display created products by category
     const categories = ['shuttlecock', 'beverage', 'snack', 'equipment'];
@@ -195,17 +245,20 @@ const seedProducts = async () => {
       const categoryProducts = createdProducts.filter(p => p.category === category);
       console.log(`\n${category.toUpperCase()} (${categoryProducts.length} items):`);
       categoryProducts.forEach((product) => {
-        console.log(`- ${product.sku}: ${product.name} (฿${product.price})`);
+        const imageStatus = product.image ? '🖼️' : '❌';
+        console.log(`${imageStatus} ${product.sku}: ${product.name} (฿${product.price})`);
       });
     });
 
     console.log('\n✅ Product seeding completed!');
     console.log(`\nTotal products: ${createdProducts.length}`);
+    console.log(`Products with images: ${createdProducts.filter(p => p.image).length}`);
     console.log('Categories: Shuttlecock, Beverage, Snack, Equipment');
+    console.log('\n💡 Note: Images are using SVG placeholders as base64 data URLs');
 
     process.exit(0);
   } catch (error) {
-    console.error('Error seeding products:', error);
+    console.error('❌ Error seeding products:', error);
     process.exit(1);
   }
 };

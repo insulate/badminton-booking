@@ -285,11 +285,11 @@ router.patch('/:id/entry-fee/:playerId', async (req, res) => {
  * @route   POST /api/groupplay/:id/game/start
  * @desc    Start a new game with selected players
  * @access  Private
- * @body    playerIds (array of session player _ids), teammates (array), opponents (array)
+ * @body    playerIds (array of session player _ids), courtId, teammates (array), opponents (array)
  */
 router.post('/:id/game/start', async (req, res) => {
   try {
-    const { playerIds, teammates, opponents } = req.body;
+    const { playerIds, courtId, teammates, opponents } = req.body;
 
     if (!playerIds || playerIds.length < 2 || playerIds.length > 4) {
       return res.status(400).json({
@@ -298,11 +298,30 @@ router.post('/:id/game/start', async (req, res) => {
       });
     }
 
+    if (!courtId) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกสนาม',
+      });
+    }
+
     const session = await GroupPlay.findById(req.params.id);
     if (!session) {
       return res.status(404).json({
         success: false,
         message: 'ไม่พบ session',
+      });
+    }
+
+    // Validate court is in session's courts
+    const isValidCourt = session.courts.some(
+      (court) => court._id.toString() === courtId
+    );
+
+    if (!isValidCourt) {
+      return res.status(400).json({
+        success: false,
+        message: 'สนามที่เลือกไม่อยู่ในกฎก๊วนนี้',
       });
     }
 
@@ -319,10 +338,11 @@ router.post('/:id/game/start', async (req, res) => {
     }
 
     // Start game
-    await session.startGame(playerIds, teammates, opponents);
+    await session.startGame(playerIds, courtId, teammates, opponents);
 
     const updatedSession = await GroupPlay.findById(session._id)
-      .populate('players.player', 'name level levelName');
+      .populate('players.player', 'name level levelName')
+      .populate('players.games.court', 'name courtNumber');
 
     res.json({
       success: true,
@@ -333,7 +353,7 @@ router.post('/:id/game/start', async (req, res) => {
     console.error('Error starting game:', error);
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการเริ่มเกม',
+      message: error.message || 'เกิดข้อผิดพลาดในการเริ่มเกม',
       error: error.message,
     });
   }

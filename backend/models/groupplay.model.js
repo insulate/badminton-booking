@@ -26,6 +26,11 @@ const gameSchema = new mongoose.Schema({
     required: true,
     min: [1, 'เบอร์เกมต้องมากกว่า 0'],
   },
+  court: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Court',
+    required: [true, 'กรุณาเลือกสนาม'],
+  },
   teammates: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -269,7 +274,11 @@ groupPlaySchema.methods.markEntryFeePaid = function (playerId) {
 };
 
 // Method to start a new game
-groupPlaySchema.methods.startGame = function (playerIds, teammates = [], opponents = []) {
+groupPlaySchema.methods.startGame = function (playerIds, courtId, teammates = [], opponents = []) {
+  if (!courtId) {
+    throw new Error('กรุณาเลือกสนาม');
+  }
+
   const gameNumber = this.players.reduce((max, p) => Math.max(max, p.games.length), 0) + 1;
 
   playerIds.forEach((playerId) => {
@@ -277,6 +286,7 @@ groupPlaySchema.methods.startGame = function (playerIds, teammates = [], opponen
     if (player) {
       player.games.push({
         gameNumber,
+        court: courtId,
         teammates: teammates.filter((id) => id !== playerId.toString()),
         opponents,
         status: 'playing',

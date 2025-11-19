@@ -11,7 +11,7 @@ const categories = [
     isActive: true,
   },
   {
-    name: 'drink',
+    name: 'beverage',
     label: 'เครื่องดื่ม',
     color: '#10B981', // green
     order: 2,
