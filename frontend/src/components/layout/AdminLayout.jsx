@@ -47,7 +47,7 @@ export default function AdminLayout() {
       icon: LayoutDashboard,
     },
     {
-      name: 'จัดการผู้เล่น',
+      name: 'ข้อมูลลูกค้า',
       path: ROUTES.ADMIN.PLAYERS,
       icon: UserCircle2,
     },

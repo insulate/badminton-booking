@@ -153,7 +153,7 @@ export default function PlayersPage() {
               <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">จัดการผู้เล่น</h1>
+              <h1 className="text-2xl font-bold text-gray-900">ข้อมูลลูกค้า</h1>
               <p className="text-sm text-gray-500">
                 ทั้งหมด {filteredPlayers.length} คน
                 {searchTerm && ` (กรองจาก ${players.length} คน)`}
