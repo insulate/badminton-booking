@@ -101,6 +101,16 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/categories/${id}`,
     DELETE: (id) => `/categories/${id}`,
   },
+
+  // Players Management (Admin)
+  PLAYERS: {
+    LIST: '/players',
+    GET: (id) => `/players/${id}`,
+    STATS: (id) => `/players/stats/${id}`,
+    CREATE: '/players',
+    UPDATE: (id) => `/players/${id}`,
+    DELETE: (id) => `/players/${id}`,
+  },
 };
 
 export default API_ENDPOINTS;

@@ -6,6 +6,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import PlayersPage from './pages/admin/PlayersPage';
 
 // Settings Pages
 import VenueSettingsPage from './pages/admin/settings/VenueSettingsPage';
@@ -80,6 +81,7 @@ function App() {
           <Route index element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
+          <Route path="players" element={<PlayersPage />} />
 
           {/* Booking Routes */}
           <Route path="booking" element={<BookingPage />} />

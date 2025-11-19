@@ -24,6 +24,7 @@ import {
   Package,
   ShoppingCart,
   Tag,
+  UserCircle2,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -44,6 +45,11 @@ export default function AdminLayout() {
       name: 'Dashboard',
       path: ROUTES.ADMIN.DASHBOARD,
       icon: LayoutDashboard,
+    },
+    {
+      name: 'จัดการผู้เล่น',
+      path: ROUTES.ADMIN.PLAYERS,
+      icon: UserCircle2,
     },
     {
       name: 'การจอง',

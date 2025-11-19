@@ -364,4 +364,37 @@ export const categoriesAPI = {
   },
 };
 
+// Players API (Admin only)
+export const playersAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.PLAYERS.LIST, { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.PLAYERS.GET(id));
+    return response.data;
+  },
+
+  getStats: async (id) => {
+    const response = await api.get(API_ENDPOINTS.PLAYERS.STATS(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.PLAYERS.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.PLAYERS.UPDATE(id), data);
+    return response.data;
+  },
+
+  delete: async (id) => {
+    const response = await api.delete(API_ENDPOINTS.PLAYERS.DELETE(id));
+    return response.data;
+  },
+};
+
 export default api;
