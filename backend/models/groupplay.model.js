@@ -316,21 +316,42 @@ groupPlaySchema.methods.finishGame = function (playerId, gameNumber, items) {
   // Calculate total items cost
   const totalItemsCost = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  // Find all players who have this game (by gameNumber and status = playing)
+  const playersInGame = [];
+  this.players.forEach(p => {
+    const playerGame = p.games.find(g => g.gameNumber === gameNumber && g.status === 'playing');
+    if (playerGame) {
+      playersInGame.push(p);
+    }
+  });
+
+  if (playersInGame.length === 0) {
+    throw new Error('ไม่พบผู้เล่นในเกมนี้');
+  }
+
   // Get total number of players in this game
-  const totalPlayers = 1 + game.teammates.length + game.opponents.length;
+  const totalPlayers = playersInGame.length;
 
   // Calculate cost per player
   const costPerPlayer = totalItemsCost / totalPlayers;
 
-  // Update game
-  game.items = items;
-  game.totalItemsCost = totalItemsCost;
-  game.costPerPlayer = costPerPlayer;
-  game.status = 'finished';
-  game.endTime = new Date();
+  const endTime = new Date();
 
-  // Update player total cost
-  player.totalCost += costPerPlayer;
+  // Update all players in this game
+  playersInGame.forEach(p => {
+    const playerGame = p.games.find(g => g.gameNumber === gameNumber && g.status === 'playing');
+    if (playerGame) {
+      // Update game details
+      playerGame.items = items;
+      playerGame.totalItemsCost = totalItemsCost;
+      playerGame.costPerPlayer = costPerPlayer;
+      playerGame.status = 'finished';
+      playerGame.endTime = endTime;
+
+      // Update player total cost
+      p.totalCost += costPerPlayer;
+    }
+  });
 
   return this.save();
 };
