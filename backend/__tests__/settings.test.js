@@ -1,4 +1,5 @@
 // Set test environment before any imports
+process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI = process.env.MONGODB_TEST_URI || 'mongodb://admin:admin123@localhost:27017/badminton_test?authSource=admin';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'badminton_secret_key_for_development_only_change_in_production';
 
@@ -38,7 +39,7 @@ describe('Settings API Tests', () => {
     // Create admin user
     adminUser = await User.create({
       username: 'admin-test',
-      password: 'admin123',
+      password: 'Admin123!',
       name: 'Admin Test User',
       role: 'admin',
     });
@@ -46,7 +47,7 @@ describe('Settings API Tests', () => {
     // Create regular user
     regularUser = await User.create({
       username: 'user-test',
-      password: 'user123',
+      password: 'User123!',
       name: 'Regular Test User',
       role: 'user',
     });

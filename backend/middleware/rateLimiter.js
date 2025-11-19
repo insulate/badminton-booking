@@ -17,6 +17,8 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: false,
   // Skip failed requests
   skipFailedRequests: false,
+  // Skip rate limiting in test environment
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 /**
@@ -32,6 +34,8 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting in test environment
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 /**
@@ -47,6 +51,8 @@ const strictLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting in test environment
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 module.exports = {
