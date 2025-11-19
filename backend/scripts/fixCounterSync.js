@@ -13,10 +13,7 @@ async function fixCounterSync() {
   try {
     // Connect to database
     const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:admin123@localhost:27017/badminton_db?authSource=admin';
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
     // Get today's date formatted as YYYYMMDD

@@ -46,7 +46,7 @@ const courtSchema = new mongoose.Schema(
 );
 
 // Index for better query performance
-courtSchema.index({ courtNumber: 1 });
+// courtNumber already has unique index from schema definition
 courtSchema.index({ status: 1 });
 courtSchema.index({ type: 1 });
 courtSchema.index({ deletedAt: 1 });

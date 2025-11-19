@@ -106,7 +106,7 @@ const bookingSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
-bookingSchema.index({ bookingCode: 1 });
+// bookingCode already has unique index from schema definition
 bookingSchema.index({ date: 1, court: 1 });
 bookingSchema.index({ 'customer.phone': 1 });
 bookingSchema.index({ bookingStatus: 1 });

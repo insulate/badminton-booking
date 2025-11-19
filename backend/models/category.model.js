@@ -36,7 +36,7 @@ const categorySchema = new mongoose.Schema(
 );
 
 // Index for faster queries
-categorySchema.index({ name: 1 });
+// name already has unique index from schema definition
 categorySchema.index({ isActive: 1 });
 
 const Category = mongoose.model('Category', categorySchema);

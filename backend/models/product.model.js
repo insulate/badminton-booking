@@ -52,8 +52,8 @@ const productSchema = new mongoose.Schema(
 );
 
 // Index for faster queries
+// sku already has unique index from schema definition
 productSchema.index({ category: 1, status: 1 });
-productSchema.index({ sku: 1 });
 
 // Virtual for checking if stock is low
 productSchema.virtual('isLowStock').get(function () {

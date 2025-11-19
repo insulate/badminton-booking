@@ -73,7 +73,7 @@ const saleSchema = new mongoose.Schema(
 );
 
 // Index for faster queries
-saleSchema.index({ saleCode: 1 });
+// saleCode already has unique index from schema definition
 saleSchema.index({ createdAt: -1 });
 saleSchema.index({ relatedBooking: 1 });
 
