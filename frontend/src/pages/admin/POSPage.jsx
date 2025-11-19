@@ -151,9 +151,9 @@ const POSPage = () => {
           {/* Products Section */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              {/* Search and Filter */}
-              <div className="flex gap-4 mb-6">
-                <div className="flex-1 relative">
+              {/* Search */}
+              <div className="mb-4">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
@@ -163,18 +163,70 @@ const POSPage = () => {
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              </div>
+
+              {/* Category Filter Buttons */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <button
+                  onClick={() => setCategoryFilter('')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === ''
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  <option value="">ทุกหมวดหมู่</option>
-                  <option value="shuttlecock">ลูกแบด</option>
-                  <option value="drink">เครื่องดื่ม</option>
-                  <option value="snack">ขนม</option>
-                  <option value="equipment">อุปกรณ์</option>
-                  <option value="other">อื่นๆ</option>
-                </select>
+                  ทั้งหมด
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('shuttlecock')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === 'shuttlecock'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                  }`}
+                >
+                  ลูกแบด
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('drink')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === 'drink'
+                      ? 'bg-green-600 text-white shadow-md'
+                      : 'bg-green-100 text-green-800 hover:bg-green-200'
+                  }`}
+                >
+                  เครื่องดื่ม
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('snack')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === 'snack'
+                      ? 'bg-yellow-600 text-white shadow-md'
+                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                  }`}
+                >
+                  ขนม
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('equipment')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === 'equipment'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                  }`}
+                >
+                  อุปกรณ์
+                </button>
+                <button
+                  onClick={() => setCategoryFilter('other')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    categoryFilter === 'other'
+                      ? 'bg-gray-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  อื่นๆ
+                </button>
               </div>
 
               {/* Product Grid */}
