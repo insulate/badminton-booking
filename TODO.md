@@ -387,73 +387,84 @@
 
 ---
 
-## ⚙️ Sprint 6: Admin Settings (ตั้งค่าระบบ)
-> **เป้าหมาย:** Admin จัดการสนาม ช่วงเวลา ราคา สินค้า ได้เอง
+## ⚙️ Sprint 6: Admin Settings & Player Management (ตั้งค่าระบบ)
+> **เป้าหมาย:** Admin จัดการสนาม ช่วงเวลา ราคา สินค้า และผู้เล่นได้เอง
 
-### Backend Tasks
-- [ ] อัพเดท Court Routes (เพิ่ม CRUD)
+### Phase 6.1: Settings Pages
+- [x] อัพเดท Court Routes (เพิ่ม CRUD) ✅
   - POST `/` - เพิ่มสนาม (Admin)
   - PUT `/:id` - แก้ไขสนาม
   - DELETE `/:id` - ลบสนาม
   - PATCH `/:id/status` - เปลี่ยนสถานะ
 
-- [ ] อัพเดท TimeSlot Routes (เพิ่ม CRUD)
+- [x] อัพเดท TimeSlot Routes (เพิ่ม CRUD) ✅
   - POST `/` - เพิ่มช่วงเวลา
   - PUT `/:id` - แก้ไขราคา
   - DELETE `/:id` - ลบช่วงเวลา
 
-- [ ] สร้าง Setting Routes `/api/settings`
+- [x] สร้าง Setting Routes `/api/settings` ✅
   - GET `/` - ดูการตั้งค่า
   - PUT `/` - อัพเดทการตั้งค่า
   - PATCH `/venue` - อัพเดทข้อมูลสนาม
   - PATCH `/operating` - อัพเดทเวลาทำการ
 
-- [ ] Role-based Access Control
+- [x] Role-based Access Control ✅
   - เฉพาะ Admin เท่านั้น
 
-### Frontend Tasks
-- [ ] สร้าง Setting Service
-  - services/settingService.js
+- [x] Frontend: Admin Settings Pages ✅
+  - VenueSettingsPage - ข้อมูลสนาม
+  - OperatingHoursPage - เวลาทำการ
+  - BookingSettingsPage - การตั้งค่าการจอง
+  - PaymentSettingsPage - วิธีการชำระเงิน
+  - GeneralSettingsPage - การตั้งค่าทั่วไป
+  - CourtsPage - จัดการสนาม (CRUD)
+  - TimeSlotsPage - ช่วงเวลาและราคา
+  - ProductsPage - จัดการสินค้า
+  - CategoryManagementPage - จัดการหมวดหมู่
 
-- [ ] สร้าง Components
-  - components/Table.jsx
-  - components/Modal.jsx
-  - components/Input.jsx
-  - components/Select.jsx
-  - components/Button.jsx
+### Phase 6.2: Player Management (✅ เสร็จแล้ว)
+- [x] สร้าง Player Model ✅
+  - name, phone, level, password, stats, notes, status
+  - Phone number validation และ unique index
+  - Password hashing ด้วย bcryptjs
+  - Stats tracking (totalGames, totalSpent, lastPlayed)
 
-- [ ] สร้าง Admin Settings Page (Tabs)
-  - pages/AdminSettings.jsx
+- [x] สร้าง Player Routes `/api/players` ✅
+  - GET `/` - ดูผู้เล่นทั้งหมด (พร้อม filter: level, status)
+  - GET `/:id` - ดูข้อมูลผู้เล่น
+  - GET `/stats/:id` - ดูสถิติผู้เล่น
+  - POST `/` - เพิ่มผู้เล่นใหม่
+  - PUT `/:id` - แก้ไขข้อมูลผู้เล่น
+  - DELETE `/:id` - ลบผู้เล่น
 
-  - **Tab 1: จัดการสนาม**
-    - ตารางแสดงสนาม
-    - Modal เพิ่ม/แก้ไข/ลบ
+- [x] Frontend: Players Management UI ✅
+  - PlayersPage - หน้าจัดการผู้เล่น
+    - ✅ ตารางแสดงผู้เล่นพร้อม stats
+    - ✅ ค้นหาด้วยชื่อและเบอร์โทร (แก้บั๊กแล้ว)
+    - ✅ กรองตามระดับมือและสถานะ
+    - ✅ CRUD operations (เพิ่ม/แก้ไข/ลบ)
+  - PlayerForm - ฟอร์มเพิ่ม/แก้ไขผู้เล่น
+  - PlayerLevelBadge - Badge แสดงระดับมือ
+  - PlayerStatsCard - Card แสดงสถิติ
 
-  - **Tab 2: ช่วงเวลา & ราคา**
-    - ตารางช่วงเวลา
-    - ตั้งราคา (ปกติ/สมาชิก/Walk-in)
-    - กำหนด Peak Hour
+- [x] Player Level System ✅
+  - 11 ระดับ: เปาะแปะ, หน้าบ้าน, S-, S, S+, A-, A, A+, B, B+, Pro
+  - Color coding สำหรับแต่ละระดับ
+  - Shared constants (frontend + backend)
 
-  - **Tab 3: ข้อมูลสนาม**
-    - ฟอร์มแก้ไขข้อมูล
-    - เวลาเปิด-ปิด
-    - วันทำการ
-
-  - **Tab 4: จัดการสินค้า**
-    - ตารางสินค้า
-    - Modal เพิ่ม/แก้ไข/ลบ
-    - จัดการสต็อก
-
-- [ ] อัพเดท Routing
-  - `/admin` -> AdminSettings
+- [x] Bug Fixes ✅
+  - แก้ไขบั๊กฟังก์ชันค้นหา: ป้องกัน empty string matching ทุก phone number
+  - อัพเดตชื่อระดับมือจาก "เปะ-แปะ" เป็น "เปาะแปะ"
 
 ### Testing Sprint 6
-- [ ] ทดสอบเพิ่ม/แก้ไข/ลบ สนาม
-- [ ] ทดสอบตั้งราคาช่วงเวลา
-- [ ] ทดสอบแก้ไขข้อมูลสนาม
-- [ ] ทดสอบจัดการสินค้า
+- [x] ทดสอบเพิ่ม/แก้ไข/ลบ สนาม ✅
+- [x] ทดสอบตั้งราคาช่วงเวลา ✅
+- [x] ทดสอบแก้ไขข้อมูลสนาม ✅
+- [x] ทดสอบจัดการสินค้า ✅
+- [x] ทดสอบจัดการผู้เล่น (CRUD) ✅
+- [x] ทดสอบค้นหาและกรองผู้เล่น ✅
 
-**Progress:** 0% | **Demo:** Admin ตั้งค่าระบบได้ครบ
+**Progress:** 100% ✅ | **Demo:** Admin ตั้งค่าระบบได้ครบ พร้อม Player Management
 
 ---
 
@@ -536,40 +547,47 @@
 | Sprint | Feature | Backend | Frontend | Status |
 |--------|---------|---------|----------|--------|
 | 0 | Project Setup | ✅ 100% | ✅ 100% | ✅ เสร็จ |
-| 1 | Authentication | ✅ 100% | 🔄 25% | 🔄 กำลังทำ |
-| 2 | Dashboard | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
-| 3 | Booking System | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
-| 4 | Group Play | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
-| 5 | POS System | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
-| 6 | Admin Settings | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
+| 1 | Authentication | ✅ 100% | ✅ 100% | ✅ เสร็จ |
+| 2 | Dashboard | ✅ 100% | ✅ 100% | ✅ เสร็จ |
+| 3 | Booking System | ✅ 100% | ✅ 100% | ✅ เสร็จ |
+| 4 | Group Play | ✅ 100% | ✅ 100% | ✅ เสร็จ |
+| 5 | POS System | ✅ 100% | ✅ 100% | ✅ เสร็จ |
+| 6 | Admin Settings + Players | ✅ 100% | ✅ 100% | ✅ เสร็จ |
 | 7 | Reports | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
 | 8 | Deployment | ⏳ 0% | ⏳ 0% | 🔄 รอทำ |
 
-**Overall Progress:** 19% (1.5/8 sprints completed)
+**Overall Progress:** 75% (6/8 sprints completed)
 
-### 🎯 Sprint 1 Progress Details:
-- ✅ Backend: User Model, Auth Middleware, Auth Controllers, Auth Routes
-- ✅ Frontend: Dependencies installed
-- 🔄 Frontend: กำลังติดตั้ง Tailwind CSS
-- ⏳ Frontend: รอสร้าง Login Page
-- ⏸️ MongoDB: รอติดตั้ง (Admin user script พร้อมแล้ว)
+### 🎯 Latest Completed Features:
+- ✅ **Sprint 6 Phase 6.2: Player Management** - เสร็จสมบูรณ์!
+  - Backend: Player Model + Routes (/api/players)
+  - Frontend: PlayersPage with CRUD operations
+  - Search functionality with name and phone
+  - Filter by level and status
+  - Player level system (11 levels)
+  - Bug fix: Search empty string matching
+  - Update level name: "เปะ-แปะ" → "เปาะแปะ"
 
 ---
 
-## 🎯 Current Sprint: Sprint 1 (Authentication)
+## 🎯 Current Sprint: Sprint 7 (Reports & Polish)
 **Next Steps:**
-1. ✅ ~~สร้าง User Model (Backend)~~ - เสร็จแล้ว
-2. ✅ ~~สร้าง Auth Routes (Backend)~~ - เสร็จแล้ว
-3. 🔄 ติดตั้ง Tailwind CSS (Frontend) - กำลังทำ
-4. ⏳ สร้าง Login Page (Frontend)
-5. ⏳ สร้าง Layout Components
-6. ⏳ ทดสอบระบบ Login
+1. ⏳ สร้าง Report Routes (Backend)
+2. ⏳ สร้าง Reports Page (Frontend)
+3. ⏳ UI/UX Polish ทั้งระบบ
+4. ⏳ เพิ่ม Loading States และ Error Handling
+5. ⏳ Responsive Design ทุกหน้า
 
-**Backend API Endpoints พร้อมใช้งาน:**
-- POST `/api/auth/login` - เข้าสู่ระบบ (username + password)
-- GET `/api/auth/profile` - ดูข้อมูลผู้ใช้ (ต้อง JWT token)
-- PUT `/api/auth/profile` - อัพเดทข้อมูล
-- POST `/api/auth/change-password` - เปลี่ยนรหัสผ่าน
+**API Endpoints พร้อมใช้งาน:**
+- Authentication: POST `/api/auth/login`, GET `/api/auth/profile`
+- Dashboard: GET `/api/dashboard/stats`, `/revenue/:period`, `/courts/status`
+- Bookings: GET/POST `/api/bookings`, PATCH `/:id/cancel`
+- Courts: GET `/api/courts`, POST/PUT/DELETE `/api/courts`
+- TimeSlots: GET `/api/timeslots`, POST/PUT/DELETE `/api/timeslots`
+- Products: GET/POST/PUT/DELETE `/api/products`
+- Sales: GET/POST `/api/sales`
+- Players: GET/POST/PUT/DELETE `/api/players`
+- Settings: GET/PATCH `/api/settings`
 
 ---
 
@@ -587,7 +605,8 @@
 
 ---
 
-**Last Updated:** 2024-11-12
-**Version:** 1.0.0
+**Last Updated:** 2025-01-19
+**Version:** 1.6.0
 **Total Sprints:** 8
-**Estimated Timeline:** 8-10 สัปดาห์
+**Current Progress:** 75% (6/8 sprints completed)
+**Latest Feature:** Player Management with Search & CRUD Operations
