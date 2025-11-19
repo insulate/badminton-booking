@@ -139,22 +139,25 @@ const groupPlaySchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, 'ชื่อ session ต้องไม่เกิน 100 ตัวอักษร'],
     },
-    court: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Court',
-      required: [true, 'กรุณาเลือกสนาม'],
-    },
-    date: {
-      type: Date,
-      required: [true, 'กรุณาเลือกวันที่'],
-    },
+    courts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Court',
+      },
+    ],
     daysOfWeek: {
       type: [String],
       enum: {
         values: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
         message: 'วันในสัปดาห์ไม่ถูกต้อง',
       },
-      default: [],
+      required: [true, 'กรุณาเลือกวันในสัปดาห์'],
+      validate: {
+        validator: function(v) {
+          return v && v.length > 0;
+        },
+        message: 'กรุณาเลือกอย่างน้อย 1 วัน'
+      }
     },
     startTime: {
       type: String,
@@ -182,6 +185,10 @@ const groupPlaySchema = new mongoose.Schema(
       min: [0, 'ค่าเข้าร่วมต้องไม่ติดลบ'],
     },
     players: [sessionPlayerSchema],
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     status: {
       type: String,
       enum: {
@@ -189,10 +196,6 @@ const groupPlaySchema = new mongoose.Schema(
         message: 'สถานะต้องเป็น scheduled, active, หรือ completed',
       },
       default: 'scheduled',
-    },
-    recurring: {
-      type: Boolean,
-      default: false,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -206,9 +209,10 @@ const groupPlaySchema = new mongoose.Schema(
 );
 
 // Indexes
-groupPlaySchema.index({ date: 1, court: 1 });
+groupPlaySchema.index({ daysOfWeek: 1 });
+groupPlaySchema.index({ courts: 1 });
+groupPlaySchema.index({ isActive: 1 });
 groupPlaySchema.index({ status: 1 });
-groupPlaySchema.index({ court: 1 });
 groupPlaySchema.index({ createdBy: 1 });
 groupPlaySchema.index({ 'players.player': 1 });
 
@@ -249,7 +253,7 @@ groupPlaySchema.methods.markEntryFeePaid = function (playerId) {
 };
 
 // Method to start a new game
-groupPlaySchema.methods.startGame = function (playerIds, teammates, opponents) {
+groupPlaySchema.methods.startGame = function (playerIds, teammates = [], opponents = []) {
   const gameNumber = this.players.reduce((max, p) => Math.max(max, p.games.length), 0) + 1;
 
   playerIds.forEach((playerId) => {
@@ -340,25 +344,37 @@ groupPlaySchema.methods.getSessionSummary = function () {
   };
 };
 
-// Static method to find sessions by date range
-groupPlaySchema.statics.findByDateRange = function (startDate, endDate) {
-  return this.find({
-    date: {
-      $gte: startDate,
-      $lte: endDate,
-    },
-  })
-    .populate('court')
+// Static method to find active group play rules
+groupPlaySchema.statics.findActiveRules = function () {
+  return this.find({ isActive: true })
+    .populate('courts')
     .populate('createdBy', 'username')
-    .sort({ date: 1, startTime: 1 });
+    .sort({ sessionName: 1, startTime: 1 });
 };
 
-// Static method to find active sessions
-groupPlaySchema.statics.findActive = function () {
-  return this.find({ status: { $in: ['scheduled', 'active'] } })
-    .populate('court')
-    .populate('createdBy', 'username')
-    .sort({ date: 1, startTime: 1 });
+// Static method to check if a time slot is blocked by group play
+groupPlaySchema.statics.isTimeSlotBlocked = async function (courtId, dayOfWeek, time) {
+  const rules = await this.find({
+    isActive: true,
+    courts: courtId,
+    daysOfWeek: dayOfWeek,
+  });
+
+  for (const rule of rules) {
+    const [startHour, startMin] = rule.startTime.split(':').map(Number);
+    const [endHour, endMin] = rule.endTime.split(':').map(Number);
+    const [checkHour, checkMin] = time.split(':').map(Number);
+
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const checkMinutes = checkHour * 60 + checkMin;
+
+    if (checkMinutes >= startMinutes && checkMinutes < endMinutes) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 // Virtual for total revenue

@@ -397,4 +397,47 @@ export const playersAPI = {
   },
 };
 
+// Group Play API (Admin only)
+export const groupPlayAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.GROUPPLAY.LIST, { params });
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.GROUPPLAY.GET(id));
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post(API_ENDPOINTS.GROUPPLAY.CREATE, data);
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.patch(API_ENDPOINTS.GROUPPLAY.UPDATE(id), data);
+    return response.data;
+  },
+
+  checkIn: async (id, playerData) => {
+    const response = await api.post(API_ENDPOINTS.GROUPPLAY.CHECKIN(id), playerData);
+    return response.data;
+  },
+
+  startGame: async (id, gameData) => {
+    const response = await api.post(API_ENDPOINTS.GROUPPLAY.START_GAME(id), gameData);
+    return response.data;
+  },
+
+  finishGame: async (id, playerId, gameNumber, gameData) => {
+    const response = await api.patch(API_ENDPOINTS.GROUPPLAY.FINISH_GAME(id, playerId, gameNumber), gameData);
+    return response.data;
+  },
+
+  checkOut: async (id, playerId) => {
+    const response = await api.post(API_ENDPOINTS.GROUPPLAY.CHECKOUT(id, playerId));
+    return response.data;
+  },
+};
+
 export default api;

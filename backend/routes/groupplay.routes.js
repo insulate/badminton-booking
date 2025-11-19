@@ -13,43 +13,35 @@ router.use(protect);
 
 /**
  * @route   GET /api/groupplay
- * @desc    Get all group play sessions with filters
+ * @desc    Get all group play rules with filters
  * @access  Private
- * @query   date, court, status
+ * @query   court, isActive
  */
 router.get('/', async (req, res) => {
   try {
-    const { date, court, status } = req.query;
+    const { court, isActive } = req.query;
 
     // Build query
     const query = {};
 
-    if (date) {
-      const searchDate = new Date(date);
-      query.date = {
-        $gte: new Date(searchDate.setHours(0, 0, 0, 0)),
-        $lte: new Date(searchDate.setHours(23, 59, 59, 999)),
-      };
-    }
-
     if (court) {
-      query.court = court;
+      query.courts = court;
     }
 
-    if (status) {
-      query.status = status;
+    if (isActive !== undefined) {
+      query.isActive = isActive === 'true';
     }
 
-    const sessions = await GroupPlay.find(query)
-      .populate('court', 'name courtNumber')
+    const rules = await GroupPlay.find(query)
+      .populate('courts', 'name courtNumber')
       .populate('createdBy', 'username')
       .populate('players.player', 'name phone level levelName')
-      .sort({ date: 1, startTime: 1 });
+      .sort({ sessionName: 1, startTime: 1 });
 
     res.json({
       success: true,
-      count: sessions.length,
-      data: sessions,
+      count: rules.length,
+      data: rules,
     });
   } catch (error) {
     console.error('Error fetching group play sessions:', error);
@@ -63,90 +55,72 @@ router.get('/', async (req, res) => {
 
 /**
  * @route   POST /api/groupplay
- * @desc    Create a new group play session and block court in calendar
+ * @desc    Create a new group play rule
  * @access  Private
- * @body    sessionName, court, date, startTime, endTime, entryFee, recurring, daysOfWeek
+ * @body    sessionName, courts, daysOfWeek, startTime, endTime, entryFee
  */
 router.post('/', async (req, res) => {
   try {
-    const { sessionName, court, date, startTime, endTime, entryFee, recurring, daysOfWeek } = req.body;
+    const { sessionName, courts, daysOfWeek, startTime, endTime, entryFee } = req.body;
 
-    // Validate court exists
-    const courtDoc = await Court.findById(court);
-    if (!courtDoc) {
-      return res.status(404).json({
-        success: false,
-        message: 'ไม่พบสนามที่เลือก',
-      });
-    }
-
-    // Check court availability
-    // Note: For recurring sessions, we should check multiple dates
-    // For now, we'll check the first date only
-    const sessionDate = new Date(date);
-
-    // Check for conflicts with existing bookings
-    const existingBookings = await Booking.find({
-      court,
-      date: sessionDate,
-      bookingStatus: { $in: ['confirmed', 'checked-in'] },
+    // Debug logging
+    console.log('Creating group play rule with data:', {
+      sessionName,
+      courts,
+      courtsType: typeof courts,
+      courtsIsArray: Array.isArray(courts),
+      daysOfWeek,
+      startTime,
+      endTime,
+      entryFee,
     });
 
-    if (existingBookings.length > 0) {
+    // Validate required fields
+    if (!sessionName || !courts || courts.length === 0 || !daysOfWeek || daysOfWeek.length === 0) {
       return res.status(400).json({
         success: false,
-        message: `สนามถูกจองแล้วในวันที่เลือก`,
+        message: 'กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อ, สนาม, วันในสัปดาห์)',
       });
     }
 
-    // Create group play session
-    const session = await GroupPlay.create({
+    // Validate all courts exist
+    console.log('Validating courts:', courts);
+    const courtDocs = await Court.find({ _id: { $in: courts } });
+    console.log('Found court docs:', courtDocs.length, 'Expected:', courts.length);
+
+    if (courtDocs.length !== courts.length) {
+      console.log('Court validation failed. Requested courts:', courts);
+      console.log('Found courts:', courtDocs.map(c => c._id.toString()));
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบสนามบางสนามที่เลือก',
+      });
+    }
+
+    // Create group play rule
+    const rule = await GroupPlay.create({
       sessionName,
-      court,
-      date: sessionDate,
+      courts,
+      daysOfWeek,
       startTime,
       endTime,
       entryFee: entryFee || 30,
-      recurring: recurring || false,
-      daysOfWeek: recurring ? daysOfWeek : [],
       status: 'scheduled',
+      isActive: true,
       createdBy: req.user.id,
     });
 
-    // Create blocking booking in calendar
-    // This prevents regular bookings from conflicting with group play sessions
-    const booking = await Booking.create({
-      customer: {
-        name: `ก๊วนสนาม - ${sessionName}`,
-        phone: '-',
-      },
-      court,
-      date: sessionDate,
-      timeSlot: null, // Group play uses startTime/endTime instead of timeSlots
-      duration: 1,
-      pricing: {
-        subtotal: 0,
-        total: 0,
-      },
-      paymentStatus: 'paid', // Group play handles payment separately
-      bookingStatus: 'confirmed',
-      notes: `Group Play Session: ${session._id}`,
-    });
-
-    const populatedSession = await GroupPlay.findById(session._id)
-      .populate('court', 'name courtNumber')
+    const populatedRule = await GroupPlay.findById(rule._id)
+      .populate('courts', 'name courtNumber')
       .populate('createdBy', 'username');
 
     res.status(201).json({
       success: true,
-      message: 'สร้าง session สำเร็จ',
-      data: {
-        session: populatedSession,
-        booking: booking,
-      },
+      message: 'สร้างกฎก๊วนสนามสำเร็จ',
+      data: populatedRule,
     });
   } catch (error) {
-    console.error('Error creating group play session:', error);
+    console.error('Error creating group play rule:', error);
 
     // Handle validation errors
     if (error.name === 'ValidationError') {
@@ -160,7 +134,7 @@ router.post('/', async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการสร้าง session',
+      message: 'เกิดข้อผิดพลาดในการสร้างกฎก๊วนสนาม',
       error: error.message,
     });
   }
@@ -174,7 +148,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const session = await GroupPlay.findById(req.params.id)
-      .populate('court', 'name courtNumber')
+      .populate('courts', 'name courtNumber')
       .populate('createdBy', 'username')
       .populate('players.player', 'name phone level levelName')
       .populate('players.games.teammates', 'name level levelName')
@@ -258,7 +232,7 @@ router.post('/:id/checkin', async (req, res) => {
     await session.checkInPlayer(playerData);
 
     const updatedSession = await GroupPlay.findById(session._id)
-      .populate('court', 'name courtNumber')
+      .populate('courts', 'name courtNumber')
       .populate('players.player', 'name phone level levelName');
 
     res.json({
@@ -491,37 +465,73 @@ router.post('/:id/checkout/:playerId', async (req, res) => {
 });
 
 /**
- * @route   DELETE /api/groupplay/:id
- * @desc    Delete a group play session and its associated booking
+ * @route   PATCH /api/groupplay/:id
+ * @desc    Update group play rule (toggle active status or update fields)
  * @access  Private
+ * @body    isActive, sessionName, courts, daysOfWeek, startTime, endTime, entryFee (all optional)
  */
-router.delete('/:id', async (req, res) => {
+router.patch('/:id', async (req, res) => {
   try {
-    const session = await GroupPlay.findById(req.params.id);
-    if (!session) {
+    const rule = await GroupPlay.findById(req.params.id);
+    if (!rule) {
       return res.status(404).json({
         success: false,
-        message: 'ไม่พบ session',
+        message: 'ไม่พบกฎก๊วนสนาม',
       });
     }
 
-    // Delete associated booking (if exists)
-    await Booking.deleteMany({
-      notes: { $regex: `Group Play Session: ${session._id}` },
-    });
+    const { isActive, sessionName, courts, daysOfWeek, startTime, endTime, entryFee } = req.body;
 
-    // Delete session
-    await session.deleteOne();
+    // Validate courts if provided
+    if (courts && courts.length > 0) {
+      const courtDocs = await Court.find({ _id: { $in: courts } });
+      if (courtDocs.length !== courts.length) {
+        return res.status(404).json({
+          success: false,
+          message: 'ไม่พบสนามบางสนามที่เลือก',
+        });
+      }
+      rule.courts = courts;
+    }
+
+    // Update fields if provided
+    if (isActive !== undefined) rule.isActive = isActive;
+    if (sessionName) rule.sessionName = sessionName;
+    if (daysOfWeek && daysOfWeek.length > 0) rule.daysOfWeek = daysOfWeek;
+    if (startTime) rule.startTime = startTime;
+    if (endTime) rule.endTime = endTime;
+    if (entryFee !== undefined) rule.entryFee = entryFee;
+
+    await rule.save({ validateModifiedOnly: true });
+
+    const updatedRule = await GroupPlay.findById(rule._id)
+      .populate('courts', 'name courtNumber')
+      .populate('createdBy', 'username');
 
     res.json({
       success: true,
-      message: 'ลบ session สำเร็จ',
+      message: 'อัปเดตกฎก๊วนสนามสำเร็จ',
+      data: updatedRule,
     });
   } catch (error) {
-    console.error('Error deleting group play session:', error);
+    console.error('Error updating group play rule:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      console.error('Validation errors:', messages);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+        errors: error.errors,
+      });
+    }
+
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการลบ session',
+      message: 'เกิดข้อผิดพลาดในการอัปเดตกฎก๊วนสนาม',
       error: error.message,
     });
   }

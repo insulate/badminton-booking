@@ -111,6 +111,18 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/players/${id}`,
     DELETE: (id) => `/players/${id}`,
   },
+
+  // Group Play Management (Admin)
+  GROUPPLAY: {
+    LIST: '/groupplay',
+    GET: (id) => `/groupplay/${id}`,
+    CREATE: '/groupplay',
+    UPDATE: (id) => `/groupplay/${id}`,
+    CHECKIN: (id) => `/groupplay/${id}/checkin`,
+    START_GAME: (id) => `/groupplay/${id}/game/start`,
+    FINISH_GAME: (id, playerId, gameNumber) => `/groupplay/${id}/game/${playerId}/${gameNumber}/finish`,
+    CHECKOUT: (id, playerId) => `/groupplay/${id}/checkout/${playerId}`,
+  },
 };
 
 export default API_ENDPOINTS;

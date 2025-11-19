@@ -52,6 +52,11 @@ export default function AdminLayout() {
       icon: UserCircle2,
     },
     {
+      name: 'ระบบตีก๊วน',
+      path: ROUTES.ADMIN.GROUPPLAY,
+      icon: Users,
+    },
+    {
       name: 'การจอง',
       icon: CalendarDays,
       children: [

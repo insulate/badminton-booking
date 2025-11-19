@@ -1,6 +1,7 @@
 const Booking = require('../models/booking.model');
 const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
+const GroupPlay = require('../models/groupplay.model');
 
 /**
  * Check if a court is available for booking
@@ -28,6 +29,18 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
     const startTimeSlot = await TimeSlot.findById(timeSlotId);
     if (!startTimeSlot) {
       throw new Error('TimeSlot not found');
+    }
+
+    // Check if time is blocked by Group Play rules
+    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][bookingDate.getDay()];
+    const isBlocked = await GroupPlay.isTimeSlotBlocked(courtId, dayOfWeek, startTimeSlot.startTime);
+
+    if (isBlocked) {
+      return {
+        available: false,
+        conflictingBooking: null,
+        message: 'สนามถูกบล็อกโดยระบบตีก๊วนในช่วงเวลานี้',
+      };
     }
 
     // Get all timeslots for this day type sorted by time

@@ -36,6 +36,9 @@ import POSPage from './pages/admin/POSPage';
 import BookingPage from './pages/admin/BookingPage';
 import BookingsPage from './pages/admin/BookingsPage';
 
+// Group Play Page
+import GroupPlayPage from './pages/admin/GroupPlayPage';
+
 function App() {
   return (
     <Router>
@@ -82,6 +85,9 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="players" element={<PlayersPage />} />
+
+          {/* Group Play Route */}
+          <Route path="groupplay" element={<GroupPlayPage />} />
 
           {/* Booking Routes */}
           <Route path="booking" element={<BookingPage />} />
