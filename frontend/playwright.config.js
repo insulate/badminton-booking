@@ -26,5 +26,8 @@ export default defineConfig({
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    // Wait for both frontend and backend to be ready
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

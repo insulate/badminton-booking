@@ -9,7 +9,8 @@
     "seed:settings": "node seeders/settings.seeder.js",
     "seed:courts": "node seeders/courts.seeder.js",
     "seed:timeslots": "node seeders/timeslots.seeder.js",
-    "seed:all": "node seeders/users.seeder.js && node seeders/settings.seeder.js && node seeders/courts.seeder.js && node seeders/timeslots.seeder.js",
+    "seed:players": "node seeders/players.seeder.js",
+    "seed:all": "node seeders/users.seeder.js && node seeders/settings.seeder.js && node seeders/courts.seeder.js && node seeders/timeslots.seeder.js && node seeders/players.seeder.js",
     "test": "jest --verbose --runInBand",
     "test:watch": "jest --watch"
   },

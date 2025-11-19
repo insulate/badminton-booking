@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:e2e": "playwright test",
+    "test:e2e": "wait-on http://localhost:3000/api http://localhost:5173 && playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"
   },
@@ -34,6 +34,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "vite": "^7.2.2"
+    "vite": "^7.2.2",
+    "wait-on": "^9.0.3"
   }
 }
