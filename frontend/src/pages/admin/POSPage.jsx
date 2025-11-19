@@ -8,30 +8,27 @@ import {
   X,
   DollarSign,
   Package,
-  Coffee,
-  Cookie,
-  Dumbbell,
-  Grid3x3,
-  Zap,
   TrendingUp,
   Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { productsAPI, salesAPI } from '../../lib/api';
+import { productsAPI, salesAPI, categoriesAPI } from '../../lib/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const POSPage = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Fetch products
+  // Fetch products and categories
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -46,6 +43,18 @@ const POSPage = () => {
       toast.error('ไม่สามารถโหลดสินค้าได้');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await categoriesAPI.getAll({ isActive: true });
+      if (response.success) {
+        setCategories(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('ไม่สามารถโหลดหมวดหมู่ได้');
     }
   };
 
@@ -123,27 +132,19 @@ const POSPage = () => {
   const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
 
   // Get category label
-  const getCategoryLabel = (category) => {
-    const labels = {
-      shuttlecock: 'ลูกแบด',
-      drink: 'เครื่องดื่ม',
-      snack: 'ขนม',
-      equipment: 'อุปกรณ์',
-      other: 'อื่นๆ',
-    };
-    return labels[category] || category;
+  const getCategoryLabel = (categoryName) => {
+    const category = categories.find((c) => c.name === categoryName);
+    return category?.label || categoryName;
   };
 
-  // Get category badge color
-  const getCategoryColor = (category) => {
-    const colors = {
-      shuttlecock: 'bg-blue-100 text-blue-800',
-      drink: 'bg-green-100 text-green-800',
-      snack: 'bg-yellow-100 text-yellow-800',
-      equipment: 'bg-purple-100 text-purple-800',
-      other: 'bg-gray-100 text-gray-800',
+  // Get category badge style
+  const getCategoryStyle = (categoryName) => {
+    const category = categories.find((c) => c.name === categoryName);
+    const color = category?.color || '#6B7280';
+    return {
+      backgroundColor: color,
+      color: '#FFFFFF',
     };
-    return colors[category] || colors.other;
   };
 
   return (
@@ -197,70 +198,40 @@ const POSPage = () => {
               <div className="flex flex-wrap gap-2 mb-6">
                 <button
                   onClick={() => setCategoryFilter('')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 ${
                     categoryFilter === ''
                       ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
                   }`}
                 >
-                  <Grid3x3 className="w-4 h-4" />
                   ทั้งหมด
                 </button>
-                <button
-                  onClick={() => setCategoryFilter('shuttlecock')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                    categoryFilter === 'shuttlecock'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 scale-105'
-                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200 hover:scale-105'
-                  }`}
-                >
-                  <Zap className="w-4 h-4" />
-                  ลูกแบด
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('drink')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                    categoryFilter === 'drink'
-                      ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-500/50 scale-105'
-                      : 'bg-green-100 text-green-800 hover:bg-green-200 hover:scale-105'
-                  }`}
-                >
-                  <Coffee className="w-4 h-4" />
-                  เครื่องดื่ม
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('snack')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                    categoryFilter === 'snack'
-                      ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 text-white shadow-lg shadow-yellow-500/50 scale-105'
-                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 hover:scale-105'
-                  }`}
-                >
-                  <Cookie className="w-4 h-4" />
-                  ขนม
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('equipment')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                    categoryFilter === 'equipment'
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50 scale-105'
-                      : 'bg-purple-100 text-purple-800 hover:bg-purple-200 hover:scale-105'
-                  }`}
-                >
-                  <Dumbbell className="w-4 h-4" />
-                  อุปกรณ์
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('other')}
-                  className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                    categoryFilter === 'other'
-                      ? 'bg-gradient-to-r from-gray-600 to-gray-500 text-white shadow-lg shadow-gray-500/50 scale-105'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:scale-105'
-                  }`}
-                >
-                  <Package className="w-4 h-4" />
-                  อื่นๆ
-                </button>
+                {categories.map((category) => {
+                  const isActive = categoryFilter === category.name;
+                  const color = category.color || '#6B7280';
+
+                  return (
+                    <button
+                      key={category._id}
+                      onClick={() => setCategoryFilter(category.name)}
+                      className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105 text-white"
+                      style={
+                        isActive
+                          ? {
+                              backgroundColor: color,
+                              boxShadow: `0 10px 15px -3px ${color}80`,
+                              transform: 'scale(1.05)',
+                            }
+                          : {
+                              backgroundColor: color,
+                              opacity: 0.7,
+                            }
+                      }
+                    >
+                      {category.label}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Product Grid */}
@@ -313,7 +284,10 @@ const POSPage = () => {
                       <div className="font-bold text-sm text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem]">
                         {product.name}
                       </div>
-                      <div className={`text-xs px-2.5 py-1 rounded-full inline-block mb-3 font-medium ${getCategoryColor(product.category)}`}>
+                      <div
+                        className="text-xs px-2.5 py-1 rounded-full inline-block mb-3 font-medium"
+                        style={getCategoryStyle(product.category)}
+                      >
                         {getCategoryLabel(product.category)}
                       </div>
                       <div className="flex justify-between items-center pt-2 border-t border-gray-100">

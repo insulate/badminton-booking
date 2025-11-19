@@ -23,6 +23,7 @@ import {
   ClipboardList,
   Package,
   ShoppingCart,
+  Tag,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -73,6 +74,11 @@ export default function AdminLayout() {
           name: 'จัดการสินค้า',
           path: ROUTES.ADMIN.PRODUCTS,
           icon: Package,
+        },
+        {
+          name: 'จัดการหมวดหมู่',
+          path: ROUTES.ADMIN.CATEGORIES,
+          icon: Tag,
         },
       ],
     },

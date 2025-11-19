@@ -15,6 +15,7 @@ const timeslotsRouter = require('./routes/timeslots.routes');
 const bookingsRouter = require('./routes/bookings.routes');
 const productsRouter = require('./routes/products.routes');
 const salesRouter = require('./routes/sales.routes');
+const categoriesRouter = require('./routes/categories.routes');
 
 const app = express();
 
@@ -77,6 +78,7 @@ app.use('/api/timeslots', timeslotsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/sales', salesRouter);
+app.use('/api/categories', categoriesRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {

@@ -25,6 +25,9 @@ import TimeSlotsPage from './pages/admin/settings/timeslots/TimeSlotsPage';
 // Products Pages
 import ProductsPage from './pages/admin/settings/products/ProductsPage';
 
+// Categories Page
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
+
 // POS Page
 import POSPage from './pages/admin/POSPage';
 
@@ -102,6 +105,9 @@ function App() {
 
           {/* Products Routes */}
           <Route path="settings/products" element={<ProductsPage />} />
+
+          {/* Categories Routes */}
+          <Route path="settings/categories" element={<CategoryManagementPage />} />
         </Route>
 
         {/* Catch all - redirect to dashboard */}

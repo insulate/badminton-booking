@@ -14,6 +14,7 @@ export const ROUTES = {
     DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
     POS: '/admin/pos',
+    CATEGORIES: '/admin/settings/categories',
     COURTS: '/admin/settings/courts',
     COURTS_ADD: '/admin/settings/courts/add',
     COURTS_EDIT: (id) => `/admin/settings/courts/edit/${id}`,
