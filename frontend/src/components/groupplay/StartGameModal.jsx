@@ -10,7 +10,33 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
   const checkedInPlayers = session.players?.filter(p => p.checkedIn && !p.checkedOut) || [];
   const courts = session.courts || [];
 
+  // Get courts that are currently in use
+  const courtsInUse = new Set();
+  session.players?.forEach(p => {
+    p.games?.forEach(g => {
+      if (g.status === 'playing' && g.court) {
+        courtsInUse.add(g.court._id || g.court);
+      }
+    });
+  });
+
+  // Check if a court is available
+  const isCourtAvailable = (courtId) => {
+    return !courtsInUse.has(courtId);
+  };
+
+  // Check if a player is currently playing
+  const isPlayerPlaying = (player) => {
+    return player.games?.some(g => g.status === 'playing') || false;
+  };
+
   const togglePlayer = (player) => {
+    // Don't allow selecting players who are currently playing
+    if (isPlayerPlaying(player)) {
+      toast.error('ผู้เล่นนี้กำลังเล่นอยู่ในสนาม');
+      return;
+    }
+
     if (selectedPlayers.find(p => p.phone === player.phone)) {
       setSelectedPlayers(selectedPlayers.filter(p => p.phone !== player.phone));
     } else {
@@ -69,21 +95,44 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
         <div className="p-6">
           {/* Court Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-text-primary mb-2">
+            <label className="block text-sm font-medium text-text-primary mb-3">
               เลือกสนาม <span className="text-red-500">*</span>
             </label>
-            <select
-              value={selectedCourt}
-              onChange={(e) => setSelectedCourt(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
-            >
-              <option value="">-- เลือกสนาม --</option>
-              {courts.map((court) => (
-                <option key={court._id} value={court._id}>
-                  {court.name} {court.courtNumber ? `(สนาม ${court.courtNumber})` : ''}
-                </option>
-              ))}
-            </select>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {courts.map((court) => {
+                const isSelected = selectedCourt === court._id;
+                const isAvailable = isCourtAvailable(court._id);
+                const courtLabel = court.name || `สนาม ${court.courtNumber}`;
+
+                return (
+                  <button
+                    key={court._id}
+                    type="button"
+                    onClick={() => isAvailable && setSelectedCourt(court._id)}
+                    disabled={!isAvailable}
+                    className={`
+                      px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all
+                      ${isSelected && isAvailable
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : isAvailable
+                        ? 'border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-text-primary'
+                        : 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    <div className="text-center">
+                      <div className="font-semibold">{courtLabel}</div>
+                      {!isAvailable && (
+                        <div className="text-xs text-red-500 mt-1">สนามไม่ว่าง</div>
+                      )}
+                      {isSelected && isAvailable && (
+                        <div className="text-xs text-blue-600 mt-1">✓ เลือกแล้ว</div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Player Selection */}
@@ -93,14 +142,26 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {checkedInPlayers.map((player, index) => {
+              {checkedInPlayers
+                .sort((a, b) => {
+                  // Sort: available players first, then playing players
+                  const aPlaying = isPlayerPlaying(a);
+                  const bPlaying = isPlayerPlaying(b);
+                  if (aPlaying === bPlaying) return 0;
+                  return aPlaying ? 1 : -1;
+                })
+                .map((player, index) => {
                 const isSelected = selectedPlayers.find(p => p.phone === player.phone);
+                const isPlaying = isPlayerPlaying(player);
                 return (
                   <button
                     key={index}
                     onClick={() => togglePlayer(player)}
+                    disabled={isPlaying}
                     className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      isSelected
+                      isPlaying
+                        ? 'border-slate-200 bg-slate-100 cursor-not-allowed opacity-60'
+                        : isSelected
                         ? 'border-primary-blue bg-blue-50'
                         : 'border-slate-200 hover:border-slate-300'
                     }`}
@@ -116,11 +177,15 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
                             {player.levelName || `Level ${player.level}`}
                           </span>
                         )}
-                        {isSelected && (
+                        {isPlaying ? (
+                          <span className="text-orange-600 text-xs font-medium">
+                            🎾 กำลังเล่น
+                          </span>
+                        ) : isSelected ? (
                           <span className="text-primary-blue text-xs font-medium">
                             ✓ เลือกแล้ว
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </button>

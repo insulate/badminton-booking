@@ -36,6 +36,7 @@ router.get('/', async (req, res) => {
       .populate('courts', 'name courtNumber')
       .populate('createdBy', 'username')
       .populate('players.player', 'name phone level levelName')
+      .populate('players.games.court', 'name courtNumber')
       .sort({ sessionName: 1, startTime: 1 });
 
     res.json({
@@ -151,6 +152,7 @@ router.get('/:id', async (req, res) => {
       .populate('courts', 'name courtNumber')
       .populate('createdBy', 'username')
       .populate('players.player', 'name phone level levelName')
+      .populate('players.games.court', 'name courtNumber')
       .populate('players.games.teammates', 'name level levelName')
       .populate('players.games.opponents', 'name level levelName')
       .populate('players.games.items.product', 'name sku price');

@@ -153,13 +153,30 @@ export default function GroupPlayPage() {
     (p.games?.filter(g => g.status === 'playing') || []).map(g => ({
       ...g,
       playerId: p._id,  // Add player reference for API calls
+      playerInfo: p.player,  // Add player info (name, phone, etc.)
     }))
   ) || [];
 
-  // Deduplicate games by gameNumber (each game is stored per player, so we need to show it only once)
-  const currentGames = Array.from(
-    new Map(allGames.map(game => [game.gameNumber, game])).values()
-  );
+  // Deduplicate games by gameNumber and collect all players in each game
+  const gamesMap = new Map();
+  allGames.forEach(game => {
+    if (!gamesMap.has(game.gameNumber)) {
+      gamesMap.set(game.gameNumber, {
+        ...game,
+        players: []
+      });
+    }
+    const gameData = gamesMap.get(game.gameNumber);
+    gameData.players.push({
+      _id: game.playerId,
+      name: game.playerInfo?.name || 'Unknown',
+      phone: game.playerInfo?.phone,
+      level: game.playerInfo?.level,
+      levelName: game.playerInfo?.levelName
+    });
+  });
+
+  const currentGames = Array.from(gamesMap.values());
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -387,7 +404,7 @@ export default function GroupPlayPage() {
                     key={index}
                     className="border border-green-200 bg-green-50 rounded-lg p-4"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <div>
                         <span className="font-medium text-text-primary">
                           เกมที่ {game.gameNumber}
@@ -402,6 +419,29 @@ export default function GroupPlayPage() {
                         กำลังเล่น
                       </span>
                     </div>
+
+                    {/* Players List */}
+                    {game.players && game.players.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-xs text-text-secondary mb-1">ผู้เล่น:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {game.players.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 bg-white border border-green-200 rounded-full text-xs text-text-primary"
+                            >
+                              {player.name}
+                              {player.levelName && (
+                                <span className="ml-1 text-blue-600">
+                                  ({player.levelName})
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <p className="text-sm text-text-secondary">
                       เริ่มเมื่อ: {new Date(game.startTime).toLocaleTimeString('th-TH')}
                     </p>
