@@ -266,7 +266,7 @@ const POSPage = () => {
                       <div className="relative overflow-hidden rounded-xl mb-3">
                         {product.image ? (
                           <img
-                            src={`${API_URL.replace('/api', '')}${product.image}`}
+                            src={product.image.startsWith('data:') ? product.image : `${API_URL.replace('/api', '')}${product.image}`}
                             alt={product.name}
                             className="w-full h-28 object-cover group-hover:scale-110 transition-transform duration-300"
                           />

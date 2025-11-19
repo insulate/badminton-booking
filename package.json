@@ -20,7 +20,9 @@
     "seed:settings": "cd backend && npm run seed:settings",
     "seed:courts": "cd backend && npm run seed:courts",
     "seed:timeslots": "cd backend && npm run seed:timeslots",
-    "seed:players": "cd backend && npm run seed:players"
+    "seed:players": "cd backend && npm run seed:players",
+    "seed:categories": "cd backend && npm run seed:categories",
+    "seed:products": "cd backend && npm run seed:products"
   },
   "keywords": [
     "badminton",

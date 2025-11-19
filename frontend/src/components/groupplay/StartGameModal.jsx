@@ -4,9 +4,11 @@ import toast from 'react-hot-toast';
 
 export default function StartGameModal({ session, onClose, onSuccess }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [selectedCourt, setSelectedCourt] = useState('');
   const [loading, setLoading] = useState(false);
 
   const checkedInPlayers = session.players?.filter(p => p.checkedIn && !p.checkedOut) || [];
+  const courts = session.courts || [];
 
   const togglePlayer = (player) => {
     if (selectedPlayers.find(p => p.phone === player.phone)) {
@@ -26,10 +28,15 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
       return;
     }
 
+    if (!selectedCourt) {
+      toast.error('กรุณาเลือกสนาม');
+      return;
+    }
+
     setLoading(true);
     try {
       const playerIds = selectedPlayers.map(p => p._id);
-      await onSuccess(session._id, { playerIds });
+      await onSuccess(session._id, { playerIds, courtId: selectedCourt });
       toast.success('เริ่มเกมสำเร็จ!');
       onClose();
     } catch (error) {
@@ -60,6 +67,25 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
         </div>
 
         <div className="p-6">
+          {/* Court Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              เลือกสนาม <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={selectedCourt}
+              onChange={(e) => setSelectedCourt(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+            >
+              <option value="">-- เลือกสนาม --</option>
+              {courts.map((court) => (
+                <option key={court._id} value={court._id}>
+                  {court.name} {court.courtNumber ? `(สนาม ${court.courtNumber})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Player Selection */}
           {checkedInPlayers.length === 0 ? (
             <div className="text-center py-8 text-text-secondary">
@@ -138,7 +164,7 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
             <button
               onClick={handleStartGame}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading || selectedPlayers.length < 2}
+              disabled={loading || selectedPlayers.length < 2 || !selectedCourt}
             >
               {loading ? 'กำลังเริ่มเกม...' : 'เริ่มเกม'}
             </button>

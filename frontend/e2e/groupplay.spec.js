@@ -135,4 +135,68 @@ test.describe('Group Play Feature Test', () => {
       }
     }
   });
+
+  test('should show only one game when starting a game with multiple players', async ({ page }) => {
+    await page.goto('http://localhost:5173/admin/groupplay');
+
+    // Wait for page to load
+    await page.waitForTimeout(1000);
+
+    // Check if there's a rule selector
+    const ruleSelector = page.locator('select');
+    const hasRules = await ruleSelector.count() > 0;
+
+    if (!hasRules) {
+      console.log('No rules available, skipping test');
+      return;
+    }
+
+    // Check-in two players
+    const player1 = { name: 'Game Test Player 1', phone: '0811111111' };
+    const player2 = { name: 'Game Test Player 2', phone: '0822222222' };
+
+    for (const player of [player1, player2]) {
+      const checkInButton = page.getByRole('button', { name: 'Check-in ผู้เล่น' });
+
+      if (await checkInButton.isVisible() && await checkInButton.isEnabled()) {
+        await checkInButton.click();
+        await expect(page.locator('text=Check-in ผู้เล่น').first()).toBeVisible();
+        await page.click('button:has-text("Walk-in")');
+        await page.fill('input[type="text"]', player.name);
+        await page.fill('input[type="tel"]', player.phone);
+        await page.click('button:has-text("Check-in"):not(:has-text("ผู้เล่น"))');
+        await page.waitForTimeout(1500);
+      }
+    }
+
+    // Start a game with both players
+    const startGameButton = page.getByRole('button', { name: 'เริ่มเกม' });
+
+    if (await startGameButton.isVisible() && await startGameButton.isEnabled()) {
+      await startGameButton.click();
+      await page.waitForTimeout(1000);
+
+      // Select both players
+      const checkboxes = page.locator('input[type="checkbox"]');
+      const count = await checkboxes.count();
+
+      if (count >= 2) {
+        await checkboxes.nth(0).check();
+        await checkboxes.nth(1).check();
+      }
+
+      // Click start game button in modal
+      const startButton = page.locator('button:has-text("เริ่มเกม")').last();
+      await startButton.click();
+      await page.waitForTimeout(2000);
+
+      // Check that "เกมที่กำลังเล่น" shows 1, not 2 or more
+      // Find the stats display for current games
+      const statsSection = page.locator('text=เกมที่กำลังเล่น').locator('..');
+      const gamesCount = await statsSection.locator('p.text-2xl.font-bold').textContent();
+
+      // Should be exactly 1 game (not 2, even though 2 players are in the game)
+      expect(parseInt(gamesCount.trim())).toBe(1);
+    }
+  });
 });

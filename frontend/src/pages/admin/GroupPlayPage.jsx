@@ -147,12 +147,19 @@ export default function GroupPlayPage() {
   }
 
   const checkedInPlayers = selectedRule?.players?.filter(p => p.checkedIn && !p.checkedOut) || [];
-  const currentGames = selectedRule?.players?.flatMap(p =>
+
+  // Collect all playing games from all players
+  const allGames = selectedRule?.players?.flatMap(p =>
     (p.games?.filter(g => g.status === 'playing') || []).map(g => ({
       ...g,
       playerId: p._id,  // Add player reference for API calls
     }))
   ) || [];
+
+  // Deduplicate games by gameNumber (each game is stored per player, so we need to show it only once)
+  const currentGames = Array.from(
+    new Map(allGames.map(game => [game.gameNumber, game])).values()
+  );
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -381,9 +388,16 @@ export default function GroupPlayPage() {
                     className="border border-green-200 bg-green-50 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-text-primary">
-                        เกมที่ {game.gameNumber}
-                      </span>
+                      <div>
+                        <span className="font-medium text-text-primary">
+                          เกมที่ {game.gameNumber}
+                        </span>
+                        {game.court && (
+                          <span className="ml-2 text-sm text-blue-600">
+                            • {game.court.name || `สนาม ${game.court.courtNumber}`}
+                          </span>
+                        )}
+                      </div>
                       <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
                         กำลังเล่น
                       </span>
