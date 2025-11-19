@@ -126,29 +126,27 @@ test.describe('Authentication E2E Tests', () => {
       expect(isInvalid).toBeTruthy();
     });
 
-    test.skip('should toggle password visibility', async ({ page }) => {
-      // Skip this test as the login form doesn't have password visibility toggle feature yet
+    test('should toggle password visibility', async ({ page }) => {
       const passwordInput = page.locator('input[name="password"]');
 
       // Initially password should be hidden
       await expect(passwordInput).toHaveAttribute('type', 'password');
 
-      // Check if there's a toggle button (eye icon)
-      const toggleButton = page.locator('button[aria-label*="password" i], button:has(svg):near(input[name="password"])');
+      // Find the toggle button (eye icon) next to password input
+      const toggleButton = page.locator('button[aria-label*="password" i]');
+      await expect(toggleButton).toBeVisible();
 
-      if (await toggleButton.count() > 0) {
-        // Click toggle button
-        await toggleButton.first().click();
+      // Click toggle button to show password
+      await toggleButton.click();
 
-        // Password should now be visible
-        await expect(passwordInput).toHaveAttribute('type', 'text');
+      // Password should now be visible
+      await expect(passwordInput).toHaveAttribute('type', 'text');
 
-        // Click again to hide
-        await toggleButton.first().click();
+      // Click again to hide
+      await toggleButton.click();
 
-        // Password should be hidden again
-        await expect(passwordInput).toHaveAttribute('type', 'password');
-      }
+      // Password should be hidden again
+      await expect(passwordInput).toHaveAttribute('type', 'password');
     });
   });
 
