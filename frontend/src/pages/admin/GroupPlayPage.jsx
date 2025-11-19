@@ -157,6 +157,12 @@ export default function GroupPlayPage() {
       });
     }
     const gameData = gamesMap.get(game.gameNumber);
+
+    // Update court info if current game has populated court data
+    if (game.court && typeof game.court === 'object' && game.court.name) {
+      gameData.court = game.court;
+    }
+
     gameData.players.push({
       _id: game.playerId,
       name: game.playerInfo?.name || 'Unknown',
