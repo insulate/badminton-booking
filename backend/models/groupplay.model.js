@@ -233,8 +233,24 @@ groupPlaySchema.pre('validate', function (next) {
 
 // Method to check in a player
 groupPlaySchema.methods.checkInPlayer = function (playerData) {
+  // Normalize phone number (remove dashes and spaces)
+  const normalizedPhone = playerData.phone.replace(/[-\s]/g, '');
+
+  // Check if player with this phone is already checked in and not checked out
+  const existingPlayer = this.players.find(
+    (p) =>
+      p.phone.replace(/[-\s]/g, '') === normalizedPhone &&
+      p.checkedIn &&
+      !p.checkedOut
+  );
+
+  if (existingPlayer) {
+    throw new Error('ผู้เล่นนี้เช็คอินแล้ว');
+  }
+
   this.players.push({
     ...playerData,
+    phone: normalizedPhone,
     checkedIn: true,
     checkInTime: new Date(),
     entryFeePaid: false,

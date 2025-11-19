@@ -202,7 +202,7 @@ router.post('/:id/checkin', async (req, res) => {
 
     let playerData = {
       name,
-      phone: phone.replace(/-/g, ''),
+      phone,
     };
 
     // If playerId is provided, get player data from database
@@ -244,7 +244,7 @@ router.post('/:id/checkin', async (req, res) => {
     console.error('Error checking in player:', error);
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการ check-in',
+      message: error.message || 'เกิดข้อผิดพลาดในการ check-in',
       error: error.message,
     });
   }

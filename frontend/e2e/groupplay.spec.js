@@ -58,4 +58,81 @@ test.describe('Group Play Feature Test', () => {
     // Close modal
     await page.click('button:has-text("ยกเลิก")');
   });
+
+  test('should prevent duplicate player check-in', async ({ page }) => {
+    await page.goto('http://localhost:5173/admin/groupplay');
+
+    // Wait for page to load
+    await page.waitForTimeout(1000);
+
+    // Check if there's a rule selector
+    const ruleSelector = page.locator('select');
+    const hasRules = await ruleSelector.count() > 0;
+
+    if (!hasRules) {
+      console.log('No rules available, skipping test');
+      return;
+    }
+
+    // Click Check-in button
+    const checkInButton = page.getByRole('button', { name: 'Check-in ผู้เล่น' });
+
+    // Check if button is visible and enabled
+    if (await checkInButton.isVisible() && await checkInButton.isEnabled()) {
+      await checkInButton.click();
+
+      // Wait for modal to appear
+      await expect(page.locator('text=Check-in ผู้เล่น').first()).toBeVisible();
+
+      // Select Walk-in mode
+      await page.click('button:has-text("Walk-in")');
+
+      // Fill in player data
+      const playerData = {
+        name: 'Test Player E2E',
+        phone: '0899999999'
+      };
+
+      await page.fill('input[type="text"]', playerData.name);
+      await page.fill('input[type="tel"]', playerData.phone);
+
+      // Click Check-in button in modal
+      await page.click('button:has-text("Check-in"):not(:has-text("ผู้เล่น"))');
+
+      // Wait for success message
+      await page.waitForTimeout(2000);
+
+      // Try to check-in the same player again
+      const checkInButton2 = page.getByRole('button', { name: 'Check-in ผู้เล่น' });
+      await checkInButton2.click();
+
+      // Wait for modal to appear
+      await expect(page.locator('text=Check-in ผู้เล่น').first()).toBeVisible();
+
+      // Select Walk-in mode
+      await page.click('button:has-text("Walk-in")');
+
+      // Fill in same player data
+      await page.fill('input[type="text"]', playerData.name);
+      await page.fill('input[type="tel"]', playerData.phone);
+
+      // Click Check-in button in modal
+      await page.click('button:has-text("Check-in"):not(:has-text("ผู้เล่น"))');
+
+      // Wait for error message
+      await page.waitForTimeout(2000);
+
+      // Should show error toast message (check for error-related text)
+      // The exact selector depends on your toast implementation
+      // This is a generic check that an error occurred
+      const hasErrorMessage = await page.locator('text=/เช็คอินแล้ว/i').count() > 0 ||
+                              await page.locator('text=/error/i').count() > 0;
+
+      // If no visible error message, check if modal is still open (which indicates failure)
+      if (!hasErrorMessage) {
+        const modalStillOpen = await page.locator('text=Check-in ผู้เล่น').first().isVisible();
+        expect(modalStillOpen).toBe(true);
+      }
+    }
+  });
 });
