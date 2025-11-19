@@ -287,8 +287,125 @@ const validateCancellation = async (req, res, next) => {
   }
 };
 
+/**
+ * Validate check availability request
+ */
+const validateAvailabilityCheck = (req, res, next) => {
+  try {
+    const { courtId, date, timeSlotId, duration } = req.body;
+
+    // Validate that at least some parameters are provided
+    if (!courtId && !date && !timeSlotId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide courtId, date, or timeSlotId to check availability',
+      });
+    }
+
+    // Validate duration if provided
+    if (duration !== undefined) {
+      const durationNum = parseInt(duration);
+      if (isNaN(durationNum) || durationNum < 1 || durationNum > 8) {
+        return res.status(400).json({
+          success: false,
+          message: 'Duration must be a number between 1 and 8 hours',
+        });
+      }
+    }
+
+    // Validate date format if provided
+    if (date) {
+      const bookingDate = new Date(date);
+      if (isNaN(bookingDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date format',
+        });
+      }
+    }
+
+    next();
+  } catch (error) {
+    console.error('Availability check validation error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Validation error',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Validate calculate price request
+ */
+const validatePriceCalculation = (req, res, next) => {
+  try {
+    const { timeSlotId, duration, customerType, discountPercent, depositAmount } = req.body;
+
+    // Validate timeSlotId is required
+    if (!timeSlotId) {
+      return res.status(400).json({
+        success: false,
+        message: 'TimeSlot ID is required',
+      });
+    }
+
+    // Validate duration
+    if (duration !== undefined) {
+      const durationNum = parseInt(duration);
+      if (isNaN(durationNum) || durationNum < 1 || durationNum > 8) {
+        return res.status(400).json({
+          success: false,
+          message: 'Duration must be a number between 1 and 8 hours',
+        });
+      }
+    }
+
+    // Validate customerType
+    if (customerType && !['normal', 'member'].includes(customerType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer type must be "normal" or "member"',
+      });
+    }
+
+    // Validate discountPercent
+    if (discountPercent !== undefined) {
+      const discountNum = parseFloat(discountPercent);
+      if (isNaN(discountNum) || discountNum < 0 || discountNum > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Discount percent must be a number between 0 and 100',
+        });
+      }
+    }
+
+    // Validate depositAmount
+    if (depositAmount !== undefined) {
+      const depositNum = parseFloat(depositAmount);
+      if (isNaN(depositNum) || depositNum < 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Deposit amount must be a non-negative number',
+        });
+      }
+    }
+
+    next();
+  } catch (error) {
+    console.error('Price calculation validation error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Validation error',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   validateBookingRequest,
   validateBookingUpdate,
   validateCancellation,
+  validateAvailabilityCheck,
+  validatePriceCalculation,
 };

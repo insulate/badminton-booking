@@ -12,7 +12,7 @@ const { protect, admin } = require('../middleware/auth');
  */
 router.get('/', protect, async (req, res) => {
   try {
-    const { startDate, endDate, paymentMethod } = req.query;
+    const { startDate, endDate, paymentMethod, page = 1, limit = 50 } = req.query;
 
     // Build filter
     const filter = {};
@@ -27,15 +27,25 @@ router.get('/', protect, async (req, res) => {
     }
     if (paymentMethod) filter.paymentMethod = paymentMethod;
 
+    // Pagination
+    const skip = (page - 1) * limit;
+
     const sales = await Sale.find(filter)
       .populate('items.product', 'name sku category')
       .populate('relatedBooking', 'bookingCode')
       .populate('createdBy', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Sale.countDocuments(filter);
 
     res.status(200).json({
       success: true,
       count: sales.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
       data: sales,
     });
   } catch (error) {

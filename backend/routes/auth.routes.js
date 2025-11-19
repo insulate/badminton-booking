@@ -7,13 +7,14 @@ const {
   changePassword
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
+const { authLimiter, strictLimiter } = require('../middleware/rateLimiter');
 
 // Public routes
-router.post('/login', login);
+router.post('/login', authLimiter, login);
 
 // Private routes (require authentication)
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
-router.put('/password', protect, changePassword);
+router.put('/password', protect, strictLimiter, changePassword);
 
 module.exports = router;

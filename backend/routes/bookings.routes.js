@@ -10,6 +10,8 @@ const {
   validateBookingRequest,
   validateBookingUpdate,
   validateCancellation,
+  validateAvailabilityCheck,
+  validatePriceCalculation,
 } = require('../middleware/bookingValidation');
 const { generateBookingCode } = require('../utils/bookingCodeGenerator');
 const { calculatePrice } = require('../utils/priceCalculator');
@@ -189,7 +191,7 @@ router.get('/:id', protect, validateObjectId(), async (req, res) => {
  * @desc    Check court availability
  * @access  Private
  */
-router.post('/check-availability', protect, async (req, res) => {
+router.post('/check-availability', protect, validateAvailabilityCheck, async (req, res) => {
   try {
     const { courtId, date, timeSlotId, duration } = req.body;
 
@@ -245,7 +247,7 @@ router.post('/check-availability', protect, async (req, res) => {
  * @desc    Calculate booking price
  * @access  Private
  */
-router.post('/calculate-price', protect, async (req, res) => {
+router.post('/calculate-price', protect, validatePriceCalculation, async (req, res) => {
   try {
     const { timeSlotId, duration, customerType, discountPercent, depositAmount } = req.body;
 

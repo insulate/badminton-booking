@@ -21,14 +21,48 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// CORS Configuration
+const corsOptions = {
+  // Allow specific origins or use environment variable
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CLIENT_URL || 'http://localhost:5173',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  // Allow credentials (cookies, authorization headers, etc.)
+  credentials: true,
+  // Allowed HTTP methods
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  // Allowed headers
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  // Expose headers to the client
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  // Cache preflight requests for 24 hours
+  maxAge: 86400,
+  // Enable preflight for all routes
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Limit request body size to prevent DoS attacks
+// 10mb for JSON (to allow product images in base64 if needed)
+app.use(express.json({ limit: '10mb' }));
+// 10mb for URL-encoded data
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

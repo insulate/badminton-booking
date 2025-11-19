@@ -75,7 +75,7 @@ router.get('/generate-sku', protect, async (req, res) => {
  */
 router.get('/', protect, async (req, res) => {
   try {
-    const { category, status, search } = req.query;
+    const { category, status, search, page = 1, limit = 50 } = req.query;
 
     // Build filter
     const filter = {};
@@ -88,11 +88,22 @@ router.get('/', protect, async (req, res) => {
       ];
     }
 
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    // Pagination
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Product.countDocuments(filter);
 
     res.status(200).json({
       success: true,
       count: products.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
       data: products,
     });
   } catch (error) {
