@@ -45,19 +45,36 @@ export default function AdminLayout() {
       icon: LayoutDashboard,
     },
     {
-      name: 'จองสนาม',
-      path: '/admin/booking',
+      name: 'การจอง',
       icon: CalendarDays,
+      children: [
+        {
+          name: 'จองสนาม',
+          path: '/admin/booking',
+          icon: Calendar,
+        },
+        {
+          name: 'รายการจอง',
+          path: '/admin/bookings',
+          icon: ClipboardList,
+        },
+      ],
     },
     {
-      name: 'รายการจอง',
-      path: '/admin/bookings',
-      icon: ClipboardList,
-    },
-    {
-      name: 'POS - ขายสินค้า',
-      path: ROUTES.ADMIN.POS,
+      name: 'ขายสินค้า',
       icon: ShoppingCart,
+      children: [
+        {
+          name: 'POS - ขายสินค้า',
+          path: ROUTES.ADMIN.POS,
+          icon: ShoppingCart,
+        },
+        {
+          name: 'จัดการสินค้า',
+          path: ROUTES.ADMIN.PRODUCTS,
+          icon: Package,
+        },
+      ],
     },
     {
       name: 'ตั้งค่า',
@@ -77,11 +94,6 @@ export default function AdminLayout() {
           name: 'ช่วงเวลาและราคา',
           path: ROUTES.ADMIN.TIMESLOTS,
           icon: Timer,
-        },
-        {
-          name: 'จัดการสินค้า',
-          path: ROUTES.ADMIN.PRODUCTS,
-          icon: Package,
         },
         {
           name: 'ข้อมูลสนาม',
