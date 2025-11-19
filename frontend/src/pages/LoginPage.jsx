@@ -51,7 +51,8 @@ export default function Login() {
 
       toast.success('เข้าสู่ระบบสำเร็จ!');
 
-      // Navigation will be handled by useEffect when isAuthenticated changes
+      // Navigate immediately after successful login
+      navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
       setError(errorMessage);

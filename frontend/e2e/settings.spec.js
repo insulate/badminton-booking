@@ -257,11 +257,15 @@ test.describe('Settings System E2E Tests', () => {
       // Uncheck transfer if checked
       if (await transferCheckbox.isChecked()) {
         await transferCheckbox.click();
+        // Wait for fields to disappear after React re-render
+        await page.waitForSelector('input[name="bankName"]', { state: 'hidden', timeout: 3000 }).catch(() => {});
         await expect(page.locator('input[name="bankName"]')).not.toBeVisible();
       }
 
       // Check transfer
       await transferCheckbox.click();
+      // Wait for fields to appear after React re-render
+      await page.waitForSelector('input[name="bankName"]', { state: 'visible', timeout: 3000 });
       await expect(page.locator('input[name="bankName"]')).toBeVisible();
       await expect(page.locator('input[name="accountNumber"]')).toBeVisible();
       await expect(page.locator('input[name="accountName"]')).toBeVisible();
