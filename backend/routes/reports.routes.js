@@ -47,7 +47,7 @@ router.get('/revenue/daily', async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: '$amountPaid' },
+          totalRevenue: { $sum: '$pricing.deposit' },
           count: { $sum: 1 },
         },
       },
@@ -173,7 +173,7 @@ router.get('/revenue/monthly', async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-          revenue: { $sum: '$amountPaid' },
+          revenue: { $sum: '$pricing.deposit' },
           count: { $sum: 1 },
         },
       },
@@ -339,7 +339,7 @@ router.get('/revenue/yearly', async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m', date: '$date' } },
-          revenue: { $sum: '$amountPaid' },
+          revenue: { $sum: '$pricing.deposit' },
           count: { $sum: 1 },
         },
       },
@@ -506,7 +506,7 @@ router.get('/bookings/summary', async (req, res) => {
             $sum: {
               $cond: [
                 { $in: ['$paymentStatus', ['paid', 'partial']] },
-                '$amountPaid',
+                '$pricing.deposit',
                 0,
               ],
             },
@@ -538,7 +538,7 @@ router.get('/bookings/summary', async (req, res) => {
             $sum: {
               $cond: [
                 { $in: ['$paymentStatus', ['paid', 'partial']] },
-                '$amountPaid',
+                '$pricing.deposit',
                 0,
               ],
             },
@@ -557,8 +557,8 @@ router.get('/bookings/summary', async (req, res) => {
         $group: {
           _id: '$paymentStatus',
           count: { $sum: 1 },
-          totalAmount: { $sum: '$totalPrice' },
-          totalPaid: { $sum: '$amountPaid' },
+          totalAmount: { $sum: '$pricing.total' },
+          totalPaid: { $sum: '$pricing.deposit' },
         },
       },
     ]);
@@ -574,12 +574,12 @@ router.get('/bookings/summary', async (req, res) => {
             $sum: {
               $cond: [
                 { $in: ['$paymentStatus', ['paid', 'partial']] },
-                '$amountPaid',
+                '$pricing.deposit',
                 0,
               ],
             },
           },
-          averageBookingValue: { $avg: '$totalPrice' },
+          averageBookingValue: { $avg: '$pricing.total' },
         },
       },
     ]);
@@ -850,7 +850,7 @@ router.get('/courts/usage', async (req, res) => {
             $sum: {
               $cond: [
                 { $in: ['$paymentStatus', ['paid', 'partial']] },
-                '$amountPaid',
+                '$pricing.deposit',
                 0,
               ],
             },
