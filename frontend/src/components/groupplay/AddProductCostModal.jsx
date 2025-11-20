@@ -213,23 +213,44 @@ export default function AddProductCostModal({ player, sessionId, onClose, onSucc
                         className="border border-slate-200 rounded-lg p-3 hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer"
                         onClick={() => handleAddProduct(product)}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-medium text-text-primary">{product.name}</p>
+                        <div className="flex items-center gap-3">
+                          {/* Product Image */}
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-16 h-16 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={`w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg border border-slate-200 flex items-center justify-center flex-shrink-0 ${product.image ? 'hidden' : 'flex'}`}
+                          >
+                            <Package size={24} className="text-slate-400" />
+                          </div>
+
+                          {/* Product Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <p className="font-medium text-text-primary truncate">{product.name}</p>
                               {product.category?.name && (
-                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full flex-shrink-0">
                                   {product.category.name}
                                 </span>
                               )}
                             </div>
                             <p className="text-sm text-text-secondary">
                               {product.sku && <span className="mr-2">รหัส: {product.sku}</span>}
-                              คงเหลือ: {product.quantity} {product.unit || 'ชิ้น'}
+                              คงเหลือ: {product.stock} {product.unit || 'ชิ้น'}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-green-600">฿{product.price}</p>
+
+                          {/* Price and Add Button */}
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-semibold text-green-600 whitespace-nowrap">฿{product.price}</p>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -264,20 +285,43 @@ export default function AddProductCostModal({ player, sessionId, onClose, onSucc
                         key={product._id}
                         className="border border-green-200 bg-green-50 rounded-lg p-3"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <p className="font-medium text-text-primary">{product.name}</p>
+                        <div className="flex items-start gap-3 mb-3">
+                          {/* Product Image */}
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-12 h-12 object-cover rounded-lg border border-green-200 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={`w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-lg border border-green-200 flex items-center justify-center flex-shrink-0 ${product.image ? 'hidden' : 'flex'}`}
+                          >
+                            <Package size={20} className="text-green-600" />
+                          </div>
+
+                          {/* Product Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-text-primary truncate">{product.name}</p>
                             <p className="text-sm text-text-secondary">
                               ฿{product.price} / {product.unit || 'ชิ้น'}
                             </p>
                           </div>
+
+                          {/* Remove Button */}
                           <button
                             onClick={() => handleUpdateQuantity(product._id, 0)}
-                            className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                            className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors flex-shrink-0"
                           >
                             <X size={16} />
                           </button>
                         </div>
+
+                        {/* Quantity Controls */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <button
