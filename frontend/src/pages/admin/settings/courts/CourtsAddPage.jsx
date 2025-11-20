@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Grid3x3 } from 'lucide-react';
 import { courtsAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
+import { PageContainer, Card, PageHeader, Button } from '../../../../components/common';
 
 const CourtsAddPage = () => {
   const navigate = useNavigate();
@@ -54,8 +55,8 @@ const CourtsAddPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
+    <PageContainer variant="form">
+      {/* Header with Back Button */}
       <div className="flex items-center mb-6">
         <button
           onClick={() => navigate(ROUTES.ADMIN.COURTS)}
@@ -63,14 +64,16 @@ const CourtsAddPage = () => {
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">เพิ่มสนามใหม่</h1>
-          <p className="text-gray-600 text-sm">กรอกข้อมูลสนามแบดมินตัน</p>
-        </div>
+        <PageHeader
+          title="เพิ่มสนามใหม่"
+          subtitle="กรอกข้อมูลสนามแบดมินตัน"
+          icon={Grid3x3}
+          iconColor="blue"
+        />
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+      <Card padding="p-0">
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
             {/* Court Number */}
@@ -140,34 +143,29 @@ const CourtsAddPage = () => {
 
           {/* Footer with Actions */}
           <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => navigate(ROUTES.ADMIN.COURTS)}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition"
             >
               ยกเลิก
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
               disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center disabled:bg-blue-400 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  กำลังบันทึก...
-                </>
+              icon={saving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
               ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  บันทึกสนาม
-                </>
+                <Save className="w-4 h-4" />
               )}
-            </button>
+            >
+              {saving ? 'กำลังบันทึก...' : 'บันทึกสนาม'}
+            </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </Card>
+    </PageContainer>
   );
 };
 

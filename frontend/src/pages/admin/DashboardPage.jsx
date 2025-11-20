@@ -6,6 +6,7 @@ import {
   Activity,
   LayoutDashboard
 } from 'lucide-react';
+import { PageContainer, PageHeader } from '../../components/common';
 
 export default function Dashboard() {
   // Mock data
@@ -90,23 +91,21 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <PageContainer variant="full">
+      <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <LayoutDashboard className="w-6 h-6 text-blue-600" />
+      <PageHeader
+        title="Dashboard"
+        subtitle="ภาพรวมระบบจัดการสนามแบดมินตัน"
+        icon={LayoutDashboard}
+        iconColor="blue"
+        actions={
+          <div className="flex items-center gap-2 text-gray-500">
+            <Activity size={20} />
+            <span className="text-sm">อัพเดทล่าสุด: วันนี้ 14:30 น.</span>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-sm text-gray-500">ภาพรวมระบบจัดการสนามแบดมินตัน</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-gray-500">
-          <Activity size={20} />
-          <span className="text-sm">อัพเดทล่าสุด: วันนี้ 14:30 น.</span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
@@ -229,6 +228,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

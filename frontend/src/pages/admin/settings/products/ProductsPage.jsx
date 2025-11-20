@@ -5,6 +5,7 @@ import { productsAPI, categoriesAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
 import ProductModal from '../../../../components/products/ProductModal';
+import { PageContainer, Card, PageHeader, Button } from '../../../../components/common';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -161,38 +162,27 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-cream p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+    <PageContainer variant="full">
+      <div className="space-y-6">
+      {/* Header */}
+      <PageHeader
+        title="จัดการสินค้า"
+        subtitle={`จัดการสินค้าและสต็อกทั้งหมด • ${filteredProducts.length} รายการ`}
+        icon={Package}
+        iconColor="purple"
+        actions={
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            เพิ่มสินค้าใหม่
+          </button>
+        }
+      />
 
-          <div className="flex justify-between items-center relative z-10">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                  <Package className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold text-white">จัดการสินค้า</h1>
-              </div>
-              <p className="text-blue-100 text-sm ml-14">
-                จัดการสินค้าและสต็อกทั้งหมด • {filteredProducts.length} รายการ
-              </p>
-            </div>
-            <button
-              onClick={handleAdd}
-              className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-semibold flex items-center gap-2 shadow-lg border border-white/30"
-            >
-              <Plus className="w-5 h-5" />
-              เพิ่มสินค้าใหม่
-            </button>
-          </div>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+      {/* Search and Filters */}
+      <Card padding="p-6" className="bg-white/80 backdrop-blur-sm border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
@@ -231,11 +221,11 @@ const ProductsPage = () => {
               <option value="inactive">ปิดขาย</option>
             </select>
           </div>
-        </div>
+      </Card>
 
-        {/* Low Stock Alert */}
+      {/* Low Stock Alert */}
         {products.filter(isLowStock).length > 0 && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-5 mb-6 flex items-start gap-3 shadow-lg">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-5 flex items-start gap-3 shadow-lg">
             <div className="bg-yellow-500 p-2 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-white" />
             </div>
@@ -248,34 +238,34 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {/* Products Table */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+      {/* Products Table */}
+      <Card padding="p-0" className="overflow-hidden bg-white/80 backdrop-blur-sm border-gray-100">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-blue-600 to-purple-600">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     รูปภาพ
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     SKU
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ชื่อสินค้า
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     หมวดหมู่
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ราคา
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     สต็อก
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     สถานะ
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-white uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     จัดการ
                   </th>
                 </tr>
@@ -371,18 +361,18 @@ const ProductsPage = () => {
               </tbody>
             </table>
           </div>
-        </div>
+      </Card>
 
-        {/* Product Modal */}
-        {showModal && (
-          <ProductModal
-            product={selectedProduct}
-            onClose={handleModalClose}
-            onSuccess={handleModalSuccess}
-          />
-        )}
+      {/* Product Modal */}
+      {showModal && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={handleModalClose}
+          onSuccess={handleModalSuccess}
+        />
+      )}
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

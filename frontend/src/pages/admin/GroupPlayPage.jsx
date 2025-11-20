@@ -27,6 +27,7 @@ import EditGamePlayersModal from '../../components/groupplay/EditGamePlayersModa
 import PlayerCostDetailModal from '../../components/groupplay/PlayerCostDetailModal';
 import AddProductCostModal from '../../components/groupplay/AddProductCostModal';
 import CheckoutConfirmModal from '../../components/groupplay/CheckoutConfirmModal';
+import { PageContainer, PageHeader } from '../../components/common';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -327,30 +328,23 @@ export default function GroupPlayPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <PageContainer variant="full"><div className="space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <Users className="text-primary-blue" size={28} />
-              ระบบตีก๊วน (Group Play)
-            </h1>
-            <p className="text-text-secondary text-sm mt-1">
-              จัดการกฎก๊วนสนาม ผู้เล่น เกม และการชำระเงิน
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={fetchData}
-              className="px-4 py-2 bg-white border border-slate-300 text-text-primary rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw size={18} />
-              รีเฟรช
-            </button>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="ระบบตีก๊วน (Group Play)"
+        subtitle="จัดการกฎก๊วนสนาม ผู้เล่น เกม และการชำระเงิน"
+        icon={Users}
+        iconColor="blue"
+        actions={
+          <button
+            onClick={fetchData}
+            className="px-4 py-2 bg-white border border-slate-300 text-text-primary rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+          >
+            <RefreshCw size={18} />
+            รีเฟรช
+          </button>
+        }
+      />
 
       {/* Rule Display */}
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
@@ -990,6 +984,6 @@ export default function GroupPlayPage() {
           }}
         />
       )}
-    </div>
+    </div></PageContainer>
   );
 }

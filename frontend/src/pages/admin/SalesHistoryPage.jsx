@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { salesAPI } from '../../lib/api';
+import { PageContainer, PageHeader } from '../../components/common';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -140,20 +141,15 @@ const SalesHistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg-cream p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto">
+    <PageContainer variant="full">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Receipt className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">ประวัติการขาย</h1>
-                <p className="text-sm text-gray-500">ดูรายการขายทั้งหมดและรายละเอียด</p>
-              </div>
-            </div>
+        <PageHeader
+          title="ประวัติการขาย"
+          subtitle="ดูรายการขายทั้งหมดและรายละเอียด"
+          icon={Receipt}
+          iconColor="orange"
+          actions={
             <div className="flex items-center gap-3 bg-orange-50 px-6 py-3 rounded-xl border border-orange-200">
               <Receipt className="w-6 h-6 text-orange-600" />
               <div className="text-right">
@@ -161,8 +157,8 @@ const SalesHistoryPage = () => {
                 <div className="text-orange-600 font-bold text-xl">{pagination.total || 0}</div>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Filters */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
@@ -548,7 +544,7 @@ const SalesHistoryPage = () => {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 };
 

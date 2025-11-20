@@ -25,6 +25,7 @@ import {
   PieChart as PieChartIcon,
   Award,
 } from 'lucide-react';
+import { PageContainer, PageHeader } from '../../components/common';
 
 const ReportsPage = () => {
   const [loading, setLoading] = useState(true);
@@ -108,12 +109,6 @@ const ReportsPage = () => {
   };
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-  const GRADIENT_COLORS = [
-    'from-blue-500 to-blue-600',
-    'from-emerald-500 to-emerald-600',
-    'from-amber-500 to-amber-600',
-    'from-purple-500 to-purple-600',
-  ];
 
   // Prepare revenue chart data
   const getRevenueChartData = () => {
@@ -187,21 +182,16 @@ const ReportsPage = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <PageContainer variant="full"><div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-purple-100 p-3 rounded-lg">
-            <BarChart3 className="w-6 h-6 text-purple-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">รายงานและสถิติ</h1>
-            <p className="text-sm text-gray-500">สรุปรายได้และข้อมูลการดำเนินงาน</p>
-          </div>
-        </div>
-
-        {/* Period Selector */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <PageHeader
+        title="รายงานและสถิติ"
+        subtitle="สรุปรายได้และข้อมูลการดำเนินงาน"
+        icon={BarChart3}
+        iconColor="purple"
+        actions={
+          /* Period Selector */
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
             <button
               onClick={() => setSelectedPeriod('day')}
@@ -277,7 +267,8 @@ const ReportsPage = () => {
             )}
           </div>
         </div>
-      </div>
+        }
+      />
 
       {/* Revenue Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -695,7 +686,7 @@ const ReportsPage = () => {
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </div></PageContainer>
   );
 };
 

@@ -7,6 +7,7 @@ import PlayerLevelBadge from '../../components/players/PlayerLevelBadge';
 import PlayerStatsCard from '../../components/players/PlayerStatsCard';
 import PlayerForm from '../../components/players/PlayerForm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { PageContainer } from '../../components/common';
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState([]);
@@ -253,7 +254,7 @@ export default function PlayersPage() {
   };
 
   return (
-    <div className="p-6">
+    <PageContainer variant="full"><div className="space-y-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
@@ -571,6 +572,6 @@ export default function PlayersPage() {
         confirmText="ยืนยัน"
         cancelText="ยกเลิก"
       />
-    </div>
+    </div></PageContainer>
   );
 }

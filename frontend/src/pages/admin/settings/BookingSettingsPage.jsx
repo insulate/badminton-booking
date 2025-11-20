@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Save } from 'lucide-react';
 import { settingsAPI } from '../../../lib/api';
 import toast from 'react-hot-toast';
 import { ROUTES } from '../../../constants';
+import { PageContainer, Card, PageHeader, Button } from '../../../components/common';
 
 const BookingSettingsPage = () => {
   const navigate = useNavigate();
@@ -79,8 +80,8 @@ const BookingSettingsPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
+    <PageContainer variant="form">
+      {/* Header with Back Button */}
       <div className="flex items-center mb-6">
         <button
           onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
@@ -88,17 +89,16 @@ const BookingSettingsPage = () => {
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
-        <div className="flex items-center">
-          <Calendar className="w-8 h-8 text-purple-600 mr-3" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">การตั้งค่าการจอง</h1>
-            <p className="text-gray-600 text-sm">กำหนดกฎและเงื่อนไขการจองสนาม</p>
-          </div>
-        </div>
+        <PageHeader
+          title="การตั้งค่าการจอง"
+          subtitle="กำหนดกฎและเงื่อนไขการจองสนาม"
+          icon={Calendar}
+          iconColor="purple"
+        />
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+      <Card padding="p-0">
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
             {/* Advance Booking */}
@@ -237,34 +237,29 @@ const BookingSettingsPage = () => {
 
           {/* Footer with Actions */}
           <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition"
             >
               ยกเลิก
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="purple"
               disabled={saving}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center disabled:bg-purple-400 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  กำลังบันทึก...
-                </>
+              icon={saving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
               ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  บันทึกการตั้งค่า
-                </>
+                <Save className="w-4 h-4" />
               )}
-            </button>
+            >
+              {saving ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า'}
+            </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </Card>
+    </PageContainer>
   );
 };
 

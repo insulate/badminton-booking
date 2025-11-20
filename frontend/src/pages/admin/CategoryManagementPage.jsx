@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { categoriesAPI } from '../../lib/api';
+import { PageContainer, PageHeader } from '../../components/common';
 
 export default function CategoryManagementPage() {
   const [categories, setCategories] = useState([]);
@@ -154,35 +155,23 @@ export default function CategoryManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-cream p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto">
+    <PageContainer variant="full"><div className="space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-
-          <div className="flex justify-between items-center relative z-10">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                  <Tag className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold text-white">จัดการหมวดหมู่สินค้า</h1>
-              </div>
-              <p className="text-blue-100 text-sm ml-14">
-                เพิ่ม แก้ไข หรือลบหมวดหมู่สินค้า • {filteredCategories.length} รายการ
-              </p>
-            </div>
+        <PageHeader
+          title="จัดการหมวดหมู่สินค้า"
+          subtitle={`เพิ่ม แก้ไข หรือลบหมวดหมู่สินค้า • ${filteredCategories.length} รายการ`}
+          icon={Tag}
+          iconColor="purple"
+          actions={
             <button
               onClick={handleCreateClick}
-              className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-semibold flex items-center gap-2 shadow-lg border border-white/30"
+              className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-all font-semibold flex items-center gap-2 shadow-lg"
             >
               <Plus className="w-5 h-5" />
               เพิ่มหมวดหมู่ใหม่
             </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Search Bar */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
@@ -414,8 +403,7 @@ export default function CategoryManagementPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </div></PageContainer>
   );
 }
 

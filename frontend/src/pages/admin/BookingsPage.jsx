@@ -6,6 +6,8 @@ import BookingsTable from '../../components/booking/BookingsTable';
 import BookingDetailModal from '../../components/booking/BookingDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { toast } from 'react-hot-toast';
+import { PageContainer, PageHeader } from '../../components/common';
+import { Calendar, RefreshCw } from 'lucide-react';
 
 /**
  * BookingsPage
@@ -270,37 +272,26 @@ const BookingsPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <PageContainer variant="full">
+      <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">รายการจอง</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            จัดการและติดตามรายการจองสนามทั้งหมด
-          </p>
-        </div>
-        <button
-          onClick={loadBookings}
-          disabled={loading}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-          title="รีเฟรชรายการจอง"
-        >
-          <svg
-            className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      <PageHeader
+        title="รายการจอง"
+        subtitle="จัดการและติดตามรายการจองสนามทั้งหมด"
+        icon={Calendar}
+        iconColor="blue"
+        actions={
+          <button
+            onClick={loadBookings}
+            disabled={loading}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            title="รีเฟรชรายการจอง"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          รีเฟรช
-        </button>
-      </div>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            รีเฟรช
+          </button>
+        }
+      />
 
       {/* Content */}
       <div className="space-y-6">
@@ -340,7 +331,8 @@ const BookingsPage = () => {
         message={confirmDialog.message}
         type={confirmDialog.type}
       />
-    </div>
+      </div>
+    </PageContainer>
   );
 };
 

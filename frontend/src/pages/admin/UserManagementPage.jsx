@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Users, Plus, Search, RefreshCw, Trash2, Edit2, UserCheck } from 'lucide-react';
 import { userAPI } from '../../lib/api';
+import { PageContainer, PageHeader } from '../../components/common';
 
 export default function Settings() {
   const [users, setUsers] = useState([]);
@@ -142,14 +143,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6">
+    <PageContainer variant="full"><div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">จัดการผู้ใช้งาน</h1>
-          <p className="text-text-secondary mt-1">เพิ่ม แก้ไข และลบผู้ใช้งานในระบบ</p>
-        </div>
-      </div>
+      <PageHeader
+        title="จัดการผู้ใช้งาน"
+        subtitle="เพิ่ม แก้ไข และลบผู้ใช้งานในระบบ"
+        icon={Users}
+        iconColor="blue"
+      />
 
       {/* User Management Section */}
       <div className="bg-white rounded-xl shadow-md p-6">
@@ -410,6 +411,6 @@ export default function Settings() {
           </div>
         </div>
       )}
-    </div>
+    </div></PageContainer>
   );
 }

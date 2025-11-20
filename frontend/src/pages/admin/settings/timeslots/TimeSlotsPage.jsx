@@ -6,6 +6,7 @@ import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
 import TimeSlotModal from '../../../../components/timeslots/TimeSlotModal';
 import BulkUpdatePricingModal from '../../../../components/timeslots/BulkUpdatePricingModal';
+import { PageContainer, Card, PageHeader, Button } from '../../../../components/common';
 
 const TimeSlotsPage = () => {
   const navigate = useNavigate();
@@ -171,7 +172,7 @@ const TimeSlotsPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
@@ -181,33 +182,33 @@ const TimeSlotsPage = () => {
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">จัดการช่วงเวลาและราคา</h1>
-            <p className="text-gray-600 text-sm">
-              จัดการช่วงเวลาการให้บริการและราคา ({filteredTimeslots.length} ช่วงเวลา)
-            </p>
-          </div>
+          <PageHeader
+            title="จัดการช่วงเวลาและราคา"
+            subtitle={`จัดการช่วงเวลาการให้บริการและราคา (${filteredTimeslots.length} ช่วงเวลา)`}
+            icon={Clock}
+            iconColor="blue"
+          />
         </div>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="green"
             onClick={() => setShowBulkUpdateModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+            icon={<DollarSign className="w-4 h-4" />}
           >
-            <DollarSign className="w-4 h-4" />
             อัปเดตราคาทั้งหมด
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
             onClick={handleAdd}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            icon={<Plus className="w-4 h-4" />}
           >
-            <Plus className="w-4 h-4" />
             เพิ่มช่วงเวลาใหม่
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 mb-6">
+      <Card padding="p-4" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Filter by Day Type */}
           <select
@@ -231,7 +232,7 @@ const TimeSlotsPage = () => {
             <option value="inactive">ปิดใช้งาน</option>
           </select>
         </div>
-      </div>
+      </Card>
 
       {/* Timeslots by Day Type */}
       {!filterDayType ? (
@@ -243,7 +244,7 @@ const TimeSlotsPage = () => {
                 <Clock className="w-5 h-5" />
                 {getDayTypeLabel(dayType)} ({groupedTimeslots[dayType].length} ช่วงเวลา)
               </h2>
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <Card padding="p-0" className="overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -342,13 +343,13 @@ const TimeSlotsPage = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </Card>
             </div>
           ))}
         </div>
       ) : (
         // Show filtered day type only
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <Card padding="p-0" className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -453,7 +454,7 @@ const TimeSlotsPage = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* TimeSlot Modal */}
@@ -475,7 +476,7 @@ const TimeSlotsPage = () => {
           }}
         />
       )}
-    </div>
+    </PageContainer>
   );
 };
 

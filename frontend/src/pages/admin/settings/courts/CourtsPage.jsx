@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Search, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ArrowLeft, Grid3x3 } from 'lucide-react';
 import { courtsAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
+import { PageContainer, Card, PageHeader, Button } from '../../../../components/common';
 
 const CourtsPage = () => {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ const CourtsPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
@@ -102,24 +103,24 @@ const CourtsPage = () => {
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">จัดการสนาม</h1>
-            <p className="text-gray-600 text-sm">
-              จัดการข้อมูลสนามแบดมินตันทั้งหมด ({filteredCourts.length} สนาม)
-            </p>
-          </div>
+          <PageHeader
+            title="จัดการสนาม"
+            subtitle={`จัดการข้อมูลสนามแบดมินตันทั้งหมด (${filteredCourts.length} สนาม)`}
+            icon={Grid3x3}
+            iconColor="blue"
+          />
         </div>
-        <button
+        <Button
+          variant="primary"
           onClick={() => navigate(ROUTES.ADMIN.COURTS_ADD)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          icon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" />
           เพิ่มสนามใหม่
-        </button>
+        </Button>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 mb-6">
+      <Card className="mb-6"  padding="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
@@ -145,10 +146,10 @@ const CourtsPage = () => {
             <option value="inactive">ปิดใช้งาน</option>
           </select>
         </div>
-      </div>
+      </Card>
 
       {/* Courts Table */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <Card padding="p-0"  className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -222,8 +223,8 @@ const CourtsPage = () => {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </Card>
+    </PageContainer>
   );
 };
 
