@@ -439,6 +439,11 @@ export const groupPlayAPI = {
     return response.data;
   },
 
+  addPlayerProducts: async (sessionId, playerId, data) => {
+    const response = await api.post(API_ENDPOINTS.GROUPPLAY.ADD_PLAYER_PRODUCTS(sessionId, playerId), data);
+    return response.data;
+  },
+
   checkOut: async (id, playerId) => {
     const response = await api.post(API_ENDPOINTS.GROUPPLAY.CHECKOUT(id, playerId));
     return response.data;

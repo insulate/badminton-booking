@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
 
 export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers, onClose }) {
   const [showFinishedGames, setShowFinishedGames] = useState(false);
@@ -9,9 +9,13 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
   const finishedGames = player.games?.filter(g => g.status === 'finished') || [];
   const playingGames = player.games?.filter(g => g.status === 'playing') || [];
   const otherGames = player.games?.filter(g => g.status !== 'finished' && g.status !== 'playing') || [];
+  const standaloneItems = player.standaloneItems || [];
 
   // Calculate total cost from finished games
   const finishedGamesCost = finishedGames.reduce((sum, game) => sum + (game.costPerPlayer || 0), 0);
+
+  // Calculate total cost from standalone items
+  const standaloneItemsCost = standaloneItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Helper function to get players in a specific game
   const getPlayersInGame = (gameNumber) => {
@@ -396,11 +400,62 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
             </div>
           )}
 
+          {/* Standalone Items */}
+          {standaloneItems.length > 0 && (
+            <div>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="text-purple-600" size={20} />
+                    <span className="font-semibold text-text-primary">
+                      สินค้าเพิ่มเติม
+                    </span>
+                  </div>
+                  <span className="text-lg font-semibold text-purple-600">
+                    ฿{standaloneItemsCost.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {standaloneItems.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-white border border-purple-100 rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium text-text-primary">
+                          {item.product?.name || 'สินค้า'}
+                        </p>
+                        <p className="text-sm text-text-secondary">
+                          {item.product?.sku && <span className="mr-2">รหัส: {item.product.sku}</span>}
+                          จำนวน: {item.quantity}
+                        </p>
+                        {item.addedAt && (
+                          <p className="text-xs text-text-secondary mt-1">
+                            เพิ่มเมื่อ: {new Date(item.addedAt).toLocaleString('th-TH', {
+                              dateStyle: 'short',
+                              timeStyle: 'short'
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-sm text-text-secondary">
+                          ฿{item.price} x {item.quantity}
+                        </p>
+                        <p className="font-semibold text-purple-600">
+                          ฿{(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* No Games */}
-          {(!player.games || player.games.length === 0) && (
+          {(!player.games || player.games.length === 0) && standaloneItems.length === 0 && (
             <div className="text-center py-8 text-text-secondary">
               <Package size={48} className="mx-auto mb-3 opacity-50" />
-              <p>ยังไม่มีข้อมูลเกม</p>
+              <p>ยังไม่มีข้อมูลเกมและสินค้า</p>
             </div>
           )}
         </div>
@@ -415,9 +470,17 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">ค่าใช้จ่ายจากเกม</span>
               <span className="text-text-primary">
-                ฿{((player.totalCost || 0) - (entryFee || 0)).toFixed(2)}
+                ฿{((player.totalCost || 0) - (entryFee || 0) - standaloneItemsCost).toFixed(2)}
               </span>
             </div>
+            {standaloneItemsCost > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-text-secondary">ค่าสินค้าเพิ่มเติม</span>
+                <span className="text-text-primary">
+                  ฿{standaloneItemsCost.toFixed(2)}
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between pt-2 border-t border-slate-300">
               <span className="text-lg font-semibold text-text-primary">ยอดรวมทั้งหมด</span>
               <span className="text-2xl font-bold text-primary-blue">

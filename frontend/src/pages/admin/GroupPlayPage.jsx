@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Eye
+  Eye,
+  ShoppingCart
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -23,6 +24,7 @@ import StartGameModal from '../../components/groupplay/StartGameModal';
 import FinishGameModal from '../../components/groupplay/FinishGameModal';
 import EditGamePlayersModal from '../../components/groupplay/EditGamePlayersModal';
 import PlayerCostDetailModal from '../../components/groupplay/PlayerCostDetailModal';
+import AddProductCostModal from '../../components/groupplay/AddProductCostModal';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -49,6 +51,8 @@ export default function GroupPlayPage() {
   const [selectedGameForEdit, setSelectedGameForEdit] = useState(null);
   const [showPlayerCostModal, setShowPlayerCostModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [selectedPlayerForProduct, setSelectedPlayerForProduct] = useState(null);
 
   // Players table state
   const [searchTerm, setSearchTerm] = useState('');
@@ -577,18 +581,34 @@ export default function GroupPlayPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <div className="relative group inline-block">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedPlayer(player);
-                                      setShowPlayerCostModal(true);
-                                    }}
-                                    className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                                  >
-                                    <Eye size={16} />
-                                  </button>
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    ดูรายละเอียด
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="relative group inline-block">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedPlayer(player);
+                                        setShowPlayerCostModal(true);
+                                      }}
+                                      className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                    >
+                                      <Eye size={16} />
+                                    </button>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                      ดูรายละเอียด
+                                    </div>
+                                  </div>
+                                  <div className="relative group inline-block">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedPlayerForProduct(player);
+                                        setShowAddProductModal(true);
+                                      }}
+                                      className="inline-flex items-center justify-center p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                    >
+                                      <ShoppingCart size={16} />
+                                    </button>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                      เพิ่มสินค้า
+                                    </div>
                                   </div>
                                 </div>
                               </td>
@@ -824,6 +844,21 @@ export default function GroupPlayPage() {
           onClose={() => {
             setShowPlayerCostModal(false);
             setSelectedPlayer(null);
+          }}
+        />
+      )}
+
+      {showAddProductModal && selectedPlayerForProduct && (
+        <AddProductCostModal
+          player={selectedPlayerForProduct}
+          sessionId={selectedRule?._id}
+          onClose={() => {
+            setShowAddProductModal(false);
+            setSelectedPlayerForProduct(null);
+          }}
+          onSuccess={async (sessionId, playerId, data) => {
+            await groupPlayAPI.addPlayerProducts(sessionId, playerId, data);
+            await refreshRule();
           }}
         />
       )}

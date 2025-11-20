@@ -122,6 +122,7 @@ export const API_ENDPOINTS = {
     START_GAME: (id) => `/groupplay/${id}/game/start`,
     FINISH_GAME: (id, playerId, gameNumber) => `/groupplay/${id}/game/${playerId}/${gameNumber}/finish`,
     CHECKOUT: (id, playerId) => `/groupplay/${id}/checkout/${playerId}`,
+    ADD_PLAYER_PRODUCTS: (id, playerId) => `/groupplay/${id}/player/${playerId}/products`,
   },
 };
 

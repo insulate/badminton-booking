@@ -113,6 +113,29 @@ const sessionPlayerSchema = new mongoose.Schema({
     default: false,
   },
   games: [gameSchema],
+  standaloneItems: [
+    {
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: [1, 'จำนวนต้องมากกว่า 0'],
+      },
+      price: {
+        type: Number,
+        required: true,
+        min: [0, 'ราคาต้องไม่ติดลบ'],
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
   totalCost: {
     type: Number,
     default: 0,

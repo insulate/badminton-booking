@@ -37,6 +37,7 @@ router.get('/', async (req, res) => {
       .populate('createdBy', 'username')
       .populate('players.player', 'name phone level levelName')
       .populate('players.games.court', 'name courtNumber')
+      .populate('players.standaloneItems.product', 'name sku price')
       .sort({ sessionName: 1, startTime: 1 });
 
     res.json({
@@ -155,7 +156,8 @@ router.get('/:id', async (req, res) => {
       .populate('players.games.court', 'name courtNumber')
       .populate('players.games.teammates', 'name level levelName')
       .populate('players.games.opponents', 'name level levelName')
-      .populate('players.games.items.product', 'name sku price');
+      .populate('players.games.items.product', 'name sku price')
+      .populate('players.standaloneItems.product', 'name sku price');
 
     if (!session) {
       return res.status(404).json({
@@ -474,6 +476,106 @@ router.patch('/:id/game/:playerId/:gameNumber/finish', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการจบเกม',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/groupplay/:id/player/:playerId/products
+ * @desc    Add product costs to a player
+ * @access  Private
+ * @body    items (array of { product, quantity, price })
+ */
+router.post('/:id/player/:playerId/products', async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกสินค้าอย่างน้อย 1 รายการ',
+      });
+    }
+
+    const session = await GroupPlay.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบ session',
+      });
+    }
+
+    const sessionPlayer = session.players.id(req.params.playerId);
+    if (!sessionPlayer) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบผู้เล่นใน session',
+      });
+    }
+
+    // Validate products exist and have enough stock
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `ไม่พบสินค้า ID: ${item.product}`,
+        });
+      }
+
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `สินค้า ${product.name} มีสต็อกไม่เพียงพอ (คงเหลือ: ${product.stock})`,
+        });
+      }
+    }
+
+    // Calculate total cost from items
+    let totalItemsCost = 0;
+    for (const item of items) {
+      totalItemsCost += item.price * item.quantity;
+    }
+
+    // Add items to player's standalone items and update total cost
+    if (!sessionPlayer.standaloneItems) {
+      sessionPlayer.standaloneItems = [];
+    }
+
+    items.forEach(item => {
+      sessionPlayer.standaloneItems.push({
+        product: item.product,
+        quantity: item.quantity,
+        price: item.price,
+      });
+    });
+
+    sessionPlayer.totalCost = (sessionPlayer.totalCost || 0) + totalItemsCost;
+
+    await session.save();
+
+    // Update product stock
+    for (const item of items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: -item.quantity },
+      });
+    }
+
+    const updatedSession = await GroupPlay.findById(session._id)
+      .populate('players.player', 'name phone level levelName')
+      .populate('players.standaloneItems.product', 'name sku price');
+
+    res.json({
+      success: true,
+      message: 'เพิ่มค่าใช้จ่ายสินค้าสำเร็จ',
+      data: updatedSession,
+    });
+  } catch (error) {
+    console.error('Error adding player products:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการเพิ่มค่าใช้จ่ายสินค้า',
       error: error.message,
     });
   }
