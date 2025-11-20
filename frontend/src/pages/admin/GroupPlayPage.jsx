@@ -577,16 +577,20 @@ export default function GroupPlayPage() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <button
-                                  onClick={() => {
-                                    setSelectedPlayer(player);
-                                    setShowPlayerCostModal(true);
-                                  }}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors"
-                                >
-                                  <Eye size={14} />
-                                  ดูรายละเอียด
-                                </button>
+                                <div className="relative group inline-block">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPlayer(player);
+                                      setShowPlayerCostModal(true);
+                                    }}
+                                    className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                  >
+                                    <Eye size={16} />
+                                  </button>
+                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    ดูรายละเอียด
+                                  </div>
+                                </div>
                               </td>
                             </tr>
                           );
