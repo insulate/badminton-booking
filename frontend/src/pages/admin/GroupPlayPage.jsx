@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -8,7 +8,11 @@ import {
   Plus,
   RefreshCw,
   CheckCircle,
-  Edit
+  Edit,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -45,9 +49,21 @@ export default function GroupPlayPage() {
   const [showPlayerCostModal, setShowPlayerCostModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
+  // Players table state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const fetchData = async () => {
     try {
@@ -131,18 +147,7 @@ export default function GroupPlayPage() {
     setShowStartGameModal(true);
   };
 
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-secondary">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Calculate derived state before early return (to satisfy Rules of Hooks)
   const checkedInPlayers = selectedRule?.players?.filter(p => p.checkedIn && !p.checkedOut) || [];
 
   // Collect all playing games from all players
@@ -180,6 +185,93 @@ export default function GroupPlayPage() {
   });
 
   const currentGames = Array.from(gamesMap.values());
+
+  // Handle sorting
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  // Filter, sort and paginate players
+  const processedPlayers = useMemo(() => {
+    // Step 1: Filter
+    let filtered = checkedInPlayers;
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      const searchNumbers = searchTerm.replace(/\D/g, '');
+
+      filtered = checkedInPlayers.filter((player) => {
+        const nameMatch = player.name?.toLowerCase().includes(searchLower);
+        const phoneMatch = searchNumbers && player.phone?.includes(searchNumbers);
+        return nameMatch || phoneMatch;
+      });
+    }
+
+    // Step 2: Sort
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name?.toLowerCase() || '';
+          bValue = b.name?.toLowerCase() || '';
+          break;
+        case 'level':
+          const levelOrder = { 'C': 0, 'B-': 1, 'B': 2, 'B+': 3, 'A-': 4, 'A': 5, 'A+': 6, 'S': 7 };
+          aValue = levelOrder[a.level] ?? -1;
+          bValue = levelOrder[b.level] ?? -1;
+          break;
+        case 'games':
+          aValue = a.games?.length || 0;
+          bValue = b.games?.length || 0;
+          break;
+        case 'totalCost':
+          aValue = a.totalCost || 0;
+          bValue = b.totalCost || 0;
+          break;
+        case 'paymentStatus':
+          aValue = a.paymentStatus === 'paid' ? 1 : 0;
+          bValue = b.paymentStatus === 'paid' ? 1 : 0;
+          break;
+        case 'status':
+          const playingGameA = a.games?.find(g => g.status === 'playing');
+          const playingGameB = b.games?.find(g => g.status === 'playing');
+          aValue = playingGameA ? 1 : 0;
+          bValue = playingGameB ? 1 : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [searchTerm, checkedInPlayers, sortField, sortDirection]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(processedPlayers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPlayers = processedPlayers.slice(startIndex, endIndex);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-secondary">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -326,76 +418,243 @@ export default function GroupPlayPage() {
 
           {/* Players List */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-4">
-              รายชื่อผู้เล่น ({checkedInPlayers.length} คน)
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-text-primary">
+                รายชื่อผู้เล่น ({processedPlayers.length} คน)
+              </h2>
+            </div>
+
+            {/* Search Bar */}
+            {checkedInPlayers.length > 0 && (
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="ค้นหาชื่อหรือเบอร์โทร..."
+                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                  />
+                </div>
+              </div>
+            )}
+
             {checkedInPlayers.length === 0 ? (
               <div className="text-center py-8 text-text-secondary">
                 <Users size={48} className="mx-auto mb-3 opacity-50" />
                 <p>ยังไม่มีผู้เล่น check-in</p>
               </div>
+            ) : processedPlayers.length === 0 ? (
+              <div className="text-center py-8 text-text-secondary">
+                <Users size={48} className="mx-auto mb-3 opacity-50" />
+                <p>ไม่พบผู้เล่นที่ค้นหา</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {checkedInPlayers.map((player, index) => {
-                  const playingGame = player.games?.find(g => g.status === 'playing');
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        setSelectedPlayer(player);
-                        setShowPlayerCostModal(true);
-                      }}
-                      className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer hover:border-primary-blue"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="font-medium text-text-primary">{player.name}</p>
-                          <p className="text-sm text-text-secondary">{player.phone}</p>
+              <>
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                        <tr>
+                          <th
+                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('name')}
+                          >
+                            <div className="flex items-center gap-2">
+                              ผู้เล่น
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'name' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('level')}
+                          >
+                            <div className="flex items-center gap-2">
+                              ระดับ
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'level' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('status')}
+                          >
+                            <div className="flex items-center gap-2">
+                              สถานะ
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'status' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('games')}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              เกม
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'games' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('totalCost')}
+                          >
+                            <div className="flex items-center justify-end gap-2">
+                              ค่าใช้จ่าย
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'totalCost' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                          <th
+                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            onClick={() => handleSort('paymentStatus')}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              การชำระ
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'paymentStatus' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {paginatedPlayers.map((player, index) => {
+                          const playingGame = player.games?.find(g => g.status === 'playing');
+                          return (
+                            <tr
+                              key={index}
+                              onClick={() => {
+                                setSelectedPlayer(player);
+                                setShowPlayerCostModal(true);
+                              }}
+                              className={`cursor-pointer hover:bg-blue-50 transition-all duration-150 ${
+                                index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                              }`}
+                            >
+                              <td className="px-6 py-4">
+                                <div>
+                                  <div className="font-semibold text-gray-900">{player.name}</div>
+                                  <div className="text-sm text-gray-600 mt-1">{player.phone}</div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                {player.level ? (
+                                  <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
+                                    {player.levelName || `Level ${player.level}`}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-gray-400">ไม่ระบุ</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {playingGame ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                    <span className="text-sm font-medium text-green-600">
+                                      กำลังเล่น
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                                    <span className="text-sm font-medium text-slate-500">
+                                      ว่าง
+                                    </span>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className="font-semibold text-gray-900">{player.games?.length || 0}</span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <span className="font-semibold text-green-600">฿{player.totalCost || 0}</span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span
+                                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                                    player.paymentStatus === 'paid'
+                                      ? 'bg-green-100 text-green-800 border border-green-200'
+                                      : 'bg-red-100 text-red-800 border border-red-200'
+                                  }`}
+                                >
+                                  {player.paymentStatus === 'paid' ? 'จ่ายแล้ว' : 'ยังไม่จ่าย'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6 bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-700">
+                        แสดง <span className="font-semibold">{startIndex + 1}</span> ถึง{' '}
+                        <span className="font-semibold">{Math.min(endIndex, processedPlayers.length)}</span> จาก{' '}
+                        <span className="font-semibold">{processedPlayers.length}</span> รายการ
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className={`flex items-center gap-1 px-3 py-2 rounded-lg border transition-colors ${
+                            currentPage === 1
+                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span className="text-sm">ก่อนหน้า</span>
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                            if (
+                              page === 1 ||
+                              page === totalPages ||
+                              (page >= currentPage - 1 && page <= currentPage + 1)
+                            ) {
+                              return (
+                                <button
+                                  key={page}
+                                  onClick={() => setCurrentPage(page)}
+                                  className={`w-10 h-10 rounded-lg border font-medium text-sm transition-colors ${
+                                    currentPage === page
+                                      ? 'bg-blue-600 text-white border-blue-600'
+                                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              );
+                            } else if (page === currentPage - 2 || page === currentPage + 2) {
+                              return (
+                                <span key={page} className="px-2 text-gray-400">
+                                  ...
+                                </span>
+                              );
+                            }
+                            return null;
+                          })}
                         </div>
-                        {player.level && (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                            {player.levelName || `Level ${player.level}`}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Playing Status */}
-                      <div className="mb-2 pb-2 border-b border-slate-200">
-                        {playingGame ? (
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            <span className="text-xs font-medium text-green-600">
-                              กำลังเล่น - {playingGame.court?.name || `สนาม ${playingGame.court?.courtNumber || playingGame.gameNumber}`}
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
-                            <span className="text-xs font-medium text-slate-500">
-                              ว่าง
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm mt-3 pt-3 border-t border-slate-200">
-                        <span className="text-text-secondary">เกม:</span>
-                        <span className="font-medium">{player.games?.length || 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm mt-1">
-                        <span className="text-text-secondary">ค่าใช้จ่าย:</span>
-                        <span className="font-medium text-green-600">฿{player.totalCost || 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm mt-1">
-                        <span className="text-text-secondary">สถานะ:</span>
-                        <span className={`font-medium ${player.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-600'}`}>
-                          {player.paymentStatus === 'paid' ? 'จ่ายแล้ว' : 'ยังไม่จ่าย'}
-                        </span>
+                        <button
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className={`flex items-center gap-1 px-3 py-2 rounded-lg border transition-colors ${
+                            currentPage === totalPages
+                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <span className="text-sm">ถัดไป</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
