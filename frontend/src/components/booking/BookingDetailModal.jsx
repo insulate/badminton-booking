@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, DollarSign } from 'lucide-react';
+import { settingsAPI } from '../../lib/api';
 
 /**
  * BookingDetailModal Component
@@ -11,6 +12,37 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
     paymentMethod: booking.paymentMethod || 'cash',
     amountPaid: 0, // Amount to pay (incremental)
   });
+  const [paymentSettings, setPaymentSettings] = useState(null);
+
+  // Fetch payment settings
+  useEffect(() => {
+    const fetchPaymentSettings = async () => {
+      try {
+        const response = await settingsAPI.get();
+        if (response.success && response.data.payment) {
+          setPaymentSettings(response.data.payment);
+        }
+      } catch (error) {
+        console.error('Error fetching payment settings:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchPaymentSettings();
+    }
+  }, [isOpen]);
+
+  // Get available payment methods based on settings
+  const getAvailablePaymentMethods = (settings) => {
+    if (!settings) return [];
+
+    const methods = [];
+    if (settings.acceptCash) methods.push({ value: 'cash', label: 'เงินสด' });
+    if (settings.acceptTransfer) methods.push({ value: 'transfer', label: 'โอนเงิน' });
+    if (settings.acceptPromptPay) methods.push({ value: 'qr', label: 'QR Code' });
+    if (settings.acceptCreditCard) methods.push({ value: 'card', label: 'บัตรเครดิต' });
+    return methods;
+  };
 
   if (!isOpen || !booking) return null;
 
@@ -224,10 +256,14 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="cash">เงินสด</option>
-                      <option value="transfer">โอนเงิน</option>
-                      <option value="qr">QR Code</option>
-                      <option value="card">บัตรเครดิต</option>
+                      {paymentSettings && getAvailablePaymentMethods(paymentSettings).map((method) => (
+                        <option key={method.value} value={method.value}>
+                          {method.label}
+                        </option>
+                      ))}
+                      {(!paymentSettings || getAvailablePaymentMethods(paymentSettings).length === 0) && (
+                        <option value="">ไม่มีวิธีการชำระเงินที่ใช้งานได้</option>
+                      )}
                     </select>
                   </div>
 

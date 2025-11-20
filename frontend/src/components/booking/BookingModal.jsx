@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
-import { bookingsAPI } from '../../lib/api';
+import { bookingsAPI, settingsAPI } from '../../lib/api';
 
 /**
  * BookingModal Component
@@ -22,6 +22,42 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
   const [pricing, setPricing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [paymentSettings, setPaymentSettings] = useState(null);
+
+  // Fetch payment settings
+  useEffect(() => {
+    const fetchPaymentSettings = async () => {
+      try {
+        const response = await settingsAPI.get();
+        if (response.success && response.data.payment) {
+          setPaymentSettings(response.data.payment);
+          // Set default payment method to first available option
+          const availableMethods = getAvailablePaymentMethods(response.data.payment);
+          if (availableMethods.length > 0 && !formData.paymentMethod) {
+            setFormData(prev => ({ ...prev, paymentMethod: availableMethods[0].value }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment settings:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchPaymentSettings();
+    }
+  }, [isOpen]);
+
+  // Get available payment methods based on settings
+  const getAvailablePaymentMethods = (settings) => {
+    if (!settings) return [];
+
+    const methods = [];
+    if (settings.acceptCash) methods.push({ value: 'cash', label: 'เงินสด' });
+    if (settings.acceptTransfer) methods.push({ value: 'transfer', label: 'โอนเงิน' });
+    if (settings.acceptPromptPay) methods.push({ value: 'qr', label: 'QR Code' });
+    if (settings.acceptCreditCard) methods.push({ value: 'card', label: 'บัตรเครดิต' });
+    return methods;
+  };
 
   // Calculate end time based on duration
   const calculateEndTime = () => {
@@ -338,10 +374,14 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="cash">เงินสด</option>
-                <option value="transfer">โอนเงิน</option>
-                <option value="qr">QR Code</option>
-                <option value="card">บัตรเครดิต</option>
+                {paymentSettings && getAvailablePaymentMethods(paymentSettings).map((method) => (
+                  <option key={method.value} value={method.value}>
+                    {method.label}
+                  </option>
+                ))}
+                {(!paymentSettings || getAvailablePaymentMethods(paymentSettings).length === 0) && (
+                  <option value="">ไม่มีวิธีการชำระเงินที่ใช้งานได้</option>
+                )}
               </select>
             </div>
 
