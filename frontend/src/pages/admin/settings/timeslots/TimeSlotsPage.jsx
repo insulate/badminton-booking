@@ -172,43 +172,36 @@ const TimeSlotsPage = () => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer variant="full">
+      <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
-            className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <PageHeader
-            title="จัดการช่วงเวลาและราคา"
-            subtitle={`จัดการช่วงเวลาการให้บริการและราคา (${filteredTimeslots.length} ช่วงเวลา)`}
-            icon={Clock}
-            iconColor="blue"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="green"
-            onClick={() => setShowBulkUpdateModal(true)}
-            icon={<DollarSign className="w-4 h-4" />}
-          >
-            อัปเดตราคาทั้งหมด
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleAdd}
-            icon={<Plus className="w-4 h-4" />}
-          >
-            เพิ่มช่วงเวลาใหม่
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="จัดการช่วงเวลาและราคา"
+        subtitle={`จัดการช่วงเวลาการให้บริการและราคา (${filteredTimeslots.length} ช่วงเวลา)`}
+        icon={Clock}
+        iconColor="blue"
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="green"
+              onClick={() => setShowBulkUpdateModal(true)}
+              icon={<DollarSign className="w-4 h-4" />}
+            >
+              อัปเดตราคาทั้งหมด
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleAdd}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              เพิ่มช่วงเวลาใหม่
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filters */}
-      <Card padding="p-4" className="mb-6">
+      <Card padding="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Filter by Day Type */}
           <select
@@ -476,6 +469,7 @@ const TimeSlotsPage = () => {
           }}
         />
       )}
+      </div>
     </PageContainer>
   );
 };

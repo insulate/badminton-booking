@@ -181,6 +181,7 @@ const VenueSettingsPage = () => {
           </div>
         </form>
       </Card>
+      </div>
     </PageContainer>
   );
 };

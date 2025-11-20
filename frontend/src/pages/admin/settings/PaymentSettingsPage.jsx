@@ -101,21 +101,14 @@ const PaymentSettingsPage = () => {
 
   return (
     <PageContainer variant="form">
-      {/* Header with Back Button */}
-      <div className="flex items-center mb-6">
-        <button
-          onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
-          className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <PageHeader
-          title="วิธีการชำระเงิน"
-          subtitle="เลือกช่องทางการรับชำระเงิน"
-          icon={CreditCard}
-          iconColor="orange"
-        />
-      </div>
+      <div className="space-y-6">
+      {/* Header */}
+      <PageHeader
+        title="วิธีการชำระเงิน"
+        subtitle="เลือกช่องทางการรับชำระเงิน"
+        icon={CreditCard}
+        iconColor="orange"
+      />
 
       {/* Form */}
       <Card padding="p-0">
@@ -275,6 +268,7 @@ const PaymentSettingsPage = () => {
           </div>
         </form>
       </Card>
+      </div>
     </PageContainer>
   );
 };

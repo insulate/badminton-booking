@@ -93,34 +93,27 @@ const CourtsPage = () => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer variant="full">
+      <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
-            className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition"
+      <PageHeader
+        title="จัดการสนาม"
+        subtitle={`จัดการข้อมูลสนามแบดมินตันทั้งหมด (${filteredCourts.length} สนาม)`}
+        icon={Grid3x3}
+        iconColor="blue"
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ADMIN.COURTS_ADD)}
+            icon={<Plus className="w-4 h-4" />}
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <PageHeader
-            title="จัดการสนาม"
-            subtitle={`จัดการข้อมูลสนามแบดมินตันทั้งหมด (${filteredCourts.length} สนาม)`}
-            icon={Grid3x3}
-            iconColor="blue"
-          />
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => navigate(ROUTES.ADMIN.COURTS_ADD)}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          เพิ่มสนามใหม่
-        </Button>
-      </div>
+            เพิ่มสนามใหม่
+          </Button>
+        }
+      />
 
       {/* Search and Filters */}
-      <Card className="mb-6"  padding="p-4">
+      <Card padding="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
@@ -224,6 +217,7 @@ const CourtsPage = () => {
           </table>
         </div>
       </Card>
+      </div>
     </PageContainer>
   );
 };
