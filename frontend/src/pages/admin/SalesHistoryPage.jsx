@@ -282,27 +282,27 @@ const SalesHistoryPage = () => {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Sale Code
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         วันที่/เวลา
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         ลูกค้า
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         รายการ
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         ยอดรวม
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         วิธีชำระเงิน
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         การดำเนินการ
                       </th>
                     </tr>
@@ -459,18 +459,18 @@ const SalesHistoryPage = () => {
                 </h3>
                 <div className="border-2 border-gray-200 rounded-xl overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
+                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           สินค้า
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           จำนวน
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           ราคา
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           รวม
                         </th>
                       </tr>
