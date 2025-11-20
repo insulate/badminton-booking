@@ -58,6 +58,11 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   // Get slot status color
   const getSlotColor = (slot) => {
+    // Blocked by Group Play
+    if (slot.blockedByGroupPlay) {
+      return 'bg-purple-100 border-purple-400 cursor-not-allowed';
+    }
+
     // Booked slots
     if (!slot.available) {
       // Booked and paid = green
@@ -79,6 +84,11 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   // Handle slot click
   const handleSlotClick = (court, slot) => {
+    // Blocked by Group Play - do nothing
+    if (slot.blockedByGroupPlay) {
+      return;
+    }
+
     if (slot.available) {
       // For available slots, open booking modal
       onSlotClick({
@@ -146,6 +156,10 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
             <div className="w-4 h-4 bg-red-100 border-2 border-red-300 rounded"></div>
             <span className="text-sm text-gray-600">จองแล้ว (ยังไม่ชำระ)</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-purple-100 border-2 border-purple-400 rounded"></div>
+            <span className="text-sm text-gray-600">ก๊วนสนาม (Group Play)</span>
+          </div>
         </div>
       </div>
 
@@ -192,12 +206,18 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
                           slot
                         )}`}
                         title={
-                          slot.available
+                          slot.blockedByGroupPlay
+                            ? 'ถูกบล็อกโดยก๊วนสนาม (Group Play)'
+                            : slot.available
                             ? 'คลิกเพื่อจอง'
                             : `จองโดย: ${slot.booking?.customerName || 'N/A'}`
                         }
                       >
-                        {slot.available ? (
+                        {slot.blockedByGroupPlay ? (
+                          <div className="text-xs font-semibold text-purple-700">
+                            ก๊วนสนาม
+                          </div>
+                        ) : slot.available ? (
                           <div className={`text-xs font-semibold ${
                             slot.peakHour ? 'text-orange-700' : 'text-blue-700'
                           }`}>

@@ -163,6 +163,15 @@ const getAvailableCourts = async ({ date, timeSlotId, courtType = null }) => {
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
 
+    // Calculate day of week for Group Play blocking check
+    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][bookingDate.getDay()];
+
+    // Get the time slot to check start time
+    const timeSlot = await TimeSlot.findById(timeSlotId);
+    if (!timeSlot) {
+      throw new Error('TimeSlot not found');
+    }
+
     // Get all active courts
     const courtQuery = {
       deletedAt: null,
@@ -183,12 +192,31 @@ const getAvailableCourts = async ({ date, timeSlotId, courtType = null }) => {
       bookingStatus: { $ne: 'cancelled' },
     }).distinct('court');
 
-    // Filter out booked courts
-    const availableCourts = allCourts.filter(
-      (court) => !bookedCourts.some((bookedCourtId) => bookedCourtId.equals(court._id))
+    // Filter out booked courts and courts blocked by Group Play
+    const availableCourts = await Promise.all(
+      allCourts.map(async (court) => {
+        // Check if booked
+        const isBooked = bookedCourts.some((bookedCourtId) => bookedCourtId.equals(court._id));
+        if (isBooked) {
+          return null;
+        }
+
+        // Check if blocked by Group Play
+        const isBlockedByGroupPlay = await GroupPlay.isTimeSlotBlocked(
+          court._id,
+          dayOfWeek,
+          timeSlot.startTime
+        );
+        if (isBlockedByGroupPlay) {
+          return null;
+        }
+
+        return court;
+      })
     );
 
-    return availableCourts;
+    // Filter out null values (booked or blocked courts)
+    return availableCourts.filter((court) => court !== null);
   } catch (error) {
     console.error('Error getting available courts:', error);
     throw error;
@@ -210,6 +238,9 @@ const getCourtSchedule = async (date, dayType) => {
 
     const endOfDay = new Date(bookingDate);
     endOfDay.setHours(23, 59, 59, 999);
+
+    // Calculate day of week for Group Play blocking check
+    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][bookingDate.getDay()];
 
     // Get all active courts
     const courts = await Court.find({
@@ -234,59 +265,71 @@ const getCourtSchedule = async (date, dayType) => {
       .populate('timeSlot', 'startTime endTime');
 
     // Build schedule grid
-    const schedule = courts.map((court) => {
-      // Create a map to track which timeslots are booked for this court
-      const bookedSlots = new Map(); // key: timeSlotId, value: booking
+    const schedule = await Promise.all(
+      courts.map(async (court) => {
+        // Create a map to track which timeslots are booked for this court
+        const bookedSlots = new Map(); // key: timeSlotId, value: booking
 
-      // Process all bookings for this court
-      bookings
-        .filter((b) => b.court && b.court._id.equals(court._id))
-        .forEach((booking) => {
-          // Find the starting timeslot index
-          const startIndex = timeSlots.findIndex((ts) =>
-            booking.timeSlot && ts._id.equals(booking.timeSlot._id)
-          );
+        // Process all bookings for this court
+        bookings
+          .filter((b) => b.court && b.court._id.equals(court._id))
+          .forEach((booking) => {
+            // Find the starting timeslot index
+            const startIndex = timeSlots.findIndex((ts) =>
+              booking.timeSlot && ts._id.equals(booking.timeSlot._id)
+            );
 
-          if (startIndex !== -1) {
-            // Mark the starting slot and all consecutive slots based on duration
-            for (let i = 0; i < booking.duration && startIndex + i < timeSlots.length; i++) {
-              const slot = timeSlots[startIndex + i];
-              bookedSlots.set(slot._id.toString(), booking);
+            if (startIndex !== -1) {
+              // Mark the starting slot and all consecutive slots based on duration
+              for (let i = 0; i < booking.duration && startIndex + i < timeSlots.length; i++) {
+                const slot = timeSlots[startIndex + i];
+                bookedSlots.set(slot._id.toString(), booking);
+              }
             }
-          }
-        });
+          });
 
-      // Map each timeslot with availability info
-      const courtSlots = timeSlots.map((timeSlot) => {
-        const booking = bookedSlots.get(timeSlot._id.toString());
+        // Map each timeslot with availability info (check Group Play blocking)
+        const courtSlots = await Promise.all(
+          timeSlots.map(async (timeSlot) => {
+            const booking = bookedSlots.get(timeSlot._id.toString());
+
+            // Check if time slot is blocked by Group Play
+            const isBlockedByGroupPlay = await GroupPlay.isTimeSlotBlocked(
+              court._id,
+              dayOfWeek,
+              timeSlot.startTime
+            );
+
+            return {
+              timeSlotId: timeSlot._id,
+              startTime: timeSlot.startTime,
+              endTime: timeSlot.endTime,
+              peakHour: timeSlot.peakHour,
+              available: !booking && !isBlockedByGroupPlay,
+              blockedByGroupPlay: isBlockedByGroupPlay,
+              booking: booking
+                ? {
+                    bookingId: booking._id,
+                    bookingCode: booking.bookingCode,
+                    customerName: booking.customer.name,
+                    customerPhone: booking.customer.phone,
+                    bookingStatus: booking.bookingStatus,
+                    paymentStatus: booking.paymentStatus,
+                  }
+                : null,
+            };
+          })
+        );
 
         return {
-          timeSlotId: timeSlot._id,
-          startTime: timeSlot.startTime,
-          endTime: timeSlot.endTime,
-          peakHour: timeSlot.peakHour,
-          available: !booking,
-          booking: booking
-            ? {
-                bookingId: booking._id,
-                bookingCode: booking.bookingCode,
-                customerName: booking.customer.name,
-                customerPhone: booking.customer.phone,
-                bookingStatus: booking.bookingStatus,
-                paymentStatus: booking.paymentStatus,
-              }
-            : null,
+          courtId: court._id,
+          courtNumber: court.courtNumber,
+          courtName: court.name,
+          courtType: court.type,
+          slots: courtSlots,
         };
-      });
-
-      return {
-        courtId: court._id,
-        courtNumber: court.courtNumber,
-        courtName: court.name,
-        courtType: court.type,
-        slots: courtSlots,
-      };
-    });
+      })
+    );
 
     return {
       date: bookingDate,
