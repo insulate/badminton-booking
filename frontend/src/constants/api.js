@@ -124,6 +124,16 @@ export const API_ENDPOINTS = {
     CHECKOUT: (id, playerId) => `/groupplay/${id}/checkout/${playerId}`,
     ADD_PLAYER_PRODUCTS: (id, playerId) => `/groupplay/${id}/player/${playerId}/products`,
   },
+
+  // Reports & Analytics (Admin)
+  REPORTS: {
+    REVENUE_DAILY: '/reports/revenue/daily',
+    REVENUE_MONTHLY: '/reports/revenue/monthly',
+    REVENUE_YEARLY: '/reports/revenue/yearly',
+    BOOKINGS_SUMMARY: '/reports/bookings/summary',
+    PRODUCTS_SALES: '/reports/products/sales',
+    COURTS_USAGE: '/reports/courts/usage',
+  },
 };
 
 export default API_ENDPOINTS;

@@ -450,4 +450,49 @@ export const groupPlayAPI = {
   },
 };
 
+// Reports API
+export const reportsAPI = {
+  getDailyRevenue: async (date) => {
+    const response = await api.get(`${API_ENDPOINTS.REPORTS.REVENUE_DAILY}?date=${date}`);
+    return response.data;
+  },
+
+  getMonthlyRevenue: async (month) => {
+    const response = await api.get(`${API_ENDPOINTS.REPORTS.REVENUE_MONTHLY}?month=${month}`);
+    return response.data;
+  },
+
+  getYearlyRevenue: async (year) => {
+    const response = await api.get(`${API_ENDPOINTS.REPORTS.REVENUE_YEARLY}?year=${year}`);
+    return response.data;
+  },
+
+  getBookingsSummary: async (startDate, endDate) => {
+    let url = API_ENDPOINTS.REPORTS.BOOKINGS_SUMMARY;
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getProductsSales: async (startDate, endDate, limit = 10) => {
+    let url = `${API_ENDPOINTS.REPORTS.PRODUCTS_SALES}?limit=${limit}`;
+    if (startDate && endDate) {
+      url += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getCourtsUsage: async (startDate, endDate) => {
+    let url = API_ENDPOINTS.REPORTS.COURTS_USAGE;
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await api.get(url);
+    return response.data;
+  },
+};
+
 export default api;
