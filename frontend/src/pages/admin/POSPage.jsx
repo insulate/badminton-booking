@@ -12,7 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { productsAPI, salesAPI, categoriesAPI } from '../../lib/api';
+import { productsAPI, salesAPI, categoriesAPI, settingsAPI } from '../../lib/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -438,6 +438,40 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [customer, setCustomer] = useState({ name: '', phone: '' });
   const [loading, setLoading] = useState(false);
+  const [paymentSettings, setPaymentSettings] = useState(null);
+
+  // Fetch payment settings
+  useEffect(() => {
+    const fetchPaymentSettings = async () => {
+      try {
+        const response = await settingsAPI.get();
+        if (response.success && response.data.payment) {
+          setPaymentSettings(response.data.payment);
+          // Set default payment method to first available option
+          const availableMethods = getAvailablePaymentMethods(response.data.payment);
+          if (availableMethods.length > 0) {
+            setPaymentMethod(availableMethods[0].value);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment settings:', error);
+      }
+    };
+
+    fetchPaymentSettings();
+  }, []);
+
+  // Get available payment methods based on settings
+  const getAvailablePaymentMethods = (settings) => {
+    if (!settings) return [];
+
+    const methods = [];
+    if (settings.acceptCash) methods.push({ value: 'cash', label: 'เงินสด' });
+    if (settings.acceptPromptPay) methods.push({ value: 'promptpay', label: 'พร้อมเพย์' });
+    if (settings.acceptTransfer) methods.push({ value: 'transfer', label: 'โอนเงิน' });
+    if (settings.acceptCreditCard) methods.push({ value: 'credit_card', label: 'บัตรเครดิต' });
+    return methods;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -539,52 +573,28 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
           {/* Payment Method */}
           <div className="mb-6">
             <h3 className="font-semibold text-gray-800 mb-3">วิธีการชำระเงิน</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('cash')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  paymentMethod === 'cash'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">เงินสด</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('promptpay')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  paymentMethod === 'promptpay'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">พร้อมเพย์</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('transfer')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  paymentMethod === 'transfer'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">โอนเงิน</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('credit_card')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  paymentMethod === 'credit_card'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="font-semibold">บัตรเครดิต</div>
-              </button>
-            </div>
+            {paymentSettings && getAvailablePaymentMethods(paymentSettings).length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {getAvailablePaymentMethods(paymentSettings).map((method) => (
+                  <button
+                    key={method.value}
+                    type="button"
+                    onClick={() => setPaymentMethod(method.value)}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      paymentMethod === method.value
+                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="font-semibold">{method.label}</div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                ไม่มีวิธีการชำระเงินที่ใช้งานได้
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
