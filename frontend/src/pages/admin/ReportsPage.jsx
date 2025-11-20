@@ -15,6 +15,16 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import {
+  DollarSign,
+  ShoppingBag,
+  Users,
+  TrendingUp,
+  Calendar,
+  BarChart3,
+  PieChart as PieChartIcon,
+  Award,
+} from 'lucide-react';
 
 const ReportsPage = () => {
   const [loading, setLoading] = useState(true);
@@ -44,6 +54,23 @@ const ReportsPage = () => {
     try {
       setLoading(true);
 
+      // Calculate date range based on selected period
+      let startDate, endDate;
+
+      if (selectedPeriod === 'day') {
+        startDate = selectedDate;
+        endDate = selectedDate;
+      } else if (selectedPeriod === 'month') {
+        const [year, month] = selectedMonth.split('-');
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        startDate = firstDay.toISOString().split('T')[0];
+        endDate = lastDay.toISOString().split('T')[0];
+      } else {
+        startDate = `${selectedYear}-01-01`;
+        endDate = `${selectedYear}-12-31`;
+      }
+
       // Fetch revenue based on period
       let revenueResponse;
       if (selectedPeriod === 'day') {
@@ -55,11 +82,11 @@ const ReportsPage = () => {
       }
       setRevenueData(revenueResponse.data);
 
-      // Fetch other reports
+      // Fetch other reports with date range
       const [bookings, products, courts] = await Promise.all([
-        reportsAPI.getBookingsSummary(),
-        reportsAPI.getProductsSales(null, null, 10),
-        reportsAPI.getCourtsUsage(),
+        reportsAPI.getBookingsSummary(startDate, endDate),
+        reportsAPI.getProductsSales(startDate, endDate, 10),
+        reportsAPI.getCourtsUsage(startDate, endDate),
       ]);
 
       setBookingsSummary(bookings.data);
@@ -81,6 +108,12 @@ const ReportsPage = () => {
   };
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  const GRADIENT_COLORS = [
+    'from-blue-500 to-blue-600',
+    'from-emerald-500 to-emerald-600',
+    'from-amber-500 to-amber-600',
+    'from-purple-500 to-purple-600',
+  ];
 
   // Prepare revenue chart data
   const getRevenueChartData = () => {
@@ -122,56 +155,96 @@ const ReportsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">กำลังโหลดข้อมูล...</p>
+      <div className="space-y-6 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="h-8 w-64 bg-gray-200 rounded"></div>
+            <div className="h-4 w-48 bg-gray-100 rounded mt-2"></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-gray-200 rounded-lg"></div>
+            <div className="h-10 w-24 bg-gray-200 rounded-lg"></div>
+            <div className="h-10 w-24 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+
+        {/* Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl"></div>
+          ))}
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="h-96 bg-white rounded-xl border border-gray-200"></div>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">รายงานและสถิติ</h1>
-          <p className="text-gray-600">สรุปรายได้และข้อมูลการดำเนินงาน</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                รายงานและสถิติ
+              </h1>
+              <p className="text-gray-500 text-sm mt-0.5">สรุปรายได้และข้อมูลการดำเนินงาน</p>
+            </div>
+          </div>
         </div>
 
         {/* Period Selector */}
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
             <button
               onClick={() => setSelectedPeriod('day')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'day'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-white text-blue-600 shadow-md transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              รายวัน
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>รายวัน</span>
+              </div>
             </button>
             <button
               onClick={() => setSelectedPeriod('month')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'month'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-white text-blue-600 shadow-md transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              รายเดือน
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>รายเดือน</span>
+              </div>
             </button>
             <button
               onClick={() => setSelectedPeriod('year')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'year'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-white text-blue-600 shadow-md transform scale-105'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              รายปี
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>รายปี</span>
+              </div>
             </button>
           </div>
 
@@ -182,7 +255,7 @@ const ReportsPage = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300"
               />
             )}
             {selectedPeriod === 'month' && (
@@ -190,14 +263,14 @@ const ReportsPage = () => {
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300"
               />
             )}
             {selectedPeriod === 'year' && (
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 cursor-pointer"
               >
                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
                   <option key={year} value={year}>
@@ -211,88 +284,202 @@ const ReportsPage = () => {
       </div>
 
       {/* Revenue Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm">รายได้รวม</p>
-              <p className="text-3xl font-bold mt-1">{formatCurrency(revenueData?.totalRevenue || 0)}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Revenue Card */}
+        <div className="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+              <div className="p-2 bg-white/10 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
             </div>
-            <svg className="w-12 h-12 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <p className="text-blue-100 text-sm font-medium mb-1">รายได้รวม</p>
+            <p className="text-3xl font-bold tracking-tight">{formatCurrency(revenueData?.totalRevenue || 0)}</p>
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <p className="text-xs text-blue-100">
+                {selectedPeriod === 'day' && `วันที่ ${new Date(selectedDate).toLocaleDateString('th-TH')}`}
+                {selectedPeriod === 'month' && `เดือน ${new Date(selectedMonth).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}`}
+                {selectedPeriod === 'year' && `ปี ${parseInt(selectedYear) + 543}`}
+              </p>
+            </div>
           </div>
         </div>
 
         {selectedPeriod === 'day' && revenueData?.breakdown && (
           <>
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">การจองสนาม</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(revenueData.breakdown.bookings.revenue)}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">{revenueData.breakdown.bookings.count} รายการ</p>
+            {/* Bookings Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">การจองสนาม</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {formatCurrency(revenueData.breakdown.bookings.revenue)}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-emerald-50 rounded-full">
+                    <p className="text-sm text-emerald-700 font-medium">{revenueData.breakdown.bookings.count} รายการ</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">ขายสินค้า (POS)</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(revenueData.breakdown.sales.revenue)}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">{revenueData.breakdown.sales.count} รายการ</p>
+            {/* Sales Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-amber-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg">
+                    <ShoppingBag className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">ขายสินค้า (POS)</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {formatCurrency(revenueData.breakdown.sales.revenue)}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-amber-50 rounded-full">
+                    <p className="text-sm text-amber-700 font-medium">{revenueData.breakdown.sales.count} รายการ</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">ก๊วนสนาม</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(revenueData.breakdown.groupPlay.revenue)}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">{revenueData.breakdown.groupPlay.count} คน</p>
+            {/* Group Play Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-purple-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-purple-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">ก๊วนสนาม</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {formatCurrency(revenueData.breakdown.groupPlay.revenue)}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-purple-50 rounded-full">
+                    <p className="text-sm text-purple-700 font-medium">{revenueData.breakdown.groupPlay.count} คน</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </>
         )}
 
         {selectedPeriod !== 'day' && (
           <>
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">การจองทั้งหมด</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {bookingsSummary?.summary.totalBookings || 0}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">รายการ</p>
+            {/* Total Bookings Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">การจองทั้งหมด</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {bookingsSummary?.summary.totalBookings || 0}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-emerald-50 rounded-full">
+                    <p className="text-sm text-emerald-700 font-medium">รายการ</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">ยอดขายสินค้า</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {formatCurrency(productsSales?.summary.totalRevenue || 0)}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">{productsSales?.summary.totalQuantity || 0} ชิ้น</p>
+            {/* Products Sales Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-amber-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg">
+                    <ShoppingBag className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-amber-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">ยอดขายสินค้า</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {formatCurrency(productsSales?.summary.totalRevenue || 0)}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-amber-50 rounded-full">
+                    <p className="text-sm text-amber-700 font-medium">{productsSales?.summary.totalQuantity || 0} ชิ้น</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <p className="text-gray-600 text-sm">สนามทั้งหมด</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{courtsUsage?.summary.totalCourts || 0}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                {courtsUsage?.summary.totalHours || 0} ชั่วโมง
-              </p>
+            {/* Courts Usage Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-purple-200 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-purple-50 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                    <BarChart3 className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1 text-purple-600 text-sm font-medium">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">สนามทั้งหมด</p>
+                <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                  {courtsUsage?.summary.totalCourts || 0}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="px-3 py-1 bg-purple-50 rounded-full">
+                    <p className="text-sm text-purple-700 font-medium">{courtsUsage?.summary.totalHours || 0} ชั่วโมง</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </>
         )}
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Revenue Chart */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            {selectedPeriod === 'day' ? 'แยกตามประเภทรายได้' : 'แนวโน้มรายได้'}
-          </h2>
+        <div className="bg-white rounded-2xl p-8 border-2 border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                {selectedPeriod === 'day' ? (
+                  <PieChartIcon className="w-5 h-5 text-white" />
+                ) : (
+                  <TrendingUp className="w-5 h-5 text-white" />
+                )}
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">
+                {selectedPeriod === 'day' ? 'แยกตามประเภทรายได้' : 'แนวโน้มรายได้'}
+              </h2>
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             {selectedPeriod === 'day' ? (
               <PieChart>
@@ -336,8 +523,13 @@ const ReportsPage = () => {
 
         {/* Bookings Status Chart */}
         {bookingsSummary && getBookingsStatusData().length > 0 && (
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">สถานะการจอง</h2>
+          <div className="bg-white rounded-2xl p-8 border-2 border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg">
+                <PieChartIcon className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">สถานะการจอง</h2>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -363,52 +555,68 @@ const ReportsPage = () => {
 
       {/* Products Sales Table */}
       {productsSales && productsSales.products.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">สินค้าขายดี (Top 10)</h2>
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+          <div className="p-8 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg">
+                <Award className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">สินค้าขายดี (Top 10)</h2>
+            </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     อันดับ
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     สินค้า
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     หมวดหมู่
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
                     จำนวน
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
                     ยอดขาย
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
                     ราคาเฉลี่ย
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-100">
                 {productsSales.products.map((product, index) => (
-                  <tr key={product.productId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{product.productName}</div>
-                      <div className="text-sm text-gray-500">{product.sku}</div>
+                  <tr key={product.productId} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent transition-all duration-200">
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm ${
+                        index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg' :
+                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-white shadow-md' :
+                        index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-md' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {index + 1}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.category}
+                    <td className="px-6 py-5">
+                      <div className="text-sm font-semibold text-gray-900">{product.productName}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{product.sku}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <span className="px-3 py-1 inline-flex text-xs font-medium rounded-full bg-blue-50 text-blue-700">
+                        {product.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
                       {product.totalQuantity}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm font-bold text-emerald-600 text-right">
                       {formatCurrency(product.totalRevenue)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600 text-right">
                       {formatCurrency(product.averagePrice)}
                     </td>
                   </tr>
@@ -421,18 +629,72 @@ const ReportsPage = () => {
 
       {/* Courts Usage Chart */}
       {courtsUsage && courtsUsage.courts.length > 0 && (
-        <div className="bg-white rounded-lg p-6 border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">การใช้งานสนาม</h2>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-2xl p-8 border-2 border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg">
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">การใช้งานสนาม</h2>
+          </div>
+          <ResponsiveContainer width="100%" height={350}>
             <BarChart data={courtsUsage.courts}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="courtName" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value, name) => [name === 'รายได้' ? formatCurrency(value) : value, name]} />
-              <Legend />
-              <Bar yAxisId="left" dataKey="totalBookings" fill="#3b82f6" name="จำนวนการจอง" />
-              <Bar yAxisId="right" dataKey="totalRevenue" fill="#10b981" name="รายได้" />
+              <defs>
+                <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                </linearGradient>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.3}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="courtName"
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+              />
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                stroke="#3b82f6"
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                stroke="#10b981"
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+              />
+              <Tooltip
+                formatter={(value, name) => [name === 'รายได้' ? formatCurrency(value) : value, name]}
+                contentStyle={{
+                  backgroundColor: '#fff',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+              />
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="circle"
+              />
+              <Bar
+                yAxisId="left"
+                dataKey="totalBookings"
+                fill="url(#colorBookings)"
+                name="จำนวนการจอง"
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="totalRevenue"
+                fill="url(#colorRevenue)"
+                name="รายได้"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

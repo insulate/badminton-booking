@@ -66,7 +66,7 @@ router.get('/revenue/daily', async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: '$totalAmount' },
+          totalRevenue: { $sum: '$total' },
           count: { $sum: 1 },
         },
       },
@@ -194,7 +194,7 @@ router.get('/revenue/monthly', async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          revenue: { $sum: '$totalAmount' },
+          revenue: { $sum: '$total' },
           count: { $sum: 1 },
         },
       },
@@ -360,7 +360,7 @@ router.get('/revenue/yearly', async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
-          revenue: { $sum: '$totalAmount' },
+          revenue: { $sum: '$total' },
           count: { $sum: 1 },
         },
       },
@@ -484,9 +484,14 @@ router.get('/bookings/summary', async (req, res) => {
     const matchCondition = {};
 
     if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
       matchCondition.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: start,
+        $lte: end,
       };
     }
 
@@ -619,9 +624,14 @@ router.get('/products/sales', async (req, res) => {
     const matchCondition = {};
 
     if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
       matchCondition.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: start,
+        $lte: end,
       };
     }
 
@@ -805,9 +815,14 @@ router.get('/courts/usage', async (req, res) => {
     const matchCondition = {};
 
     if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
       matchCondition.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: start,
+        $lte: end,
       };
     }
 
