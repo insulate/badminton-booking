@@ -577,10 +577,10 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
     }
 
     // Calculate new payment status
-    const newAmountPaid = (booking.amountPaid || 0) + amountPaid;
-    let newPaymentStatus = 'unpaid';
+    const newAmountPaid = (booking.pricing.deposit || 0) + amountPaid;
+    let newPaymentStatus = 'pending';
 
-    if (newAmountPaid >= booking.totalPrice) {
+    if (newAmountPaid >= booking.pricing.total) {
       newPaymentStatus = 'paid';
     } else if (newAmountPaid > 0) {
       newPaymentStatus = 'partial';
@@ -588,7 +588,7 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
 
     // Prepare update object
     const updateData = {
-      amountPaid: newAmountPaid,
+      'pricing.deposit': newAmountPaid,
       paymentStatus: newPaymentStatus,
     };
 
