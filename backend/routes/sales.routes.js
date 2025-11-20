@@ -31,7 +31,7 @@ router.get('/', protect, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const sales = await Sale.find(filter)
-      .populate('items.product', 'name sku category')
+      .populate('items.product', 'name sku category image')
       .populate('relatedBooking', 'bookingCode')
       .populate('createdBy', 'name')
       .sort({ createdAt: -1 })
@@ -84,7 +84,7 @@ router.get('/daily', protect, async (req, res) => {
     const sales = await Sale.find({
       createdAt: { $gte: startOfDay, $lte: endOfDay },
     })
-      .populate('items.product', 'name sku category')
+      .populate('items.product', 'name sku category image')
       .sort({ createdAt: -1 });
 
     // Calculate summary
@@ -141,7 +141,7 @@ router.get('/daily', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const sale = await Sale.findById(req.params.id)
-      .populate('items.product', 'name sku category')
+      .populate('items.product', 'name sku category image')
       .populate('relatedBooking', 'bookingCode customer')
       .populate('createdBy', 'name');
 
@@ -267,7 +267,7 @@ router.post('/', protect, async (req, res) => {
 
     // Populate sale before sending response
     const populatedSale = await Sale.findById(sale._id)
-      .populate('items.product', 'name sku category')
+      .populate('items.product', 'name sku category image')
       .populate('createdBy', 'name');
 
     res.status(201).json({

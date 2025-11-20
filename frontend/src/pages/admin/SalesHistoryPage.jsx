@@ -493,7 +493,7 @@ const SalesHistoryPage = () => {
                               <div className="flex-shrink-0">
                                 {item.product?.image ? (
                                   <img
-                                    src={`${API_URL.replace('/api', '')}${item.product.image}`}
+                                    src={item.product.image.startsWith('data:') ? item.product.image : `${API_URL.replace('/api', '')}${item.product.image}`}
                                     alt={item.product?.name || 'Product'}
                                     className="w-12 h-12 object-cover rounded-lg border-2 border-gray-200"
                                     onError={(e) => {
