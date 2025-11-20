@@ -39,6 +39,9 @@ import BookingsPage from './pages/admin/BookingsPage';
 // Group Play Page
 import GroupPlayPage from './pages/admin/GroupPlayPage';
 
+// Reports Page
+import ReportsPage from './pages/admin/ReportsPage';
+
 function App() {
   return (
     <Router>
@@ -95,6 +98,9 @@ function App() {
 
           {/* POS Route */}
           <Route path="pos" element={<POSPage />} />
+
+          {/* Reports Route */}
+          <Route path="reports" element={<ReportsPage />} />
 
           {/* Settings Routes */}
           <Route path="settings/venue" element={<VenueSettingsPage />} />

@@ -18,6 +18,7 @@ export const ROUTES = {
     POS: '/admin/pos',
     BOOKING: '/admin/booking',
     BOOKINGS: '/admin/bookings',
+    REPORTS: '/admin/reports',
     CATEGORIES: '/admin/settings/categories',
     COURTS: '/admin/settings/courts',
     COURTS_ADD: '/admin/settings/courts/add',

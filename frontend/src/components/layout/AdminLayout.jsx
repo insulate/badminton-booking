@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   Tag,
   UserCircle2,
+  BarChart3,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -92,6 +93,11 @@ export default function AdminLayout() {
           icon: Tag,
         },
       ],
+    },
+    {
+      name: 'รายงานและสถิติ',
+      path: ROUTES.ADMIN.REPORTS,
+      icon: BarChart3,
     },
     {
       name: 'ตั้งค่า',
