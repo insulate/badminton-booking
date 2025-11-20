@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Search,
   Eye,
-  ShoppingCart
+  ShoppingCart,
+  Receipt
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -25,6 +26,7 @@ import FinishGameModal from '../../components/groupplay/FinishGameModal';
 import EditGamePlayersModal from '../../components/groupplay/EditGamePlayersModal';
 import PlayerCostDetailModal from '../../components/groupplay/PlayerCostDetailModal';
 import AddProductCostModal from '../../components/groupplay/AddProductCostModal';
+import CheckoutConfirmModal from '../../components/groupplay/CheckoutConfirmModal';
 
 const DAYS_LABELS = {
   monday: 'จันทร์',
@@ -53,6 +55,8 @@ export default function GroupPlayPage() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [selectedPlayerForProduct, setSelectedPlayerForProduct] = useState(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [selectedPlayerForCheckout, setSelectedPlayerForCheckout] = useState(null);
 
   // Players table state
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,6 +154,38 @@ export default function GroupPlayPage() {
     }
 
     setShowStartGameModal(true);
+  };
+
+  const handleCheckout = (player) => {
+    if (!selectedRule) {
+      toast.error('กรุณาเลือกกฎก๊วนสนามก่อน');
+      return;
+    }
+
+    // Check if player has any playing games
+    const hasPlayingGames = player.games?.some(g => g.status === 'playing');
+    if (hasPlayingGames) {
+      toast.error('ผู้เล่นกำลังอยู่ในเกม กรุณาจบเกมก่อน Check Out');
+      return;
+    }
+
+    setSelectedPlayerForCheckout(player);
+    setShowCheckoutModal(true);
+  };
+
+  const confirmCheckout = async () => {
+    if (!selectedRule || !selectedPlayerForCheckout) {
+      return;
+    }
+
+    try {
+      await groupPlayAPI.checkOut(selectedRule._id, selectedPlayerForCheckout._id);
+      toast.success('Check Out สำเร็จ');
+      await refreshRule();
+    } catch (error) {
+      console.error('Error checking out player:', error);
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการ Check Out');
+    }
   };
 
   // Calculate derived state before early return (to satisfy Rules of Hooks)
@@ -610,6 +646,36 @@ export default function GroupPlayPage() {
                                       เพิ่มสินค้า
                                     </div>
                                   </div>
+                                  <div className="relative group inline-block">
+                                    {(() => {
+                                      const hasPlayingGames = player.games?.some(g => g.status === 'playing');
+                                      const isDisabled = player.checkedOut || hasPlayingGames;
+                                      const tooltipText = player.checkedOut
+                                        ? 'Check Out แล้ว'
+                                        : hasPlayingGames
+                                          ? 'กำลังอยู่ในเกม'
+                                          : 'Check Out คิดเงิน';
+
+                                      return (
+                                        <>
+                                          <button
+                                            onClick={() => handleCheckout(player)}
+                                            disabled={isDisabled}
+                                            className={`inline-flex items-center justify-center p-2 rounded-lg transition-colors ${
+                                              isDisabled
+                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-purple-500 text-white hover:bg-purple-600'
+                                            }`}
+                                          >
+                                            <Receipt size={16} />
+                                          </button>
+                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                            {tooltipText}
+                                          </div>
+                                        </>
+                                      );
+                                    })()}
+                                  </div>
                                 </div>
                               </td>
                             </tr>
@@ -859,6 +925,17 @@ export default function GroupPlayPage() {
           onSuccess={async (sessionId, playerId, data) => {
             await groupPlayAPI.addPlayerProducts(sessionId, playerId, data);
             await refreshRule();
+          }}
+        />
+      )}
+
+      {showCheckoutModal && selectedPlayerForCheckout && (
+        <CheckoutConfirmModal
+          player={selectedPlayerForCheckout}
+          onConfirm={confirmCheckout}
+          onClose={() => {
+            setShowCheckoutModal(false);
+            setSelectedPlayerForCheckout(null);
           }}
         />
       )}

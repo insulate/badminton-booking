@@ -604,6 +604,15 @@ router.post('/:id/checkout/:playerId', async (req, res) => {
       });
     }
 
+    // Check if player has any playing games
+    const hasPlayingGames = sessionPlayer.games.some(g => g.status === 'playing');
+    if (hasPlayingGames) {
+      return res.status(400).json({
+        success: false,
+        message: 'ผู้เล่นกำลังอยู่ในเกม กรุณาจบเกมก่อน Check Out',
+      });
+    }
+
     // Check out player
     await session.checkOutPlayer(req.params.playerId);
 
