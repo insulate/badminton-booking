@@ -7,34 +7,21 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Filter
+  Filter,
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { salesAPI } from '../../lib/api';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 /**
  * SalesHistoryPage
  * หน้าประวัติการขาย (Sales History)
  */
 const SalesHistoryPage = () => {
-  // Get date helpers
+  // Get today's date
   const getToday = () => new Date().toISOString().split('T')[0];
-  const getYesterday = () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    return date.toISOString().split('T')[0];
-  };
-  const getThisWeekStart = () => {
-    const date = new Date();
-    const day = date.getDay();
-    const diff = date.getDate() - day;
-    date.setDate(diff);
-    return date.toISOString().split('T')[0];
-  };
-  const getThisMonthStart = () => {
-    const date = new Date();
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
-  };
 
   // State
   const [sales, setSales] = useState([]);
@@ -42,10 +29,9 @@ const SalesHistoryPage = () => {
   const [selectedSale, setSelectedSale] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Filters
-  const [dateRange, setDateRange] = useState('today');
-  const [customDateFrom, setCustomDateFrom] = useState(getToday());
-  const [customDateTo, setCustomDateTo] = useState(getToday());
+  // Filters - Default to today's date
+  const [startDate, setStartDate] = useState(getToday());
+  const [endDate, setEndDate] = useState(getToday());
   const [paymentMethod, setPaymentMethod] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -60,31 +46,12 @@ const SalesHistoryPage = () => {
   // Load sales on mount and filter change
   useEffect(() => {
     loadSales();
-  }, [dateRange, customDateFrom, customDateTo, paymentMethod, pagination.page]);
-
-  // Get date filter values
-  const getDateFilter = () => {
-    switch (dateRange) {
-      case 'today':
-        return { startDate: getToday(), endDate: getToday() };
-      case 'yesterday':
-        return { startDate: getYesterday(), endDate: getYesterday() };
-      case 'week':
-        return { startDate: getThisWeekStart(), endDate: getToday() };
-      case 'month':
-        return { startDate: getThisMonthStart(), endDate: getToday() };
-      case 'custom':
-        return { startDate: customDateFrom, endDate: customDateTo };
-      default:
-        return {};
-    }
-  };
+  }, [startDate, endDate, paymentMethod, pagination.page]);
 
   // Load sales from API
   const loadSales = async () => {
     setLoading(true);
     try {
-      const { startDate, endDate } = getDateFilter();
       const params = {
         page: pagination.page,
         limit: pagination.limit,
@@ -174,307 +141,316 @@ const SalesHistoryPage = () => {
   };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <Receipt className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">ประวัติการขาย</h1>
-            <p className="text-sm text-gray-600">ดูรายการขายทั้งหมดและรายละเอียด</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
+          {/* Decorative circles */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+
+          <div className="flex justify-between items-center relative z-10">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                  <Receipt className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-white">ประวัติการขาย</h1>
+              </div>
+              <p className="text-blue-100 text-sm ml-14">ดูรายการขายทั้งหมดและรายละเอียด • ระบบจัดการประวัติการขาย</p>
+            </div>
+            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30">
+              <Sparkles className="w-6 h-6 text-white" />
+              <div className="text-right">
+                <div className="text-white/80 text-xs">ทั้งหมด</div>
+                <div className="text-white font-bold text-xl">{pagination.total || 0}</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Date Range Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="w-4 h-4 inline mr-1" />
-              ช่วงเวลา
-            </label>
-            <select
-              value={dateRange}
-              onChange={(e) => {
-                setDateRange(e.target.value);
-                setPagination(prev => ({ ...prev, page: 1 }));
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="today">วันนี้</option>
-              <option value="yesterday">เมื่อวาน</option>
-              <option value="week">สัปดาห์นี้</option>
-              <option value="month">เดือนนี้</option>
-              <option value="custom">กำหนดเอง</option>
-            </select>
+        {/* Filters */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Start Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                จากวันที่
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+              />
+            </div>
+
+            {/* End Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                ถึงวันที่
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+              />
+            </div>
+
+            {/* Payment Method Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Filter className="w-4 h-4 inline mr-1" />
+                วิธีชำระเงิน
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => {
+                  setPaymentMethod(e.target.value);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+              >
+                <option value="all">ทั้งหมด</option>
+                <option value="cash">เงินสด</option>
+                <option value="promptpay">พร้อมเพย์</option>
+                <option value="transfer">โอนเงิน</option>
+                <option value="credit_card">บัตรเครดิต</option>
+              </select>
+            </div>
+
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Search className="w-4 h-4 inline mr-1" />
+                ค้นหา Sale Code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  placeholder="S-00001"
+                  className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Custom Date Range */}
-          {dateRange === 'custom' && (
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gradient-to-br from-white to-blue-50 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+            <p className="text-sm text-gray-600 mb-1">จำนวนรายการ</p>
+            <p className="text-3xl font-bold text-gray-900">{pagination.total || 0}</p>
+          </div>
+          <div className="bg-gradient-to-br from-white to-purple-50 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-purple-100">
+            <p className="text-sm text-gray-600 mb-1">ยอดขายรวม</p>
+            <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              ฿{formatPrice(sales.reduce((sum, sale) => sum + sale.total, 0))}
+            </p>
+          </div>
+          <div className="bg-gradient-to-br from-white to-blue-50 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100">
+            <p className="text-sm text-gray-600 mb-1">ค่าเฉลี่ยต่อรายการ</p>
+            <p className="text-3xl font-bold text-gray-900">
+              ฿{formatPrice(sales.length > 0 ? sales.reduce((sum, sale) => sum + sale.total, 0) / sales.length : 0)}
+            </p>
+          </div>
+        </div>
+
+        {/* Sales Table */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
+              <p className="text-gray-600 font-medium">กำลังโหลดรายการขาย...</p>
+            </div>
+          ) : sales.length === 0 ? (
+            <div className="text-center py-16">
+              <Receipt className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600 font-medium text-lg">ไม่พบรายการขาย</p>
+              <p className="text-gray-400 text-sm mt-2">ลองเปลี่ยนช่วงวันที่หรือตัวกรองอื่น</p>
+            </div>
+          ) : (
             <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  จากวันที่
-                </label>
-                <input
-                  type="date"
-                  value={customDateFrom}
-                  onChange={(e) => setCustomDateFrom(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        Sale Code
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        วันที่/เวลา
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        ลูกค้า
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        รายการ
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        ยอดรวม
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                        วิธีชำระเงิน
+                      </th>
+                      <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">
+                        การดำเนินการ
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white/50 divide-y divide-gray-200">
+                    {sales.map((sale) => (
+                      <tr key={sale._id} className="hover:bg-blue-50/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="font-mono text-sm font-semibold text-blue-600">
+                            {sale.saleCode}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDateTime(sale.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {sale.customer ? (
+                            <div>
+                              <p className="font-medium">{sale.customer.name || '-'}</p>
+                              <p className="text-gray-500 text-xs">{sale.customer.phone || '-'}</p>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {sale.items?.length || 0} รายการ
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          ฿{formatPrice(sale.total)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getPaymentMethodBadge(sale.paymentMethod)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                          <button
+                            onClick={() => handleViewDetails(sale)}
+                            className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
+                            title="ดูรายละเอียด"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>ดูรายละเอียด</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ถึงวันที่
-                </label>
-                <input
-                  type="date"
-                  value={customDateTo}
-                  onChange={(e) => setCustomDateTo(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-white/50">
+                  <div className="text-sm text-gray-700">
+                    แสดง {(pagination.page - 1) * pagination.limit + 1} ถึง{' '}
+                    {Math.min(pagination.page * pagination.limit, pagination.total)} จาก {pagination.total} รายการ
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      disabled={pagination.page === 1}
+                      className="px-4 py-2 border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm font-medium text-gray-700 px-3">
+                      หน้า {pagination.page} จาก {pagination.totalPages}
+                    </span>
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      disabled={pagination.page === pagination.totalPages}
+                      className="px-4 py-2 border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
-
-          {/* Payment Method Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Filter className="w-4 h-4 inline mr-1" />
-              วิธีชำระเงิน
-            </label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => {
-                setPaymentMethod(e.target.value);
-                setPagination(prev => ({ ...prev, page: 1 }));
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">ทั้งหมด</option>
-              <option value="cash">เงินสด</option>
-              <option value="promptpay">พร้อมเพย์</option>
-              <option value="transfer">โอนเงิน</option>
-              <option value="credit_card">บัตรเครดิต</option>
-            </select>
-          </div>
-
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Search className="w-4 h-4 inline mr-1" />
-              ค้นหา Sale Code
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="S-00001"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Search className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">จำนวนรายการ</p>
-          <p className="text-2xl font-bold text-gray-900">{pagination.total || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">ยอดขายรวม</p>
-          <p className="text-2xl font-bold text-blue-600">
-            ฿{formatPrice(sales.reduce((sum, sale) => sum + sale.total, 0))}
-          </p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">ค่าเฉลี่ยต่อรายการ</p>
-          <p className="text-2xl font-bold text-gray-900">
-            ฿{formatPrice(sales.length > 0 ? sales.reduce((sum, sale) => sum + sale.total, 0) / sales.length : 0)}
-          </p>
-        </div>
-      </div>
-
-      {/* Sales Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : sales.length === 0 ? (
-          <div className="text-center py-12">
-            <Receipt className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">ไม่พบรายการขายในช่วงเวลาที่เลือก</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sale Code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      วันที่/เวลา
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ลูกค้า
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      รายการ
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ยอดรวม
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      วิธีชำระเงิน
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      การดำเนินการ
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {sales.map((sale) => (
-                    <tr key={sale._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-mono text-sm font-semibold text-blue-600">
-                          {sale.saleCode}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDateTime(sale.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {sale.customer ? (
-                          <div>
-                            <p className="font-medium">{sale.customer.name || '-'}</p>
-                            <p className="text-gray-500 text-xs">{sale.customer.phone || '-'}</p>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {sale.items?.length || 0} รายการ
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        ฿{formatPrice(sale.total)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getPaymentMethodBadge(sale.paymentMethod)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <button
-                          onClick={() => handleViewDetails(sale)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="ดูรายละเอียด"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>ดูรายละเอียด</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-                <div className="text-sm text-gray-700">
-                  แสดง {(pagination.page - 1) * pagination.limit + 1} ถึง{' '}
-                  {Math.min(pagination.page * pagination.limit, pagination.total)} จาก {pagination.total} รายการ
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                    disabled={pagination.page === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-sm text-gray-700">
-                    หน้า {pagination.page} จาก {pagination.totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       {/* Detail Modal */}
       {isDetailModalOpen && selectedSale && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">รายละเอียดการขาย</h2>
-                <p className="text-sm text-gray-600 mt-1 font-mono">{selectedSale.saleCode}</p>
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12"></div>
+              <div className="relative z-10 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-white">รายละเอียดการขาย</h2>
+                  <p className="text-blue-100 text-sm mt-1 font-mono">{selectedSale.saleCode}</p>
+                </div>
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-              <button
-                onClick={() => setIsDetailModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
 
             {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Sale Info */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">วันที่/เวลา</p>
-                  <p className="font-medium">{formatDateTime(selectedSale.createdAt)}</p>
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 mb-1">วันที่/เวลา</p>
+                  <p className="font-medium text-gray-900">{formatDateTime(selectedSale.createdAt)}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">วิธีชำระเงิน</p>
+                <div className="bg-purple-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 mb-1">วิธีชำระเงิน</p>
                   <div className="mt-1">{getPaymentMethodBadge(selectedSale.paymentMethod)}</div>
                 </div>
               </div>
 
               {/* Customer Info */}
               {selectedSale.customer && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">ข้อมูลลูกค้า</h3>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-1 rounded-lg">
+                      <Eye className="w-4 h-4 text-white" />
+                    </div>
+                    ข้อมูลลูกค้า
+                  </h3>
+                  <div className="space-y-2 text-sm">
                     <p>
                       <span className="text-gray-600">ชื่อ:</span>{' '}
-                      <span className="font-medium">{selectedSale.customer.name || '-'}</span>
+                      <span className="font-medium text-gray-900">{selectedSale.customer.name || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-600">เบอร์:</span>{' '}
-                      <span className="font-medium">{selectedSale.customer.phone || '-'}</span>
+                      <span className="font-medium text-gray-900">{selectedSale.customer.phone || '-'}</span>
                     </p>
                     <p>
                       <span className="text-gray-600">ประเภท:</span>{' '}
-                      <span className="font-medium">
+                      <span className="font-medium text-gray-900">
                         {selectedSale.customer.type === 'member' ? 'สมาชิก' : 'ลูกค้าทั่วไป'}
                       </span>
                     </p>
@@ -484,39 +460,67 @@ const SalesHistoryPage = () => {
 
               {/* Items */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">รายการสินค้า</h3>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-1 rounded-lg">
+                    <Receipt className="w-4 h-4 text-white" />
+                  </div>
+                  รายการสินค้า
+                </h3>
+                <div className="border-2 border-gray-200 rounded-xl overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
                           สินค้า
                         </th>
-                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
                           จำนวน
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
                           ราคา
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
                           รวม
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200 bg-white">
                       {selectedSale.items?.map((item, index) => (
-                        <tr key={index}>
-                          <td className="px-4 py-3 text-sm">
-                            <p className="font-medium text-gray-900">
-                              {item.product?.name || 'ไม่ระบุชื่อ'}
-                            </p>
-                            {item.product?.sku && (
-                              <p className="text-xs text-gray-500">{item.product.sku}</p>
-                            )}
+                        <tr key={index} className="hover:bg-blue-50/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              {/* Product Image */}
+                              <div className="flex-shrink-0">
+                                {item.product?.image ? (
+                                  <img
+                                    src={`${API_URL.replace('/api', '')}${item.product.image}`}
+                                    alt={item.product?.name || 'Product'}
+                                    className="w-12 h-12 object-cover rounded-lg border-2 border-gray-200"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2"%3E%3Crect x="3" y="3" width="18" height="18" rx="2" ry="2"%3E%3C/rect%3E%3Ccircle cx="8.5" cy="8.5" r="1.5"%3E%3C/circle%3E%3Cpolyline points="21 15 16 10 5 21"%3E%3C/polyline%3E%3C/svg%3E';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-gray-200">
+                                    <Receipt className="w-6 h-6 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                              {/* Product Name & SKU */}
+                              <div className="min-w-0">
+                                <p className="font-medium text-gray-900 text-sm">
+                                  {item.product?.name || 'ไม่ระบุชื่อ'}
+                                </p>
+                                {item.product?.sku && (
+                                  <p className="text-xs text-gray-500 mt-0.5">SKU: {item.product.sku}</p>
+                                )}
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-center">{item.quantity}</td>
-                          <td className="px-4 py-3 text-sm text-right">฿{formatPrice(item.price)}</td>
-                          <td className="px-4 py-3 text-sm text-right font-semibold">
+                          <td className="px-4 py-3 text-sm text-center font-medium text-gray-900">{item.quantity}</td>
+                          <td className="px-4 py-3 text-sm text-right text-gray-900">฿{formatPrice(item.price)}</td>
+                          <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">
                             ฿{formatPrice(item.subtotal)}
                           </td>
                         </tr>
@@ -527,10 +531,10 @@ const SalesHistoryPage = () => {
               </div>
 
               {/* Total */}
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-5">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900">ยอดรวมทั้งหมด</span>
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-lg font-semibold text-white">ยอดรวมทั้งหมด</span>
+                  <span className="text-3xl font-bold text-white">
                     ฿{formatPrice(selectedSale.total)}
                   </span>
                 </div>
@@ -538,10 +542,10 @@ const SalesHistoryPage = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
               <button
                 onClick={() => setIsDetailModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200"
               >
                 ปิด
               </button>
