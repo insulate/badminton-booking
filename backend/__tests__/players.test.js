@@ -218,7 +218,7 @@ describe('Players API Tests', () => {
       await Player.create([
         { name: 'Alice', phone: '0811111111', level: '5', status: 'active' },
         { name: 'Bob', phone: '0822222222', level: '3', status: 'active' },
-        { name: 'Charlie', phone: '0833333333', level: '5', status: 'inactive' },
+        { name: 'Charlie', phone: '0833333333', level: '5', status: 'active' },
         { name: 'David', phone: '0844444444', level: '7', status: 'active' },
       ]);
     });
@@ -400,21 +400,6 @@ describe('Players API Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.level).toBe('8');
       expect(response.body.data.levelName).toBe('B'); // Level 8 = B
-    });
-
-    it('should update player status', async () => {
-      const updates = {
-        status: 'inactive',
-      };
-
-      const response = await request(app)
-        .put(`/api/players/${testPlayer._id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(updates)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.status).toBe('inactive');
     });
 
     it('should update password and hash it', async () => {

@@ -1,21 +1,32 @@
 import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Users, Plus, Search, RefreshCw, Trash2, Edit2, Phone, Calendar, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Plus, Search, RefreshCw, Trash2, Edit2, Phone, Calendar, ArrowUpDown, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { playersAPI } from '../../lib/api';
 import { getAllLevels } from '../../constants/playerLevels';
 import PlayerLevelBadge from '../../components/players/PlayerLevelBadge';
 import PlayerStatsCard from '../../components/players/PlayerStatsCard';
 import PlayerForm from '../../components/players/PlayerForm';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('active');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    type: 'warning',
+    title: '',
+    message: '',
+    onConfirm: null,
+    playerData: null,
+  });
 
   // Sorting state
   const [sortField, setSortField] = useState('name');
@@ -33,7 +44,7 @@ export default function PlayersPage() {
       setLoading(true);
       const params = {};
       if (levelFilter) params.level = levelFilter;
-      if (statusFilter) params.status = statusFilter;
+      if (showDeleted) params.includeDeleted = 'true';
 
       const response = await playersAPI.getAll(params);
       if (response.success) {
@@ -50,7 +61,7 @@ export default function PlayersPage() {
 
   useEffect(() => {
     fetchPlayers();
-  }, [levelFilter, statusFilter]);
+  }, [levelFilter, showDeleted]);
 
   // Handle sorting
   const handleSort = (field) => {
@@ -101,10 +112,6 @@ export default function PlayersPage() {
           aValue = a.stats?.lastPlayed ? new Date(a.stats.lastPlayed).getTime() : 0;
           bValue = b.stats?.lastPlayed ? new Date(b.stats.lastPlayed).getTime() : 0;
           break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
         default:
           return 0;
       }
@@ -126,7 +133,7 @@ export default function PlayersPage() {
   // Reset to page 1 when search/filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, levelFilter, statusFilter]);
+  }, [searchTerm, levelFilter, showDeleted]);
 
   // Open create form
   const handleOpenCreateForm = () => {
@@ -177,20 +184,54 @@ export default function PlayersPage() {
   };
 
   // Handle delete
-  const handleDelete = async (player) => {
-    if (!confirm(`ต้องการลบผู้เล่น "${player.name}" ใช่หรือไม่?`)) {
-      return;
-    }
+  const handleDelete = (player) => {
+    setConfirmDialog({
+      isOpen: true,
+      type: 'danger',
+      title: 'ยืนยันการลบผู้เล่น',
+      message: `คุณต้องการลบผู้เล่น "${player.name}" ใช่หรือไม่? ข้อมูลจะถูกลบออกจากระบบ`,
+      onConfirm: () => confirmDelete(player._id),
+      playerData: player,
+    });
+  };
 
+  const confirmDelete = async (playerId) => {
     try {
-      const response = await playersAPI.delete(player._id);
+      const response = await playersAPI.delete(playerId);
       if (response.success) {
         toast.success('ลบผู้เล่นสำเร็จ');
         fetchPlayers();
+        setConfirmDialog({ ...confirmDialog, isOpen: false });
       }
     } catch (error) {
       console.error('Error deleting player:', error);
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการลบผู้เล่น');
+    }
+  };
+
+  // Handle restore
+  const handleRestore = (player) => {
+    setConfirmDialog({
+      isOpen: true,
+      type: 'success',
+      title: 'ยืนยันการกู้คืนข้อมูล',
+      message: `คุณต้องการกู้คืนข้อมูลผู้เล่น "${player.name}" ใช่หรือไม่?`,
+      onConfirm: () => confirmRestore(player._id),
+      playerData: player,
+    });
+  };
+
+  const confirmRestore = async (playerId) => {
+    try {
+      const response = await playersAPI.restore(playerId);
+      if (response.success) {
+        toast.success('กู้คืนข้อมูลผู้เล่นสำเร็จ');
+        fetchPlayers();
+        setConfirmDialog({ ...confirmDialog, isOpen: false });
+      }
+    } catch (error) {
+      console.error('Error restoring player:', error);
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการกู้คืนผู้เล่น');
     }
   };
 
@@ -250,7 +291,7 @@ export default function PlayersPage() {
 
       {/* Filters */}
       <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">ค้นหา</label>
@@ -282,20 +323,19 @@ export default function PlayersPage() {
               ))}
             </select>
           </div>
+        </div>
 
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">ทั้งหมด</option>
-              <option value="active">ใช้งาน</option>
-              <option value="inactive">ระงับ</option>
-            </select>
-          </div>
+        {/* Show Deleted Toggle */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <label className="flex items-center gap-2 cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={showDeleted}
+              onChange={(e) => setShowDeleted(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm font-medium text-gray-700">แสดงผู้เล่นที่ถูกลบ</span>
+          </label>
         </div>
       </div>
 
@@ -353,15 +393,6 @@ export default function PlayersPage() {
                         <ArrowUpDown className={`w-4 h-4 ${sortField === 'gamesPlayed' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
                       </div>
                     </th>
-                    <th
-                      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
-                      onClick={() => handleSort('status')}
-                    >
-                      <div className="flex items-center gap-2">
-                        สถานะ
-                        <ArrowUpDown className={`w-4 h-4 ${sortField === 'status' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                      </div>
-                    </th>
                     <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       จัดการ
                     </th>
@@ -398,35 +429,44 @@ export default function PlayersPage() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <PlayerStatsCard stats={player.stats} compact={true} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            player.status === 'active'
-                              ? 'bg-green-100 text-green-800 border border-green-200'
-                              : 'bg-red-100 text-red-800 border border-red-200'
-                          }`}
-                        >
-                          {player.status === 'active' ? 'ใช้งาน' : 'ระงับ'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <PlayerStatsCard stats={player.stats} compact={true} />
+                          {showDeleted && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-300">
+                              ถูกลบ
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleOpenEditForm(player)}
-                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                            title="แก้ไข"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(player)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                            title="ลบ"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {showDeleted ? (
+                            <button
+                              onClick={() => handleRestore(player)}
+                              className="flex items-center gap-2 px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border border-green-200"
+                              title="กู้คืนข้อมูล"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              <span className="text-sm font-medium">กู้คืน</span>
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleOpenEditForm(player)}
+                                className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                title="แก้ไข"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(player)}
+                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                title="ลบ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -519,6 +559,18 @@ export default function PlayersPage() {
           isLoading={formLoading}
         />
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type}
+        confirmText="ยืนยัน"
+        cancelText="ยกเลิก"
+      />
     </div>
   );
 }

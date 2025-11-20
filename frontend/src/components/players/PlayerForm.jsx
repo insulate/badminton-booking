@@ -20,7 +20,6 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
     level: player?.level || '',
     password: '',
     notes: player?.notes || '',
-    status: player?.status || 'active',
   });
 
   const [errors, setErrors] = useState({});
@@ -81,7 +80,6 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
       phone: formData.phone,
       level: formData.level || null,
       notes: formData.notes.trim(),
-      status: formData.status,
     };
 
     // Only include password if it's filled
@@ -195,26 +193,6 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
             {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
           </div>
 
-          {/* Status (Edit mode only) */}
-          {isEditMode && (
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                สถานะ
-              </label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              >
-                <option value="active">ใช้งาน</option>
-                <option value="inactive">ระงับ</option>
-              </select>
-            </div>
-          )}
-
           {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
@@ -265,7 +243,6 @@ PlayerForm.propTypes = {
     phone: PropTypes.string,
     level: PropTypes.string,
     notes: PropTypes.string,
-    status: PropTypes.string,
   }),
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
