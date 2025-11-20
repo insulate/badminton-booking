@@ -32,6 +32,9 @@ import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 // POS Page
 import POSPage from './pages/admin/POSPage';
 
+// Sales History Page
+import SalesHistoryPage from './pages/admin/SalesHistoryPage';
+
 // Booking Pages
 import BookingPage from './pages/admin/BookingPage';
 import BookingsPage from './pages/admin/BookingsPage';
@@ -98,6 +101,9 @@ function App() {
 
           {/* POS Route */}
           <Route path="pos" element={<POSPage />} />
+
+          {/* Sales History Route */}
+          <Route path="sales" element={<SalesHistoryPage />} />
 
           {/* Reports Route */}
           <Route path="reports" element={<ReportsPage />} />

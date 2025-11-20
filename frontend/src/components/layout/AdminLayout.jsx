@@ -26,6 +26,7 @@ import {
   Tag,
   UserCircle2,
   BarChart3,
+  Receipt,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -81,6 +82,11 @@ export default function AdminLayout() {
           name: 'POS - ขายสินค้า',
           path: ROUTES.ADMIN.POS,
           icon: ShoppingCart,
+        },
+        {
+          name: 'ประวัติการขาย',
+          path: ROUTES.ADMIN.SALES,
+          icon: Receipt,
         },
         {
           name: 'จัดการสินค้า',

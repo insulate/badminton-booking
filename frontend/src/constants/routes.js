@@ -16,6 +16,7 @@ export const ROUTES = {
     PLAYERS: '/admin/players',
     GROUPPLAY: '/admin/groupplay',
     POS: '/admin/pos',
+    SALES: '/admin/sales',
     BOOKING: '/admin/booking',
     BOOKINGS: '/admin/bookings',
     REPORTS: '/admin/reports',
