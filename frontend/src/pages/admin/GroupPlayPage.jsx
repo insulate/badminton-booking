@@ -45,6 +45,7 @@ export default function GroupPlayPage() {
   const [selectedRule, setSelectedRule] = useState(null);
   const [courts, setCourts] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [showStartGameModal, setShowStartGameModal] = useState(false);
   const [showFinishGameModal, setShowFinishGameModal] = useState(false);
@@ -78,16 +79,19 @@ export default function GroupPlayPage() {
     try {
       setLoading(true);
       const [rulesRes, courtsRes] = await Promise.all([
-        groupPlayAPI.getAll(), // Remove isActive filter to show all rules
+        groupPlayAPI.getAll(),
         courtsAPI.getAll({ status: 'available' })
       ]);
 
-      setRules(rulesRes.data || []);
+      const allRules = rulesRes.data || [];
+      setRules(allRules);
       setCourts(courtsRes.data || []);
 
-      // Auto-select first rule if available
-      if (rulesRes.data && rulesRes.data.length > 0) {
-        setSelectedRule(rulesRes.data[0]);
+      // Since we only support one rule, select the first one (or null if none exists)
+      if (allRules.length > 0) {
+        setSelectedRule(allRules[0]);
+      } else {
+        setSelectedRule(null);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -131,6 +135,14 @@ export default function GroupPlayPage() {
 
   const handleCreateRule = () => {
     setShowCreateModal(true);
+  };
+
+  const handleEditRule = () => {
+    if (!selectedRule) {
+      toast.error('ไม่มีกฎก๊วนให้แก้ไข');
+      return;
+    }
+    setShowEditModal(true);
   };
 
   const handleCheckIn = () => {
@@ -336,66 +348,93 @@ export default function GroupPlayPage() {
               <RefreshCw size={18} />
               รีเฟรช
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Rule Display */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-text-primary">กฎก๊วนสนาม</h2>
+          {selectedRule && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleToggleActive}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  selectedRule.isActive
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                }`}
+              >
+                {selectedRule.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+              </button>
+              <button
+                onClick={handleEditRule}
+                className="px-3 py-1 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <Edit size={14} />
+                แก้ไขกฎก๊วน
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!selectedRule ? (
+          <div className="text-center py-8 text-text-secondary">
+            <Users size={48} className="mx-auto mb-3 opacity-50" />
+            <p className="mb-2">ยังไม่มีกฎก๊วนสนาม</p>
+            <p className="text-sm mb-4">สร้างกฎก๊วนเพื่อเริ่มต้นใช้งานระบบตีก๊วน</p>
             <button
               onClick={handleCreateRule}
-              className="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
             >
               <Plus size={18} />
               สร้างกฎก๊วนใหม่
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Rule Selector */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-text-primary">
-            เลือกกฎก๊วนสนาม
-          </label>
-          {selectedRule && (
-            <button
-              onClick={handleToggleActive}
-              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                selectedRule.isActive
-                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                  : 'bg-red-100 text-red-700 hover:bg-red-200'
-              }`}
-            >
-              {selectedRule.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
-            </button>
-          )}
-        </div>
-        {rules.length === 0 ? (
-          <div className="text-center py-8 text-text-secondary">
-            <Users size={48} className="mx-auto mb-3 opacity-50" />
-            <p>ยังไม่มีกฎก๊วนสนาม</p>
-            <button
-              onClick={handleCreateRule}
-              className="mt-3 text-primary-blue hover:underline"
-            >
-              สร้างกฎก๊วนใหม่
-            </button>
-          </div>
         ) : (
-          <select
-            value={selectedRule?._id || ''}
-            onChange={(e) => {
-              const rule = rules.find(r => r._id === e.target.value);
-              setSelectedRule(rule);
-            }}
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
-          >
-            {rules.map(rule => {
-              const courtNames = rule.courts?.map(c => c.name || c.courtNumber).join(', ') || 'ไม่ระบุสนาม';
-              const daysText = rule.daysOfWeek?.map(d => DAYS_LABELS[d]).join(', ') || 'ไม่ระบุวัน';
-              return (
-                <option key={rule._id} value={rule._id}>
-                  {rule.sessionName} - {courtNames} ({daysText} {rule.startTime}-{rule.endTime})
-                </option>
-              );
-            })}
-          </select>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-xs text-text-secondary">ชื่อ Session</label>
+              <p className="text-sm font-medium text-text-primary mt-1">{selectedRule.sessionName}</p>
+            </div>
+            <div>
+              <label className="text-xs text-text-secondary">สนาม</label>
+              <p className="text-sm font-medium text-text-primary mt-1">
+                {selectedRule.courts?.map(c => c.name || c.courtNumber).join(', ') || '-'}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-text-secondary">วัน</label>
+              <p className="text-sm font-medium text-text-primary mt-1">
+                {selectedRule.daysOfWeek?.map(d => DAYS_LABELS[d]).join(', ') || '-'}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-text-secondary">เวลา</label>
+              <p className="text-sm font-medium text-text-primary mt-1">
+                {selectedRule.startTime} - {selectedRule.endTime}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-text-secondary">ค่าเข้าร่วม</label>
+              <p className="text-sm font-medium text-text-primary mt-1">
+                ฿{selectedRule.entryFee}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs text-text-secondary">สถานะ</label>
+              <p className="text-sm font-medium mt-1">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${
+                  selectedRule.isActive
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedRule.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                </span>
+              </p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -845,6 +884,18 @@ export default function GroupPlayPage() {
           onClose={() => setShowCreateModal(false)}
           onSuccess={async (data) => {
             await groupPlayAPI.create(data);
+            await fetchData();
+          }}
+        />
+      )}
+
+      {showEditModal && selectedRule && (
+        <CreateSessionModal
+          courts={courts}
+          rule={selectedRule}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={async (data) => {
+            await groupPlayAPI.update(selectedRule._id, data);
             await fetchData();
           }}
         />

@@ -12,14 +12,16 @@ const DAYS_OF_WEEK = [
   { value: 'sunday', label: 'อาทิตย์' },
 ];
 
-export default function CreateSessionModal({ courts, onClose, onSuccess }) {
+export default function CreateSessionModal({ courts, onClose, onSuccess, rule = null }) {
+  const isEditMode = !!rule;
+
   const [formData, setFormData] = useState({
-    sessionName: '',
-    courts: [],
-    daysOfWeek: [],
-    startTime: '18:00',
-    endTime: '22:00',
-    entryFee: 30,
+    sessionName: rule?.sessionName || '',
+    courts: rule?.courts?.map(c => c._id || c) || [],
+    daysOfWeek: rule?.daysOfWeek || [],
+    startTime: rule?.startTime || '18:00',
+    endTime: rule?.endTime || '22:00',
+    entryFee: rule?.entryFee || 30,
   });
   const [loading, setLoading] = useState(false);
 
@@ -52,11 +54,11 @@ export default function CreateSessionModal({ courts, onClose, onSuccess }) {
     setLoading(true);
     try {
       await onSuccess(formData);
-      toast.success('สร้าง Session สำเร็จ!');
+      toast.success(isEditMode ? 'แก้ไขกฎก๊วนสำเร็จ!' : 'สร้างกฎก๊วนสำเร็จ!');
       onClose();
     } catch (error) {
-      console.error('Error creating session:', error);
-      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้าง session');
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} session:`, error);
+      toast.error(error.response?.data?.message || `เกิดข้อผิดพลาดในการ${isEditMode ? 'แก้ไข' : 'สร้าง'}กฎก๊วน`);
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,9 @@ export default function CreateSessionModal({ courts, onClose, onSuccess }) {
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-xl font-semibold text-text-primary">สร้าง Session ใหม่</h2>
+          <h2 className="text-xl font-semibold text-text-primary">
+            {isEditMode ? 'แก้ไขกฎก๊วน' : 'สร้างกฎก๊วนใหม่'}
+          </h2>
           <button
             onClick={onClose}
             className="text-text-secondary hover:text-text-primary transition-colors"
@@ -211,7 +215,7 @@ export default function CreateSessionModal({ courts, onClose, onSuccess }) {
               className="flex-1 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? 'กำลังสร้าง...' : 'สร้าง Session'}
+              {loading ? (isEditMode ? 'กำลังบันทึก...' : 'กำลังสร้าง...') : (isEditMode ? 'บันทึก' : 'สร้างกฎก๊วน')}
             </button>
           </div>
         </form>
