@@ -12,7 +12,8 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  Eye
 } from 'lucide-react';
 import { groupPlayAPI, courtsAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
@@ -511,6 +512,9 @@ export default function GroupPlayPage() {
                               <ArrowUpDown className={`w-4 h-4 ${sortField === 'paymentStatus' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
                             </div>
                           </th>
+                          <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            จัดการ
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -519,11 +523,7 @@ export default function GroupPlayPage() {
                           return (
                             <tr
                               key={index}
-                              onClick={() => {
-                                setSelectedPlayer(player);
-                                setShowPlayerCostModal(true);
-                              }}
-                              className={`cursor-pointer hover:bg-blue-50 transition-all duration-150 ${
+                              className={`transition-all duration-150 ${
                                 index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                               }`}
                             >
@@ -575,6 +575,18 @@ export default function GroupPlayPage() {
                                 >
                                   {player.paymentStatus === 'paid' ? 'จ่ายแล้ว' : 'ยังไม่จ่าย'}
                                 </span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <button
+                                  onClick={() => {
+                                    setSelectedPlayer(player);
+                                    setShowPlayerCostModal(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                  <Eye size={14} />
+                                  ดูรายละเอียด
+                                </button>
                               </td>
                             </tr>
                           );

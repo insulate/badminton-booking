@@ -1,11 +1,17 @@
-import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users } from 'lucide-react';
+import { useState } from 'react';
+import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers, onClose }) {
+  const [showFinishedGames, setShowFinishedGames] = useState(false);
+
   if (!player) return null;
 
   const finishedGames = player.games?.filter(g => g.status === 'finished') || [];
   const playingGames = player.games?.filter(g => g.status === 'playing') || [];
   const otherGames = player.games?.filter(g => g.status !== 'finished' && g.status !== 'playing') || [];
+
+  // Calculate total cost from finished games
+  const finishedGamesCost = finishedGames.reduce((sum, game) => sum + (game.costPerPlayer || 0), 0);
 
   // Helper function to get players in a specific game
   const getPlayersInGame = (gameNumber) => {
@@ -78,117 +84,155 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
           {/* Finished Games */}
           {finishedGames.length > 0 && (
             <div>
-              <h3 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                <Calendar size={18} className="text-green-600" />
-                เกมที่เล่นจบแล้ว ({finishedGames.length} เกม)
-              </h3>
-              <div className="space-y-3">
-                {finishedGames.map((game, idx) => (
-                  <div key={idx} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                    {/* Game Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-text-primary">
-                        เกมที่ {game.gameNumber}
-                      </span>
-                      <span className="text-sm px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                        เล่นจบแล้ว
-                      </span>
-                    </div>
-
-                    {/* Court Info */}
-                    {game.court && (
-                      <p className="text-sm text-text-secondary mb-2">
-                        สนาม: {game.court.name || `สนาม ${game.court.courtNumber}`}
-                      </p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="text-green-600" size={20} />
+                    <span className="font-semibold text-text-primary">
+                      เกมที่เล่นจบแล้ว
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowFinishedGames(!showFinishedGames)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    {showFinishedGames ? (
+                      <>
+                        <ChevronUp size={16} />
+                        ซ่อนรายละเอียด
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={16} />
+                        ดูรายละเอียด
+                      </>
                     )}
+                  </button>
+                </div>
 
-                    {/* Time Info */}
-                    <div className="flex items-center gap-2 text-sm text-text-secondary mb-3">
-                      <Clock size={14} />
-                      <span>
-                        {new Date(game.startTime).toLocaleTimeString('th-TH', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                        {game.endTime && (
-                          <> - {new Date(game.endTime).toLocaleTimeString('th-TH', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}</>
+                {/* Summary */}
+                <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div>
+                    <p className="text-sm text-green-700">จำนวนเกม</p>
+                    <p className="text-2xl font-bold text-green-800">{finishedGames.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-green-700">ค่าใช้จ่ายรวม</p>
+                    <p className="text-2xl font-bold text-green-800">฿{finishedGamesCost.toFixed(2)}</p>
+                  </div>
+                </div>
+
+                {/* Detailed Games List */}
+                {showFinishedGames && (
+                  <div className="mt-4 pt-4 border-t border-green-200 space-y-3">
+                    {finishedGames.map((game, idx) => (
+                      <div key={idx} className="border border-slate-200 rounded-lg p-4 bg-white">
+                        {/* Game Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-text-primary">
+                            เกมที่ {game.gameNumber}
+                          </span>
+                          <span className="text-sm px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                            เล่นจบแล้ว
+                          </span>
+                        </div>
+
+                        {/* Court Info */}
+                        {game.court && (
+                          <p className="text-sm text-text-secondary mb-2">
+                            สนาม: {game.court.name || `สนาม ${game.court.courtNumber}`}
+                          </p>
                         )}
-                      </span>
-                    </div>
 
-                    {/* Players in Game */}
-                    {(() => {
-                      const playersInGame = getPlayersInGame(game.gameNumber);
-                      if (playersInGame.length > 0) {
-                        return (
+                        {/* Time Info */}
+                        <div className="flex items-center gap-2 text-sm text-text-secondary mb-3">
+                          <Clock size={14} />
+                          <span>
+                            {new Date(game.startTime).toLocaleTimeString('th-TH', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                            {game.endTime && (
+                              <> - {new Date(game.endTime).toLocaleTimeString('th-TH', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}</>
+                            )}
+                          </span>
+                        </div>
+
+                        {/* Players in Game */}
+                        {(() => {
+                          const playersInGame = getPlayersInGame(game.gameNumber);
+                          if (playersInGame.length > 0) {
+                            return (
+                              <div className="mb-3 pb-3 border-b border-slate-200">
+                                <p className="text-sm font-medium text-text-primary mb-2 flex items-center gap-1">
+                                  <Users size={14} />
+                                  ผู้เล่น ({playersInGame.length} คน):
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {playersInGame.map((p, pIdx) => (
+                                    <span
+                                      key={pIdx}
+                                      className="px-2 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs text-text-primary"
+                                    >
+                                      {p.name}
+                                      {p.levelName && p.levelName !== 'ไม่ระบุ' && (
+                                        <span className="ml-1 text-blue-600">
+                                          ({p.levelName})
+                                        </span>
+                                      )}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        {/* Items Used */}
+                        {game.items && game.items.length > 0 && (
                           <div className="mb-3 pb-3 border-b border-slate-200">
                             <p className="text-sm font-medium text-text-primary mb-2 flex items-center gap-1">
-                              <Users size={14} />
-                              ผู้เล่น ({playersInGame.length} คน):
+                              <Package size={14} />
+                              สินค้าที่ใช้:
                             </p>
-                            <div className="flex flex-wrap gap-2">
-                              {playersInGame.map((p, pIdx) => (
-                                <span
-                                  key={pIdx}
-                                  className="px-2 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs text-text-primary"
-                                >
-                                  {p.name}
-                                  {p.levelName && p.levelName !== 'ไม่ระบุ' && (
-                                    <span className="ml-1 text-blue-600">
-                                      ({p.levelName})
-                                    </span>
-                                  )}
-                                </span>
+                            <div className="space-y-1">
+                              {game.items.map((item, itemIdx) => (
+                                <div key={itemIdx} className="flex items-center justify-between text-sm">
+                                  <span className="text-text-secondary">
+                                    {item.product?.name || 'สินค้า'} x {item.quantity}
+                                  </span>
+                                  <span className="text-text-primary">
+                                    ฿{(item.price * item.quantity).toFixed(2)}
+                                  </span>
+                                </div>
                               ))}
+                              {game.totalItemsCost > 0 && (
+                                <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-sm font-medium">
+                                  <span className="text-text-secondary">รวมค่าสินค้า</span>
+                                  <span className="text-text-primary">
+                                    ฿{game.totalItemsCost.toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        );
-                      }
-                      return null;
-                    })()}
+                        )}
 
-                    {/* Items Used */}
-                    {game.items && game.items.length > 0 && (
-                      <div className="mb-3 pb-3 border-b border-slate-200">
-                        <p className="text-sm font-medium text-text-primary mb-2 flex items-center gap-1">
-                          <Package size={14} />
-                          สินค้าที่ใช้:
-                        </p>
-                        <div className="space-y-1">
-                          {game.items.map((item, itemIdx) => (
-                            <div key={itemIdx} className="flex items-center justify-between text-sm">
-                              <span className="text-text-secondary">
-                                {item.product?.name || 'สินค้า'} x {item.quantity}
-                              </span>
-                              <span className="text-text-primary">
-                                ฿{(item.price * item.quantity).toFixed(2)}
-                              </span>
-                            </div>
-                          ))}
-                          {game.totalItemsCost > 0 && (
-                            <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-sm font-medium">
-                              <span className="text-text-secondary">รวมค่าสินค้า</span>
-                              <span className="text-text-primary">
-                                ฿{game.totalItemsCost.toFixed(2)}
-                              </span>
-                            </div>
-                          )}
+                        {/* Cost Per Player */}
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-300">
+                          <span className="font-medium text-text-primary">ค่าใช้จ่ายของคุณ</span>
+                          <span className="text-lg font-semibold text-green-600">
+                            ฿{game.costPerPlayer?.toFixed(2) || '0.00'}
+                          </span>
                         </div>
                       </div>
-                    )}
-
-                    {/* Cost Per Player */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-300">
-                      <span className="font-medium text-text-primary">ค่าใช้จ่ายของคุณ</span>
-                      <span className="text-lg font-semibold text-green-600">
-                        ฿{game.costPerPlayer?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
