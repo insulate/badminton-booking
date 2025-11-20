@@ -7,8 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Filter,
-  Sparkles
+  Filter
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { salesAPI } from '../../lib/api';
@@ -141,29 +140,25 @@ const SalesHistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen bg-bg-cream p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-
-          <div className="flex justify-between items-center relative z-10">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                  <Receipt className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold text-white">ประวัติการขาย</h1>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-100 p-3 rounded-lg">
+                <Receipt className="w-6 h-6 text-orange-600" />
               </div>
-              <p className="text-blue-100 text-sm ml-14">ดูรายการขายทั้งหมดและรายละเอียด • ระบบจัดการประวัติการขาย</p>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">ประวัติการขาย</h1>
+                <p className="text-sm text-gray-500">ดูรายการขายทั้งหมดและรายละเอียด</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 bg-orange-50 px-6 py-3 rounded-xl border border-orange-200">
+              <Receipt className="w-6 h-6 text-orange-600" />
               <div className="text-right">
-                <div className="text-white/80 text-xs">ทั้งหมด</div>
-                <div className="text-white font-bold text-xl">{pagination.total || 0}</div>
+                <div className="text-orange-600 text-xs">ทั้งหมด</div>
+                <div className="text-orange-600 font-bold text-xl">{pagination.total || 0}</div>
               </div>
             </div>
           </div>
@@ -239,7 +234,7 @@ const SalesHistoryPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="S-00001"
                   className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
                 />

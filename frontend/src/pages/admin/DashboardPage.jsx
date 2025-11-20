@@ -3,7 +3,8 @@ import {
   UserCheck,
   Calendar,
   TrendingUp,
-  Activity
+  Activity,
+  LayoutDashboard
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -92,11 +93,16 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
-          <p className="text-text-secondary mt-1">ภาพรวมระบบจัดการสนามแบดมินตัน</p>
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 p-3 rounded-lg">
+            <LayoutDashboard className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-500">ภาพรวมระบบจัดการสนามแบดมินตัน</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-text-secondary">
+        <div className="flex items-center gap-2 text-gray-500">
           <Activity size={20} />
           <span className="text-sm">อัพเดทล่าสุด: วันนี้ 14:30 น.</span>
         </div>

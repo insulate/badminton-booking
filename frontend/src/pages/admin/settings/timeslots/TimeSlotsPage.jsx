@@ -207,7 +207,7 @@ const TimeSlotsPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-6">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Filter by Day Type */}
           <select
@@ -243,7 +243,7 @@ const TimeSlotsPage = () => {
                 <Clock className="w-5 h-5" />
                 {getDayTypeLabel(dayType)} ({groupedTimeslots[dayType].length} ช่วงเวลา)
               </h2>
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -348,7 +348,7 @@ const TimeSlotsPage = () => {
         </div>
       ) : (
         // Show filtered day type only
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

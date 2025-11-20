@@ -100,7 +100,7 @@ const CourtsEditPage = () => {
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
             {/* Court Number */}

@@ -190,17 +190,13 @@ const ReportsPage = () => {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
-              <BarChart3 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                รายงานและสถิติ
-              </h1>
-              <p className="text-gray-500 text-sm mt-0.5">สรุปรายได้และข้อมูลการดำเนินงาน</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-purple-100 p-3 rounded-lg">
+            <BarChart3 className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">รายงานและสถิติ</h1>
+            <p className="text-sm text-gray-500">สรุปรายได้และข้อมูลการดำเนินงาน</p>
           </div>
         </div>
 
@@ -493,7 +489,7 @@ const ReportsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {getRevenueChartData().map((entry, index) => (
+                  {getRevenueChartData().map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -542,7 +538,7 @@ const ReportsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {getBookingsStatusData().map((entry, index) => (
+                  {getBookingsStatusData().map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

@@ -148,29 +148,25 @@ const POSPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen bg-bg-cream p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 relative overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
-
-          <div className="flex justify-between items-center relative z-10">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold text-white">POS - ขายสินค้า</h1>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <ShoppingCart className="w-6 h-6 text-green-600" />
               </div>
-              <p className="text-blue-100 text-sm ml-14">เลือกสินค้าเพื่อเพิ่มลงตะกร้า • ระบบขายสินค้าอัจฉริยะ</p>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">POS - ขายสินค้า</h1>
+                <p className="text-sm text-gray-500">เลือกสินค้าเพื่อเพิ่มลงตะกร้า</p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30">
-              <ShoppingCart className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 bg-green-50 px-6 py-3 rounded-xl border border-green-200">
+              <ShoppingCart className="w-6 h-6 text-green-600" />
               <div className="text-right">
-                <div className="text-white/80 text-xs">รายการในตะกร้า</div>
-                <div className="text-white font-bold text-xl">{cart.length}</div>
+                <div className="text-green-600 text-xs">รายการในตะกร้า</div>
+                <div className="text-green-600 font-bold text-xl">{cart.length}</div>
               </div>
             </div>
           </div>
