@@ -70,6 +70,16 @@ const playerSchema = new mongoose.Schema(
       },
       default: 'active',
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      select: false, // Don't return by default
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+      select: false, // Don't return by default
+    },
   },
   {
     timestamps: true,
@@ -83,6 +93,7 @@ playerSchema.index({ level: 1 });
 playerSchema.index({ status: 1 });
 playerSchema.index({ 'stats.totalGames': -1 });
 playerSchema.index({ 'stats.totalSpent': -1 });
+playerSchema.index({ isDeleted: 1 }); // For soft delete filtering
 
 // Pre-save middleware to auto-generate levelName from level
 playerSchema.pre('save', function (next) {
@@ -132,27 +143,54 @@ playerSchema.set('toJSON', {
 
 playerSchema.set('toObject', { virtuals: true });
 
-// Static method to find active players
+// Static method to find active players (exclude deleted)
 playerSchema.statics.findActive = function () {
-  return this.find({ status: 'active' }).sort({ name: 1 });
+  return this.find({ status: 'active', isDeleted: false }).sort({ name: 1 });
 };
 
-// Static method to find players by level
+// Static method to find players by level (exclude deleted)
 playerSchema.statics.findByLevel = function (level) {
-  return this.find({ level, status: 'active' }).sort({ name: 1 });
+  return this.find({ level, status: 'active', isDeleted: false }).sort({ name: 1 });
 };
 
-// Static method to find players by phone (for check-in search)
+// Static method to find players by phone (for check-in search, exclude deleted)
 playerSchema.statics.findByPhone = function (phone) {
   const cleanPhone = phone.replace(/-/g, '');
-  return this.findOne({ phone: { $regex: cleanPhone, $options: 'i' } });
+  return this.findOne({
+    phone: { $regex: cleanPhone, $options: 'i' },
+    isDeleted: false
+  });
 };
 
-// Static method to get top players by games played
+// Static method to get top players by games played (exclude deleted)
 playerSchema.statics.getTopPlayers = function (limit = 10) {
-  return this.find({ status: 'active' })
+  return this.find({ status: 'active', isDeleted: false })
     .sort({ 'stats.totalGames': -1 })
     .limit(limit);
+};
+
+// Static method to soft delete a player
+playerSchema.statics.softDelete = function (id) {
+  return this.findByIdAndUpdate(
+    id,
+    {
+      isDeleted: true,
+      deletedAt: new Date()
+    },
+    { new: true }
+  );
+};
+
+// Static method to restore a deleted player
+playerSchema.statics.restore = function (id) {
+  return this.findByIdAndUpdate(
+    id,
+    {
+      isDeleted: false,
+      deletedAt: null
+    },
+    { new: true }
+  );
 };
 
 const Player = mongoose.model('Player', playerSchema);

@@ -395,6 +395,11 @@ export const playersAPI = {
     const response = await api.delete(API_ENDPOINTS.PLAYERS.DELETE(id));
     return response.data;
   },
+
+  restore: async (id) => {
+    const response = await api.post(API_ENDPOINTS.PLAYERS.RESTORE(id));
+    return response.data;
+  },
 };
 
 // Group Play API (Admin only)

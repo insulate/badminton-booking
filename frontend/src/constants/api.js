@@ -110,6 +110,7 @@ export const API_ENDPOINTS = {
     CREATE: '/players',
     UPDATE: (id) => `/players/${id}`,
     DELETE: (id) => `/players/${id}`,
+    RESTORE: (id) => `/players/${id}/restore`,
   },
 
   // Group Play Management (Admin)

@@ -11,14 +11,16 @@ router.use(protect);
  * @route   GET /api/players
  * @desc    Get all players with filters
  * @access  Private
- * @query   level, status, search (name or phone)
+ * @query   level, status, search (name or phone), includeDeleted
  */
 router.get('/', async (req, res) => {
   try {
-    const { level, status, search } = req.query;
+    const { level, status, search, includeDeleted } = req.query;
 
-    // Build query
-    const query = {};
+    // Build query - show only deleted when includeDeleted is true
+    const query = {
+      isDeleted: includeDeleted === 'true' ? true : false
+    };
 
     if (level) {
       query.level = level;
@@ -133,7 +135,7 @@ router.post('/', async (req, res) => {
  */
 router.get('/stats/:id', async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findOne({ _id: req.params.id, isDeleted: false });
 
     if (!player) {
       return res.status(404).json({
@@ -174,7 +176,7 @@ router.get('/stats/:id', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findOne({ _id: req.params.id, isDeleted: false });
 
     if (!player) {
       return res.status(404).json({
@@ -207,7 +209,7 @@ router.put('/:id', async (req, res) => {
   try {
     const { name, phone, level, notes, status, password } = req.body;
 
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findOne({ _id: req.params.id, isDeleted: false });
 
     if (!player) {
       return res.status(404).json({
@@ -272,12 +274,12 @@ router.put('/:id', async (req, res) => {
 
 /**
  * @route   DELETE /api/players/:id
- * @desc    Delete player
+ * @desc    Soft delete player
  * @access  Private
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findById(req.params.id).select('+isDeleted +deletedAt');
 
     if (!player) {
       return res.status(404).json({
@@ -286,7 +288,18 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await player.deleteOne();
+    // Check if already deleted
+    if (player.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: 'ผู้เล่นถูกลบไปแล้ว',
+      });
+    }
+
+    // Soft delete
+    player.isDeleted = true;
+    player.deletedAt = new Date();
+    await player.save();
 
     res.json({
       success: true,
@@ -297,6 +310,50 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการลบผู้เล่น',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/players/:id/restore
+ * @desc    Restore a soft-deleted player
+ * @access  Private
+ */
+router.post('/:id/restore', async (req, res) => {
+  try {
+    const player = await Player.findById(req.params.id).select('+isDeleted +deletedAt');
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบผู้เล่น',
+      });
+    }
+
+    // Check if not deleted
+    if (!player.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: 'ผู้เล่นนี้ยังไม่ได้ถูกลบ',
+      });
+    }
+
+    // Restore player
+    player.isDeleted = false;
+    player.deletedAt = null;
+    await player.save();
+
+    res.json({
+      success: true,
+      message: 'กู้คืนข้อมูลผู้เล่นสำเร็จ',
+      data: player,
+    });
+  } catch (error) {
+    console.error('Error restoring player:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการกู้คืนข้อมูลผู้เล่น',
       error: error.message,
     });
   }
