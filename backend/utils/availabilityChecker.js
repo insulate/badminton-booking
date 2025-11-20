@@ -25,22 +25,13 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
 
+    // Calculate day of week for Group Play blocking check
+    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][bookingDate.getDay()];
+
     // Get the starting timeslot
     const startTimeSlot = await TimeSlot.findById(timeSlotId);
     if (!startTimeSlot) {
       throw new Error('TimeSlot not found');
-    }
-
-    // Check if time is blocked by Group Play rules
-    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][bookingDate.getDay()];
-    const isBlocked = await GroupPlay.isTimeSlotBlocked(courtId, dayOfWeek, startTimeSlot.startTime);
-
-    if (isBlocked) {
-      return {
-        available: false,
-        conflictingBooking: null,
-        message: 'สนามถูกบล็อกโดยระบบตีก๊วนในช่วงเวลานี้',
-      };
     }
 
     // Get all timeslots for this day type sorted by time
@@ -77,6 +68,18 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
           available: false,
           conflictingBooking: null,
           message: `Time slots are not consecutive. Gap between ${currentSlot.endTime} and ${nextSlot.startTime}`,
+        };
+      }
+    }
+
+    // Check if ANY of the required time slots are blocked by Group Play rules
+    for (const slot of slotsNeeded) {
+      const isBlocked = await GroupPlay.isTimeSlotBlocked(courtId, dayOfWeek, slot.startTime);
+      if (isBlocked) {
+        return {
+          available: false,
+          conflictingBooking: null,
+          message: 'ไม่สามารถจองสนามได้ในวันและเวลาที่เลือก',
         };
       }
     }

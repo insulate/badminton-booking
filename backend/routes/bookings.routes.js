@@ -301,7 +301,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
     if (!availability.available) {
       return res.status(400).json({
         success: false,
-        message: 'Court is not available for the selected date and time',
+        message: availability.message || 'ไม่สามารถจองสนามได้ในวันและเวลาที่เลือก',
         conflictingBooking: availability.conflictingBooking,
       });
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { API_BASE_URL, API_ENDPOINTS } from '../../constants/api';
 import { bookingsAPI } from '../../lib/api';
 
@@ -159,7 +160,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
       }
     } catch (error) {
       console.error('Create booking error:', error);
-      alert(
+      toast.error(
         error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างการจอง'
       );
     } finally {
