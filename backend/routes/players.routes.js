@@ -63,6 +63,14 @@ router.post('/', async (req, res) => {
   try {
     const { name, phone, level, password, notes } = req.body;
 
+    // Check if required fields are provided
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณากรอกเบอร์โทรศัพท์',
+      });
+    }
+
     // Check if player with same phone already exists
     const existingPlayer = await Player.findOne({ phone: phone.replace(/-/g, '') });
     if (existingPlayer) {

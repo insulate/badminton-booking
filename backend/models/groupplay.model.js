@@ -276,8 +276,15 @@ groupPlaySchema.methods.checkInPlayer = function (playerData) {
     throw new Error('ผู้เล่นนี้เช็คอินแล้ว');
   }
 
+  // Convert playerId to player field if provided
+  const playerDataToSave = { ...playerData };
+  if (playerDataToSave.playerId) {
+    playerDataToSave.player = playerDataToSave.playerId;
+    delete playerDataToSave.playerId;
+  }
+
   this.players.push({
-    ...playerData,
+    ...playerDataToSave,
     phone: normalizedPhone,
     checkedIn: true,
     checkInTime: new Date(),

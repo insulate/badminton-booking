@@ -814,7 +814,6 @@
 - [x] เพิ่ม "Group Play" ใน Admin menu
 - [x] ทดสอบ flow ทั้งหมด (check-in → start → finish → add products → checkout)
 - [x] เพิ่ม E2E tests (Playwright)
-- [ ] ⏳ MatchRecommendation component (แนะนำการจับคู่ตามระดับมือ - optional feature)
 
 **Status**: ✅ Frontend Group Play พร้อมใช้งาน 95%
 
@@ -830,9 +829,6 @@
 - ✅ Custom checkout modal
 - ✅ Playing game validation
 - ✅ Player stats auto-update
-
-**Optional features ที่เหลือ:**
-- ⏳ Match recommendation logic (แนะนำการจับคู่ตามระดับมือ)
 
 ---
 

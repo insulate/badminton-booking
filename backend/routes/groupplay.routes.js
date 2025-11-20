@@ -588,7 +588,7 @@ router.post('/:id/player/:playerId/products', async (req, res) => {
  */
 router.post('/:id/checkout/:playerId', async (req, res) => {
   try {
-    const session = await GroupPlay.findById(req.params.id);
+    let session = await GroupPlay.findById(req.params.id);
     if (!session) {
       return res.status(404).json({
         success: false,
@@ -596,7 +596,7 @@ router.post('/:id/checkout/:playerId', async (req, res) => {
       });
     }
 
-    const sessionPlayer = session.players.id(req.params.playerId);
+    let sessionPlayer = session.players.id(req.params.playerId);
     if (!sessionPlayer) {
       return res.status(404).json({
         success: false,
@@ -615,6 +615,10 @@ router.post('/:id/checkout/:playerId', async (req, res) => {
 
     // Check out player
     await session.checkOutPlayer(req.params.playerId);
+
+    // Reload session to get fresh player data after checkout
+    session = await GroupPlay.findById(req.params.id);
+    sessionPlayer = session.players.id(req.params.playerId);
 
     // Update player stats if player is from database (not walk-in)
     if (sessionPlayer.player) {
