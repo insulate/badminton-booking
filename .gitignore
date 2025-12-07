@@ -34,3 +34,7 @@ backend/logs/
 .playwright-mcp/
 coverage/
 *.lcov
+
+# OpenCode
+.opencode/
+opencode.json
