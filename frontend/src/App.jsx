@@ -8,6 +8,12 @@ import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import PlayersPage from './pages/admin/PlayersPage';
 
+// Customer Pages
+import CustomerLayout from './components/customer/CustomerLayout';
+import HomePage from './pages/customer/HomePage';
+import RulesPage from './pages/customer/RulesPage';
+import CustomerBookingPage from './pages/customer/CustomerBookingPage';
+
 // Settings Pages
 import VenueSettingsPage from './pages/admin/settings/VenueSettingsPage';
 import OperatingHoursPage from './pages/admin/settings/OperatingHoursPage';
@@ -72,11 +78,15 @@ function App() {
       />
 
       <Routes>
-        {/* Public Routes */}
-        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        {/* Customer Public Routes */}
+        <Route element={<CustomerLayout />}>
+          <Route path={ROUTES.CUSTOMER.HOME} element={<HomePage />} />
+          <Route path={ROUTES.CUSTOMER.RULES} element={<RulesPage />} />
+          <Route path={ROUTES.CUSTOMER.BOOKING} element={<CustomerBookingPage />} />
+        </Route>
 
-        {/* Redirect root to admin dashboard */}
-        <Route path={ROUTES.ROOT} element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
+        {/* Auth Routes */}
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -130,8 +140,8 @@ function App() {
           <Route path="settings/categories" element={<CategoryManagementPage />} />
         </Route>
 
-        {/* Catch all - redirect to dashboard */}
-        <Route path="*" element={<Navigate to={ROUTES.ADMIN.DASHBOARD} replace />} />
+        {/* Catch all - redirect to home */}
+        <Route path="*" element={<Navigate to={ROUTES.CUSTOMER.HOME} replace />} />
       </Routes>
     </Router>
   );

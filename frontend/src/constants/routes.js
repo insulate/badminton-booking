@@ -5,6 +5,13 @@
 
 // Public Routes
 export const ROUTES = {
+  // Customer Routes (Public)
+  CUSTOMER: {
+    HOME: '/',
+    RULES: '/rules',
+    BOOKING: '/booking',
+  },
+
   // Authentication
   LOGIN: '/login',
 
