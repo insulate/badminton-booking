@@ -70,25 +70,25 @@ export default function CustomerRegisterPage() {
   return (
     <div className="min-h-full flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserPlus className="w-8 h-8 text-blue-900" />
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserPlus className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">สมัครสมาชิก</h1>
-            <p className="text-blue-200 mt-2">สร้างบัญชีเพื่อจองสนาม</p>
+            <h1 className="text-2xl font-bold text-gray-800">สมัครสมาชิก</h1>
+            <p className="text-gray-500 mt-2">สร้างบัญชีเพื่อจองสนาม</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 ชื่อ-นามสกุล
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   name="name"
@@ -96,18 +96,18 @@ export default function CustomerRegisterPage() {
                   onChange={handleChange}
                   placeholder="ชื่อ นามสกุล"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 เบอร์โทรศัพท์
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="tel"
                   name="phone"
@@ -115,18 +115,18 @@ export default function CustomerRegisterPage() {
                   onChange={handleChange}
                   placeholder="0812345678"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 รหัสผ่าน
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="password"
                   name="password"
@@ -135,18 +135,18 @@ export default function CustomerRegisterPage() {
                   placeholder="อย่างน้อย 6 ตัวอักษร"
                   required
                   minLength={6}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-blue-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 ยืนยันรหัสผ่าน
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="password"
                   name="confirmPassword"
@@ -154,7 +154,7 @@ export default function CustomerRegisterPage() {
                   onChange={handleChange}
                   placeholder="ยืนยันรหัสผ่าน"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function CustomerRegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'กำลังสมัคร...' : 'สมัครสมาชิก'}
             </button>
@@ -171,11 +171,11 @@ export default function CustomerRegisterPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-blue-200">
+            <p className="text-gray-500">
               มีบัญชีอยู่แล้ว?{' '}
               <Link
                 to={`${ROUTES.CUSTOMER.LOGIN}${location.search}`}
-                className="text-yellow-400 hover:text-yellow-300 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 เข้าสู่ระบบ
               </Link>

@@ -54,8 +54,8 @@ export default function RulesPage() {
     <div className="min-h-full p-4">
       {/* Title */}
       <div className="text-center mb-6">
-        <div className="inline-block bg-yellow-100 border-2 border-yellow-400 rounded-xl px-6 py-3">
-          <h1 className="text-lg md:text-xl font-bold text-blue-900">
+        <div className="inline-block bg-blue-50 border-2 border-blue-200 rounded-xl px-6 py-3">
+          <h1 className="text-lg md:text-xl font-bold text-blue-700">
             เงื่อนไขการจองสนามแบดมินตัน
           </h1>
         </div>
@@ -69,15 +69,15 @@ export default function RulesPage() {
             {rules.slice(0, 5).map((rule) => (
               <div
                 key={rule.id}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
               >
                 <div className="flex gap-3">
                   <div className="flex-shrink-0">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-400 text-blue-900 font-bold rounded-full text-sm">
+                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-full text-sm">
                       {rule.id}
                     </span>
                   </div>
-                  <p className="text-white text-sm leading-relaxed whitespace-pre-line">
+                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                     {rule.text}
                   </p>
                 </div>
@@ -90,15 +90,15 @@ export default function RulesPage() {
             {rules.slice(5, 10).map((rule) => (
               <div
                 key={rule.id}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
               >
                 <div className="flex gap-3">
                   <div className="flex-shrink-0">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-400 text-blue-900 font-bold rounded-full text-sm">
+                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-full text-sm">
                       {rule.id}
                     </span>
                   </div>
-                  <p className="text-white text-sm leading-relaxed whitespace-pre-line">
+                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                     {rule.text}
                   </p>
                 </div>
@@ -109,12 +109,12 @@ export default function RulesPage() {
 
         {/* Contact Information */}
         <div className="mt-8 flex flex-col lg:flex-row lg:justify-end">
-          <div className="bg-blue-950/50 rounded-xl p-6 border border-yellow-400/30 max-w-sm lg:ml-auto">
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm max-w-sm lg:ml-auto">
             {/* Logo */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-blue-900"
+                  className="w-6 h-6 text-white"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -123,15 +123,15 @@ export default function RulesPage() {
                   <path d="M12 18c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
               </div>
-              <span className="text-yellow-400 font-bold text-lg">
+              <span className="text-blue-600 font-bold text-lg">
                 Lucky Badminton
               </span>
             </div>
 
             {/* Operating Hours */}
-            <div className="text-sm text-white/90 space-y-1 mb-4">
+            <div className="text-sm text-gray-700 space-y-1 mb-4">
               <p className="flex items-center gap-2">
-                <span className="text-yellow-400">เวลาเปิด:</span>
+                <span className="text-blue-600 font-medium">เวลาเปิด:</span>
               </p>
               <p className="pl-4">จ-ส 08:00-24:00 น.</p>
               <p className="pl-4">อา 08:00-22:00 น.</p>
@@ -139,7 +139,7 @@ export default function RulesPage() {
 
             {/* LINE QR Placeholder */}
             <div className="mb-4">
-              <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center mx-auto">
+              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center mx-auto border border-gray-200">
                 <span className="text-gray-400 text-xs text-center">
                   LINE QR
                   <br />
@@ -150,20 +150,20 @@ export default function RulesPage() {
 
             {/* Contact Details */}
             <div className="text-sm space-y-2">
-              <p className="flex items-center gap-2 text-white">
-                <span className="text-yellow-400 font-medium">TEL:</span>
+              <p className="flex items-center gap-2 text-gray-700">
+                <span className="text-blue-600 font-medium">TEL:</span>
                 099-999-9999
               </p>
-              <p className="flex items-center gap-2 text-white">
-                <span className="text-yellow-400 font-medium">LINE:</span>
+              <p className="flex items-center gap-2 text-gray-700">
+                <span className="text-blue-600 font-medium">LINE:</span>
                 @luckybadminton
               </p>
-              <p className="flex items-center gap-2 text-white">
-                <span className="text-yellow-400 font-medium">FACEBOOK:</span>
+              <p className="flex items-center gap-2 text-gray-700">
+                <span className="text-blue-600 font-medium">FACEBOOK:</span>
                 Lucky Badminton
               </p>
-              <p className="flex items-center gap-2 text-white">
-                <span className="text-yellow-400 font-medium">INSTAGRAM:</span>
+              <p className="flex items-center gap-2 text-gray-700">
+                <span className="text-blue-600 font-medium">INSTAGRAM:</span>
                 @luckybadminton
               </p>
             </div>

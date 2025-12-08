@@ -64,8 +64,8 @@ export default function MyBookingsPage() {
     <div className="min-h-full p-4">
       {/* Header */}
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">ประวัติการจอง</h1>
-        <p className="text-blue-200 text-sm">ดูรายการจองของคุณ</p>
+        <h1 className="text-2xl font-bold text-gray-800 mb-1">ประวัติการจอง</h1>
+        <p className="text-gray-500 text-sm">ดูรายการจองของคุณ</p>
       </div>
 
       {/* Filters */}
@@ -76,8 +76,8 @@ export default function MyBookingsPage() {
             onClick={() => setFilter(f.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               filter === f.value
-                ? 'bg-yellow-400 text-blue-900'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             {f.label}
@@ -88,12 +88,12 @@ export default function MyBookingsPage() {
       {/* Bookings List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : bookings.length === 0 ? (
         <div className="text-center py-12">
-          <Receipt className="w-12 h-12 text-blue-300 mx-auto mb-4" />
-          <p className="text-blue-200">ไม่พบรายการจอง</p>
+          <Receipt className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">ไม่พบรายการจอง</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -102,11 +102,11 @@ export default function MyBookingsPage() {
             return (
               <div
                 key={booking._id}
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+                className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-yellow-400 font-bold">
+                  <span className="text-blue-600 font-bold">
                     {booking.bookingCode}
                   </span>
                   <span
@@ -118,18 +118,18 @@ export default function MyBookingsPage() {
 
                 {/* Details */}
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-blue-200">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Calendar className="w-4 h-4" />
                     <span>{formatDate(booking.date)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-blue-200">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Clock className="w-4 h-4" />
                     <span>
                       {booking.timeSlot?.startTime} - {booking.timeSlot?.endTime}
                       {booking.duration > 1 && ` (${booking.duration} ชม.)`}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-blue-200">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="w-4 h-4" />
                     <span>
                       {booking.court
@@ -140,9 +140,9 @@ export default function MyBookingsPage() {
                 </div>
 
                 {/* Price */}
-                <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-blue-200 text-sm">ยอดรวม</span>
-                  <span className="text-white font-bold">
+                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-gray-500 text-sm">ยอดรวม</span>
+                  <span className="text-gray-800 font-bold">
                     {formatPrice(booking.pricing?.total || 0)} บาท
                   </span>
                 </div>

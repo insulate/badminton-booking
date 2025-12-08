@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flame, Calendar, Clock, Info, CheckCircle, Ticket } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
 import usePlayerAuthStore from '../../store/playerAuthStore';
@@ -19,6 +19,24 @@ export default function CustomerBookingPage() {
   const [showSlotModal, setShowSlotModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdBooking, setCreatedBooking] = useState(null);
+  
+  // Date strip state
+  const [dateList, setDateList] = useState([]);
+  const dateScrollRef = useRef(null);
+
+  // Initialize dates (next 14 days)
+  useEffect(() => {
+    const dates = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Ensure today starts at midnight for comparison
+    
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      dates.push(d);
+    }
+    setDateList(dates);
+  }, []);
 
   // Load availability when date changes
   useEffect(() => {
@@ -41,58 +59,51 @@ export default function CustomerBookingPage() {
     }
   };
 
-  // Navigate dates
-  const handlePrevDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() - 1);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (newDate >= today) {
-      setSelectedDate(newDate);
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
+
+  const scrollDates = (direction) => {
+    if (dateScrollRef.current) {
+      const scrollAmount = 200;
+      dateScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
     }
   };
 
-  const handleNextDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + 1);
-    const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + 2);
-    if (newDate <= maxDate) {
-      setSelectedDate(newDate);
-    }
+  // Format helper
+  const isSameDay = (d1, d2) => {
+    return d1.getDate() === d2.getDate() && 
+           d1.getMonth() === d2.getMonth() && 
+           d1.getFullYear() === d2.getFullYear();
   };
 
-  // Format date
-  const formatDate = (date) => {
-    return date.toLocaleDateString('th-TH', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+  const getDayName = (date) => {
+    const days = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    return days[date.getDay()];
   };
 
-  const formatDateShort = (date) => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear() + 543;
-    return `${day}/${month}/${year}`;
+  const getDateNumber = (date) => date.getDate();
+
+  // Get status color for cards
+  const getStatusColor = (percentage) => {
+    if (percentage > 50) return 'text-emerald-600 bg-emerald-50/50 border-emerald-100';
+    if (percentage >= 20) return 'text-amber-600 bg-amber-50/50 border-amber-100';
+    return 'text-rose-600 bg-rose-50/50 border-rose-100';
+  };
+  
+  const getProgressBarColor = (percentage) => {
+    if (percentage > 50) return 'bg-gradient-to-r from-emerald-400 to-emerald-600';
+    if (percentage >= 20) return 'bg-gradient-to-r from-amber-400 to-amber-600';
+    return 'bg-gradient-to-r from-rose-400 to-rose-600';
   };
 
-  // Get progress bar color
-  const getProgressColor = (available, total) => {
-    const percentage = (available / total) * 100;
-    if (percentage > 50) return 'bg-green-500';
-    if (percentage >= 20) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
-  // Get status text color
-  const getStatusColor = (available, total) => {
-    const percentage = (available / total) * 100;
-    if (percentage > 50) return 'text-green-400';
-    if (percentage >= 20) return 'text-yellow-400';
-    return 'text-red-400';
+  const getCardBorderTopColor = (percentage) => {
+    if (percentage > 50) return 'border-t-emerald-400';
+    if (percentage >= 20) return 'border-t-amber-400';
+    return 'border-t-rose-400';
   };
 
   // Handle slot click
@@ -117,171 +128,233 @@ export default function CustomerBookingPage() {
   };
 
   return (
-    <div className="min-h-full p-4">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">จองสนาม</h1>
-        <p className="text-blue-200 text-sm">เลือกวันและเวลาที่ต้องการ</p>
-      </div>
-
-      {/* Date Picker */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 max-w-2xl mx-auto">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handlePrevDay}
-            className="p-2 rounded-lg bg-blue-800/50 text-white hover:bg-blue-700/50 transition-colors disabled:opacity-50"
-            disabled={selectedDate <= new Date().setHours(0, 0, 0, 0)}
-          >
-            <ChevronLeft size={20} />
-          </button>
-
-          <div className="text-center">
-            <p className="text-yellow-400 font-bold text-lg">
-              {formatDateShort(selectedDate)}
-            </p>
-            <p className="text-blue-200 text-xs">{formatDate(selectedDate)}</p>
-          </div>
-
-          <button
-            onClick={handleNextDay}
-            className="p-2 rounded-lg bg-blue-800/50 text-white hover:bg-blue-700/50 transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="max-w-2xl mx-auto">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
-          </div>
-        ) : (
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
-            {/* Table Header */}
-            <div className="bg-blue-950/50 px-4 py-3 border-b border-white/10">
-              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-300 uppercase">
-                <div className="col-span-2">เวลา</div>
-                <div className="col-span-5 hidden sm:block">สถานะ</div>
-                <div className="col-span-4 sm:col-span-2 text-center">ว่าง</div>
-                <div className="col-span-3 sm:col-span-2 text-center">ราคา</div>
-                <div className="col-span-3 sm:col-span-1 text-center"></div>
+    <div className="min-h-full bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50 pb-12">
+      {/* Header Section with Gradient */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-indigo-100 shadow-sm sticky top-0 z-20">
+        <div className="max-w-md mx-auto px-4 py-4 md:max-w-4xl">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center gap-2">
+                <Ticket className="w-6 h-6 text-indigo-600" />
+                จองสนามแบดมินตัน
+              </h1>
+              <p className="text-xs font-medium text-slate-500 mt-1 ml-1">
+                {selectedDate.toLocaleDateString('th-TH', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+            </div>
+            {/* Legend */}
+            <div className="hidden sm:flex gap-3 text-xs font-medium bg-white/50 px-3 py-1.5 rounded-full border border-indigo-50">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 shadow-sm shadow-emerald-200"></div>
+                <span className="text-slate-600">ว่างมาก</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 shadow-sm shadow-amber-200"></div>
+                <span className="text-slate-600">ว่างน้อย</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-rose-400 to-rose-600 shadow-sm shadow-rose-200"></div>
+                <span className="text-slate-600">เต็ม</span>
               </div>
             </div>
+          </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-white/5">
-              {availability?.availability?.map((slot) => {
-                const isAvailable = slot.availableCount > 0;
-                const percentage = (slot.availableCount / slot.totalCourts) * 100;
-                const price = player?.isMember
-                  ? slot.pricing.member
-                  : slot.pricing.normal;
-
+          {/* Date Scroller */}
+          <div className="relative group">
+            <button 
+              onClick={() => scrollDates('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-lg text-indigo-600 hover:text-indigo-800 hover:scale-110 border border-indigo-100 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-0"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            
+            <div 
+              ref={dateScrollRef}
+              className="flex overflow-x-auto gap-3 pb-4 pt-2 scrollbar-hide -mx-4 px-4 scroll-smooth"
+            >
+              {dateList.map((date, index) => {
+                const isSelected = isSameDay(date, selectedDate);
+                const isToday = isSameDay(date, new Date());
+                
                 return (
-                  <div
-                    key={slot.timeSlotId}
-                    className={`px-4 py-3 transition-colors ${
-                      isAvailable ? 'hover:bg-white/5' : 'opacity-50'
+                  <button
+                    key={index}
+                    onClick={() => handleDateSelect(date)}
+                    className={`flex-shrink-0 flex flex-col items-center justify-center min-w-[3.8rem] h-[5rem] rounded-2xl transition-all duration-300 border relative overflow-hidden ${
+                      isSelected 
+                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-transparent shadow-lg shadow-blue-500/30 scale-105 -translate-y-1' 
+                        : 'bg-white text-slate-500 border-indigo-50 hover:border-blue-300 hover:bg-blue-50 hover:-translate-y-0.5 hover:shadow-md'
                     }`}
                   >
-                    <div className="grid grid-cols-12 gap-2 items-center">
-                      {/* Time */}
-                      <div className="col-span-2">
-                        <div className="flex items-center gap-1">
-                          <span className="text-white font-medium text-sm">
-                            {slot.startTime}
-                          </span>
-                          {slot.peakHour && (
-                            <Flame className="w-3 h-3 text-orange-400" />
-                          )}
-                        </div>
-                      </div>
+                    {/* Background blob for unselected */}
+                    {!isSelected && (
+                      <div className="absolute -top-4 -right-4 w-8 h-8 bg-indigo-50 rounded-full blur-xl"></div>
+                    )}
 
-                      {/* Progress Bar - Hidden on mobile */}
-                      <div className="col-span-5 hidden sm:block">
-                        <div className="flex items-center gap-2">
-                          {/* Progress Bar */}
-                          <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all ${getProgressColor(
-                                slot.availableCount,
-                                slot.totalCourts
-                              )}`}
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-blue-300 w-10 text-right">
-                            {Math.round(percentage)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Available Count */}
-                      <div className="col-span-4 sm:col-span-2 text-center">
-                        {isAvailable ? (
-                          <span className={`text-sm font-medium ${getStatusColor(
-                            slot.availableCount,
-                            slot.totalCourts
-                          )}`}>
-                            {slot.availableCount}/{slot.totalCourts}
-                            <span className="text-blue-300 ml-1 hidden sm:inline">ว่าง</span>
-                          </span>
-                        ) : (
-                          <span className="text-sm font-medium text-red-400">
-                            เต็ม
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Price */}
-                      <div className="col-span-3 sm:col-span-2 text-center">
-                        <span className="text-white font-medium text-sm">
-                          ฿{price}
-                        </span>
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="col-span-3 sm:col-span-1 text-center">
-                        {isAvailable ? (
-                          <button
-                            onClick={() => handleSlotClick(slot)}
-                            className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-blue-900 text-xs font-semibold rounded-lg transition-colors"
-                          >
-                            จอง
-                          </button>
-                        ) : (
-                          <span className="text-gray-500 text-xs">-</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-wider mb-0.5 opacity-90">{getDayName(date)}</span>
+                    <span className={`text-2xl font-black ${isSelected ? 'text-white' : 'text-slate-700'}`}>
+                      {getDateNumber(date)}
+                    </span>
+                    {isToday && (
+                      <span className={`text-[0.6rem] mt-1 px-2 py-0.5 rounded-full font-bold shadow-sm ${
+                        isSelected 
+                          ? 'bg-white/20 text-white backdrop-blur-sm' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'
+                      }`}>
+                        วันนี้
+                      </span>
+                    )}
+                  </button>
                 );
               })}
             </div>
-          </div>
-        )}
 
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-blue-300">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span>ว่างมาก (&gt;50%)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span>ว่างน้อย</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span>เต็ม</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Flame className="w-3 h-3 text-orange-400" />
-            <span>Peak Hour</span>
+            <button 
+              onClick={() => scrollDates('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-3 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-lg text-indigo-600 hover:text-indigo-800 hover:scale-110 border border-indigo-100 opacity-0 group-hover:opacity-100 transition-all"
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 py-6 md:max-w-4xl">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-100 border-t-indigo-600 mb-4"></div>
+            <p className="text-indigo-600 font-medium animate-pulse">กำลังโหลดตารางเวลา...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {availability?.availability?.map((slot) => {
+              const isAvailable = slot.availableCount > 0;
+              const percentage = (slot.availableCount / slot.totalCourts) * 100;
+              const progressColor = getProgressBarColor(percentage);
+              const borderColor = getCardBorderTopColor(percentage);
+              
+              const price = player?.isMember
+                ? slot.pricing.member
+                : slot.pricing.normal;
+
+              return (
+                <div
+                  key={slot.timeSlotId}
+                  onClick={() => handleSlotClick(slot)}
+                  className={`group relative bg-white rounded-2xl border-x border-b border-t-[4px] shadow-sm transition-all duration-300 overflow-hidden ${
+                    borderColor
+                  } ${
+                    isAvailable 
+                      ? 'border-indigo-50 hover:shadow-xl hover:shadow-indigo-100 hover:-translate-y-1 cursor-pointer' 
+                      : 'border-slate-100 opacity-70 grayscale-[0.5] cursor-not-allowed bg-slate-50'
+                  }`}
+                >
+                  {/* Card Content */}
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm`}>
+                          <Clock size={20} className="stroke-[2.5]" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-black text-slate-800 leading-none mb-1">
+                            {slot.startTime}
+                          </h3>
+                          <p className="text-xs font-medium text-slate-500">
+                            ถึง {slot.endTime.split(':')[0]}:00 น.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="flex flex-col items-end">
+                          <span className="block text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                            ฿{price}
+                          </span>
+                          {player?.isMember && (
+                            <span className="text-[0.6rem] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 mt-1">
+                              ราคาสมาชิก
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Bar */}
+                    <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="text-slate-500 font-semibold">สถานะสนาม</span>
+                        <span className={`font-bold flex items-center gap-1 ${
+                          percentage > 50 ? 'text-emerald-600' : 
+                          percentage >= 20 ? 'text-amber-600' : 'text-rose-600'
+                        }`}>
+                          {isAvailable ? (
+                            <>
+                              <div className={`w-1.5 h-1.5 rounded-full ${
+                                percentage > 50 ? 'bg-emerald-500' : 
+                                percentage >= 20 ? 'bg-amber-500' : 'bg-rose-500'
+                              }`}></div>
+                              {slot.availableCount} สนาม
+                            </>
+                          ) : 'เต็มแล้ว'}
+                        </span>
+                      </div>
+                      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${isAvailable ? progressColor : 'bg-slate-300'}`}
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex gap-2 min-h-[24px]">
+                         {slot.peakHour && (
+                          <div className="flex items-center gap-1 text-[0.65rem] text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full font-bold border border-orange-100 shadow-sm">
+                            <Flame size={10} fill="currentColor" />
+                            PEAK
+                          </div>
+                        )}
+                      </div>
+                      
+                      {isAvailable ? (
+                        <button className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 rounded-lg shadow-md shadow-blue-200 group-hover:shadow-lg group-hover:shadow-blue-300 transition-all active:scale-95">
+                          จองเลย <ChevronRight size={14} />
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg">
+                          ไม่ว่าง
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        {/* Info Text */}
+        {!loading && (
+          <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 flex gap-4 border border-blue-100 shadow-sm">
+             <div className="bg-white p-2.5 rounded-xl shadow-sm text-blue-600 h-fit">
+               <Info className="w-6 h-6" />
+             </div>
+             <div>
+               <h4 className="font-bold text-blue-900 mb-1">คำแนะนำการจอง</h4>
+               <p className="text-sm text-blue-700/80 leading-relaxed">
+                 เลือกเวลาที่ต้องการจองเพื่อดูรายละเอียดสนาม หากเป็นสมาชิกจะได้รับส่วนลดพิเศษทันที 
+                 สามารถจองล่วงหน้าได้สูงสุด 14 วัน กรุณามาก่อนเวลาจองอย่างน้อย 10 นาที
+               </p>
+             </div>
+          </div>
+        )}
       </div>
 
       {/* Slot Modal */}

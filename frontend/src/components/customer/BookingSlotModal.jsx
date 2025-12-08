@@ -85,46 +85,46 @@ export default function BookingSlotModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-blue-900 rounded-2xl w-full max-w-md p-6 border border-white/20 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl w-full max-w-md p-6 border border-gray-200 shadow-xl max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-blue-300 hover:text-white"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
         >
           <X className="w-6 h-6" />
         </button>
 
         {/* Header */}
-        <h2 className="text-xl font-bold text-white mb-6 text-center">
+        <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">
           จองสนาม
         </h2>
 
         {/* Slot Info */}
         <div className="space-y-3 mb-6">
-          <div className="flex items-center gap-3 text-blue-200">
-            <Calendar className="w-5 h-5 text-yellow-400" />
+          <div className="flex items-center gap-3 text-gray-600">
+            <Calendar className="w-5 h-5 text-blue-600" />
             <span>{formatDate(selectedDate)}</span>
           </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <Clock className="w-5 h-5 text-yellow-400" />
+          <div className="flex items-center gap-3 text-gray-600">
+            <Clock className="w-5 h-5 text-blue-600" />
             <span>เริ่ม {slot.startTime} น.</span>
             {slot.peakHour && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded text-xs">
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-600 rounded text-xs">
                 <Flame className="w-3 h-3" />
                 Peak Hour
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-blue-200">
-            <span className="w-5 h-5 flex items-center justify-center text-yellow-400">฿</span>
+          <div className="flex items-center gap-3 text-gray-600">
+            <span className="w-5 h-5 flex items-center justify-center text-blue-600 font-medium">฿</span>
             <span>{pricePerHour.toLocaleString()} บาท/ชม.</span>
             {player?.isMember && (
-              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
+              <span className="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs">
                 ราคาสมาชิก
               </span>
             )}
@@ -132,11 +132,11 @@ export default function BookingSlotModal({
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10 my-4" />
+        <div className="border-t border-gray-200 my-4" />
 
         {/* Duration Selector */}
         <div className="mb-4">
-          <p className="text-sm text-blue-200 mb-3">จำนวนชั่วโมง</p>
+          <p className="text-sm text-gray-600 mb-3">จำนวนชั่วโมง</p>
           <div className="flex flex-wrap gap-2">
             {durationOptions.map((duration) => (
               <button
@@ -144,8 +144,8 @@ export default function BookingSlotModal({
                 onClick={() => setSelectedDuration(duration)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedDuration === duration
-                    ? 'bg-yellow-400 text-blue-900'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {duration} ชม.
@@ -155,42 +155,42 @@ export default function BookingSlotModal({
         </div>
 
         {/* Time Range */}
-        <div className="bg-white/5 rounded-lg p-3 mb-4">
-          <div className="flex items-center justify-center gap-2 text-white">
-            <Clock className="w-4 h-4 text-yellow-400" />
+        <div className="bg-gray-50 rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-center gap-2 text-gray-800">
+            <Clock className="w-4 h-4 text-blue-600" />
             <span className="font-medium">
               {slot.startTime} - {endTime}
             </span>
-            <span className="text-blue-300">({selectedDuration} ชั่วโมง)</span>
+            <span className="text-gray-500">({selectedDuration} ชั่วโมง)</span>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10 my-4" />
+        <div className="border-t border-gray-200 my-4" />
 
         {/* Player Info */}
         <div className="mb-4">
-          <p className="text-sm text-blue-200 mb-2">ข้อมูลผู้จอง</p>
+          <p className="text-sm text-gray-600 mb-2">ข้อมูลผู้จอง</p>
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-white">
-              <User className="w-4 h-4 text-blue-300" />
+            <div className="flex items-center gap-2 text-gray-800">
+              <User className="w-4 h-4 text-gray-400" />
               <span>{player?.name}</span>
             </div>
-            <div className="flex items-center gap-2 text-white">
-              <Phone className="w-4 h-4 text-blue-300" />
+            <div className="flex items-center gap-2 text-gray-800">
+              <Phone className="w-4 h-4 text-gray-400" />
               <span>{player?.phone}</span>
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10 my-4" />
+        <div className="border-t border-gray-200 my-4" />
 
         {/* Total Price */}
-        <div className="bg-yellow-400/20 rounded-xl p-4 mb-6">
+        <div className="bg-blue-50 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between">
-            <span className="text-blue-200">ยอดรวม</span>
-            <span className="text-2xl font-bold text-yellow-400">
+            <span className="text-gray-600">ยอดรวม</span>
+            <span className="text-2xl font-bold text-blue-600">
               {totalPrice.toLocaleString()} บาท
             </span>
           </div>
@@ -201,14 +201,14 @@ export default function BookingSlotModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-colors"
+            className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
           >
             ยกเลิก
           </button>
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
           >
             {loading ? 'กำลังจอง...' : 'ยืนยันการจอง'}
           </button>

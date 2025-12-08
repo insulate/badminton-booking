@@ -42,16 +42,16 @@ export default function CustomerLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-14 bg-blue-950/80 backdrop-blur-sm shadow-lg z-40">
+      <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 shadow-sm z-40">
         <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-lg">🏸</span>
             </div>
-            <span className="text-white font-bold text-lg hidden sm:block">Lucky Badminton</span>
+            <span className="text-gray-800 font-bold text-lg hidden sm:block">Lucky Badminton</span>
           </div>
 
           {/* Auth Actions */}
@@ -62,7 +62,7 @@ export default function CustomerLayout() {
                   to={ROUTES.CUSTOMER.MY_BOOKINGS}
                   className={({ isActive }) =>
                     `flex items-center gap-1 px-3 py-1.5 text-sm transition-colors ${
-                      isActive ? 'text-yellow-400' : 'text-blue-200 hover:text-white'
+                      isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'
                     }`
                   }
                 >
@@ -71,7 +71,7 @@ export default function CustomerLayout() {
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-200 hover:text-white transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">ออก</span>
@@ -81,14 +81,14 @@ export default function CustomerLayout() {
               <>
                 <NavLink
                   to={ROUTES.CUSTOMER.LOGIN}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-200 hover:text-white transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>เข้าสู่ระบบ</span>
                 </NavLink>
                 <NavLink
                   to={ROUTES.CUSTOMER.REGISTER}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-yellow-400 hover:bg-yellow-500 text-blue-900 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span className="hidden sm:inline">สมัคร</span>
@@ -105,7 +105,7 @@ export default function CustomerLayout() {
       </main>
 
       {/* Bottom Navigation (fixed) */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-blue-950 shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-40">
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40">
         <div className="h-full flex items-center justify-around max-w-lg mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -119,8 +119,8 @@ export default function CustomerLayout() {
                   flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg
                   transition-all duration-200 min-w-[80px]
                   ${isActive
-                    ? 'text-yellow-400'
-                    : 'text-gray-400 hover:text-gray-200'
+                    ? 'text-blue-600'
+                    : 'text-gray-400 hover:text-gray-600'
                   }
                 `}
               >
