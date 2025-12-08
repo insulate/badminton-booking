@@ -32,10 +32,25 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = ROUTES.LOGIN;
+      // Check if this is a customer or admin request
+      const isCustomerPath = window.location.pathname.startsWith('/booking') ||
+        window.location.pathname.startsWith('/my-bookings') ||
+        window.location.pathname.startsWith('/login') ||
+        window.location.pathname.startsWith('/register') ||
+        window.location.pathname === '/' ||
+        window.location.pathname === '/rules';
+
+      if (isCustomerPath) {
+        // Customer token expired - clear customer data and redirect to customer login
+        localStorage.removeItem('playerToken');
+        localStorage.removeItem('player');
+        window.location.href = ROUTES.CUSTOMER.LOGIN;
+      } else {
+        // Admin token expired - clear admin data and redirect to admin login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = ROUTES.LOGIN;
+      }
     }
     return Promise.reject(error);
   }

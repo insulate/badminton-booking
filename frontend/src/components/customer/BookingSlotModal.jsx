@@ -15,33 +15,35 @@ export default function BookingSlotModal({
   const [selectedDuration, setSelectedDuration] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen || !slot) return null;
-
-  // Find slot index in availability array
-  const slotIndex = availability?.findIndex(
-    (s) => s.timeSlotId === slot.timeSlotId
-  ) ?? 0;
+  // Find slot index in availability array (moved before useMemo)
+  const slotIndex = useMemo(() => {
+    if (!slot || !availability) return 0;
+    return availability.findIndex((s) => s.timeSlotId === slot.timeSlotId) ?? 0;
+  }, [slot, availability]);
 
   // Calculate max duration based on consecutive available slots
   const maxDuration = useMemo(() => {
-    if (!availability) return 1;
+    if (!availability || !slot) return 1;
     let max = 1;
     for (let i = slotIndex; i < availability.length && i < slotIndex + 8; i++) {
       if (availability[i].availableCount < 1) break;
       max = i - slotIndex + 1;
     }
     return max;
-  }, [availability, slotIndex]);
+  }, [availability, slotIndex, slot]);
+
+  // Calculate end time
+  const endTime = useMemo(() => {
+    if (!availability || !slot) return slot?.endTime || '';
+    const endIndex = slotIndex + selectedDuration - 1;
+    return availability[endIndex]?.endTime || slot.endTime;
+  }, [availability, slotIndex, selectedDuration, slot]);
 
   // Duration options
   const durationOptions = Array.from({ length: maxDuration }, (_, i) => i + 1);
 
-  // Calculate end time
-  const endTime = useMemo(() => {
-    if (!availability) return slot.endTime;
-    const endIndex = slotIndex + selectedDuration - 1;
-    return availability[endIndex]?.endTime || slot.endTime;
-  }, [availability, slotIndex, selectedDuration, slot.endTime]);
+  // Early return AFTER all hooks
+  if (!isOpen || !slot) return null;
 
   // Calculate price
   const pricePerHour = player?.isMember
