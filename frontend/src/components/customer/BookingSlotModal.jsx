@@ -63,6 +63,9 @@ export default function BookingSlotModal({
 
   // Handle confirm booking
   const handleConfirm = async () => {
+    // ป้องกันการกดปุ่มซ้ำ
+    if (loading) return;
+
     try {
       setLoading(true);
       const response = await customerBookingsAPI.create({
@@ -74,6 +77,9 @@ export default function BookingSlotModal({
       if (response.success) {
         onSuccess(response.data);
         onClose();
+      } else {
+        // แสดง error เมื่อ success === false
+        toast.error(response.message || 'ไม่สามารถจองได้ กรุณาลองใหม่อีกครั้ง');
       }
     } catch (error) {
       console.error('Booking error:', error);

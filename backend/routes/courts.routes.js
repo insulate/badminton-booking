@@ -79,12 +79,15 @@ router.post('/', protect, admin, async (req, res) => {
     const { courtNumber, name, type, status, description, hourlyRate } =
       req.body;
 
-    // Check if court number already exists
-    const existingCourt = await Court.findOne({ courtNumber, deletedAt: null });
+    // Check if court number already exists (รวมถึงที่ถูกลบไปแล้ว - ห้ามใช้ซ้ำ)
+    const existingCourt = await Court.findOne({ courtNumber });
     if (existingCourt) {
+      const message = existingCourt.deletedAt 
+        ? 'รหัสสนามนี้เคยใช้แล้ว ไม่สามารถใช้ซ้ำได้'
+        : 'รหัสสนามนี้มีอยู่ในระบบแล้ว';
       return res.status(400).json({
         success: false,
-        message: 'รหัสสนามนี้มีอยู่ในระบบแล้ว',
+        message,
       });
     }
 
@@ -131,18 +134,20 @@ router.put('/:id', protect, admin, validateObjectId(), async (req, res) => {
       });
     }
 
-    // Check if court number is being changed and if it's already in use
+    // Check if court number is being changed and if it's already in use (รวมถึงที่ถูกลบ)
     if (req.body.courtNumber && req.body.courtNumber !== court.courtNumber) {
       const existingCourt = await Court.findOne({
         courtNumber: req.body.courtNumber,
-        deletedAt: null,
         _id: { $ne: req.params.id },
       });
 
       if (existingCourt) {
+        const message = existingCourt.deletedAt 
+          ? 'รหัสสนามนี้เคยใช้แล้ว ไม่สามารถใช้ซ้ำได้'
+          : 'รหัสสนามนี้มีอยู่ในระบบแล้ว';
         return res.status(400).json({
           success: false,
-          message: 'รหัสสนามนี้มีอยู่ในระบบแล้ว',
+          message,
         });
       }
     }

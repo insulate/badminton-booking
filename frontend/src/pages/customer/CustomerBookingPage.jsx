@@ -10,9 +10,14 @@ import { ROUTES } from '../../constants';
 
 export default function CustomerBookingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, player } = usePlayerAuthStore();
+  const { isAuthenticated, isLoading: authLoading, player, initAuth } = usePlayerAuthStore();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Initialize auth state from localStorage
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -109,6 +114,12 @@ export default function CustomerBookingPage() {
   // Handle slot click
   const handleSlotClick = (slot) => {
     if (slot.availableCount < 1) return;
+
+    // รอให้ auth state โหลดเสร็จก่อน
+    if (authLoading) {
+      toast.loading('กำลังตรวจสอบสถานะ...', { duration: 1000 });
+      return;
+    }
 
     if (!isAuthenticated) {
       navigate(`${ROUTES.CUSTOMER.LOGIN}?redirect=${ROUTES.CUSTOMER.BOOKING}`);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ROUTES } from '../constants';
 import useAuthStore from '../store/authStore';
@@ -8,7 +8,12 @@ import { LogIn, User, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isAuthenticated } = useAuthStore();
+
+  // ดึง redirect path จาก query params
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get('redirect') || ROUTES.ADMIN.DASHBOARD;
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -20,9 +25,9 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
+      navigate(redirectTo, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   const handleChange = (e) => {
     setFormData({
@@ -52,7 +57,7 @@ export default function Login() {
       toast.success('เข้าสู่ระบบสำเร็จ!');
 
       // Navigate immediately after successful login
-      navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
       setError(errorMessage);

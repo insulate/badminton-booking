@@ -45,6 +45,9 @@ const CourtsAddPage = () => {
       if (response.success) {
         toast.success('เพิ่มสนามใหม่สำเร็จ');
         navigate(ROUTES.ADMIN.COURTS);
+      } else {
+        // แสดง error เมื่อ success === false
+        toast.error(response.message || 'ไม่สามารถเพิ่มสนามได้ กรุณาลองใหม่อีกครั้ง');
       }
     } catch (error) {
       console.error('Error creating court:', error);

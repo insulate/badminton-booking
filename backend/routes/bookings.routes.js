@@ -75,12 +75,51 @@ router.post('/customer', protectPlayer, async (req, res) => {
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
 
+    // === Date Validation ===
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // เช็คว่าไม่ใช่วันในอดีต
+    if (bookingDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่สามารถจองวันที่ผ่านมาแล้วได้',
+      });
+    }
+
+    // ดึง Settings สำหรับ advance booking limit
+    const settings = await Setting.findOne();
+    const advanceBookingDays = settings?.booking?.advanceBookingDays || 14;
+
+    // เช็ค advance booking limit
+    const maxAdvanceDate = new Date(today);
+    maxAdvanceDate.setDate(today.getDate() + advanceBookingDays);
+
+    if (bookingDate > maxAdvanceDate) {
+      return res.status(400).json({
+        success: false,
+        message: `ไม่สามารถจองล่วงหน้าเกิน ${advanceBookingDays} วันได้`,
+      });
+    }
+
     // Get time slot details
     const timeSlotDoc = await TimeSlot.findById(timeSlot);
     if (!timeSlotDoc) {
       return res.status(400).json({
         success: false,
         message: 'ไม่พบช่วงเวลาที่เลือก',
+      });
+    }
+
+    // เช็ค dayType mismatch
+    const dayOfWeek = bookingDate.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const expectedDayType = isWeekend ? 'weekend' : 'weekday';
+
+    if (timeSlotDoc.dayType !== expectedDayType) {
+      return res.status(400).json({
+        success: false,
+        message: `ช่วงเวลานี้สำหรับวัน${timeSlotDoc.dayType === 'weekday' ? 'ธรรมดา' : 'หยุด'} แต่วันที่เลือกเป็นวัน${expectedDayType === 'weekday' ? 'ธรรมดา' : 'หยุด'}`,
       });
     }
 

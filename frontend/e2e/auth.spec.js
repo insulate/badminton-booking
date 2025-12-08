@@ -17,8 +17,8 @@ const BASE_URL = 'http://localhost:5173';
 test.describe('Authentication E2E Tests', () => {
   test.describe('Login Page', () => {
     test.beforeEach(async ({ page }) => {
-      // Navigate to login page
-      await page.goto(`${BASE_URL}/login`);
+      // Navigate to admin login page
+      await page.goto(`${BASE_URL}/admin/login`);
     });
 
     test('should display login page correctly', async ({ page }) => {
@@ -155,14 +155,14 @@ test.describe('Authentication E2E Tests', () => {
       // Try to access admin dashboard without logging in
       await page.goto(`${BASE_URL}/admin/dashboard`);
 
-      // Should redirect to login
-      await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 });
-      await expect(page).toHaveURL(`${BASE_URL}/login`);
+      // Should redirect to admin login (with redirect param)
+      await page.waitForURL(/\/admin\/login/, { timeout: 5000 });
+      await expect(page).toHaveURL(/\/admin\/login/);
     });
 
     test('should persist authentication across page reloads', async ({ page }) => {
       // Login
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');
@@ -179,7 +179,7 @@ test.describe('Authentication E2E Tests', () => {
 
     test('should navigate to different protected routes after login', async ({ page }) => {
       // Login
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');
@@ -199,7 +199,7 @@ test.describe('Authentication E2E Tests', () => {
   test.describe('Logout Functionality', () => {
     test.beforeEach(async ({ page }) => {
       // Login before each test
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');
@@ -221,8 +221,8 @@ test.describe('Authentication E2E Tests', () => {
       await logoutButton.first().click();
 
       // Should redirect to login page
-      await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 });
-      await expect(page).toHaveURL(`${BASE_URL}/login`);
+      await page.waitForURL(/\/admin\/login/, { timeout: 5000 });
+      await expect(page).toHaveURL(/\/admin\/login/);
     });
 
     test('should not be able to access protected routes after logout', async ({ page }) => {
@@ -236,14 +236,14 @@ test.describe('Authentication E2E Tests', () => {
       }
 
       await logoutButton.first().click();
-      await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 });
+      await page.waitForURL(/\/admin\/login/, { timeout: 5000 });
 
       // Try to access protected route
       await page.goto(`${BASE_URL}/admin/dashboard`);
 
       // Should be redirected back to login
-      await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 });
-      await expect(page).toHaveURL(`${BASE_URL}/login`);
+      await page.waitForURL(/\/admin\/login/, { timeout: 5000 });
+      await expect(page).toHaveURL(/\/admin\/login/);
     });
 
     test('should clear authentication token on logout', async ({ page }) => {
@@ -261,7 +261,7 @@ test.describe('Authentication E2E Tests', () => {
       }
 
       await logoutButton.first().click();
-      await page.waitForURL(`${BASE_URL}/login`, { timeout: 5000 });
+      await page.waitForURL(/\/admin\/login/, { timeout: 5000 });
 
       // Check localStorage token is cleared
       const tokenAfter = await page.evaluate(() => localStorage.getItem('token'));
@@ -272,7 +272,7 @@ test.describe('Authentication E2E Tests', () => {
   test.describe('User Profile & Account Management', () => {
     test.beforeEach(async ({ page }) => {
       // Login before each test
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');
@@ -301,7 +301,7 @@ test.describe('Authentication E2E Tests', () => {
   test.describe('Role-Based Access Control', () => {
     test('admin should have access to admin features', async ({ page }) => {
       // Login as admin
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');
@@ -324,7 +324,7 @@ test.describe('Authentication E2E Tests', () => {
 
     test('regular user should have limited access', async ({ page }) => {
       // Login as regular user
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.regular.username);
       await page.fill('input[name="password"]', TEST_USER.regular.password);
       await page.click('button[type="submit"]');
@@ -355,14 +355,14 @@ test.describe('Authentication E2E Tests', () => {
       const page2 = await context2.newPage();
 
       // Login in first tab
-      await page1.goto(`${BASE_URL}/login`);
+      await page1.goto(`${BASE_URL}/admin/login`);
       await page1.fill('input[name="username"]', TEST_USER.admin.username);
       await page1.fill('input[name="password"]', TEST_USER.admin.password);
       await page1.click('button[type="submit"]');
       await page1.waitForURL(`${BASE_URL}/admin/dashboard`, { timeout: 10000 });
 
       // Login in second tab
-      await page2.goto(`${BASE_URL}/login`);
+      await page2.goto(`${BASE_URL}/admin/login`);
       await page2.fill('input[name="username"]', TEST_USER.regular.username);
       await page2.fill('input[name="password"]', TEST_USER.regular.password);
       await page2.click('button[type="submit"]');
@@ -378,7 +378,7 @@ test.describe('Authentication E2E Tests', () => {
 
     test('should maintain session with valid token', async ({ page }) => {
       // Login
-      await page.goto(`${BASE_URL}/login`);
+      await page.goto(`${BASE_URL}/admin/login`);
       await page.fill('input[name="username"]', TEST_USER.admin.username);
       await page.fill('input[name="password"]', TEST_USER.admin.password);
       await page.click('button[type="submit"]');

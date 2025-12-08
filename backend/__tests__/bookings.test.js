@@ -659,4 +659,103 @@ describe('Bookings API Tests', () => {
       expect(checkoutResponse.body.data.bookingStatus).toBe('completed');
     });
   });
+
+  describe('POST /api/bookings/customer - Date Validation', () => {
+    let playerToken;
+    let testPlayer;
+    let weekdayTimeSlot;
+
+    beforeAll(async () => {
+      const Player = require('../models/player.model');
+      
+      // ลบ player เดิมถ้ามี
+      await Player.deleteMany({ phone: '0888888888' });
+      
+      testPlayer = await Player.create({
+        name: 'Test Player',
+        phone: '0888888888',
+        password: 'password123',
+        status: 'active',
+      });
+      
+      playerToken = jwt.sign({ id: testPlayer._id }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      // สร้าง weekday time slot สำหรับ test
+      weekdayTimeSlot = await TimeSlot.create({
+        startTime: '10:00',
+        endTime: '11:00',
+        dayType: 'weekday',
+        pricing: { normal: 150, member: 120 },
+        peakPricing: { normal: 200, member: 170 },
+        peakHour: false,
+        status: 'active',
+      });
+    });
+
+    afterAll(async () => {
+      const Player = require('../models/player.model');
+      await Player.deleteMany({ phone: '0888888888' });
+      if (weekdayTimeSlot) {
+        await TimeSlot.findByIdAndDelete(weekdayTimeSlot._id);
+      }
+    });
+
+    it('should reject booking in the past', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const response = await request(app)
+        .post('/api/bookings/customer')
+        .set('Authorization', `Bearer ${playerToken}`)
+        .send({
+          date: yesterday.toISOString().split('T')[0],
+          timeSlot: weekdayTimeSlot._id.toString(),
+          duration: 1,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('วันที่ผ่านมาแล้ว');
+    });
+
+    it('should reject booking beyond advance booking limit', async () => {
+      const farFuture = new Date();
+      farFuture.setDate(farFuture.getDate() + 30);
+
+      const response = await request(app)
+        .post('/api/bookings/customer')
+        .set('Authorization', `Bearer ${playerToken}`)
+        .send({
+          date: farFuture.toISOString().split('T')[0],
+          timeSlot: weekdayTimeSlot._id.toString(),
+          duration: 1,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('ล่วงหน้าเกิน');
+    });
+
+    it('should reject booking with mismatched dayType', async () => {
+      // หาวัน weekend ถัดไป
+      const nextSaturday = new Date();
+      const daysUntilSaturday = (6 - nextSaturday.getDay() + 7) % 7 || 7;
+      nextSaturday.setDate(nextSaturday.getDate() + daysUntilSaturday);
+
+      const response = await request(app)
+        .post('/api/bookings/customer')
+        .set('Authorization', `Bearer ${playerToken}`)
+        .send({
+          date: nextSaturday.toISOString().split('T')[0],
+          timeSlot: weekdayTimeSlot._id.toString(), // weekday slot กับ weekend date
+          duration: 1,
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('วัน');
+    });
+  });
 });

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Group Play Feature Test', () => {
   test.beforeEach(async ({ page }) => {
     // Login first
-    await page.goto('http://localhost:5173/login');
+    await page.goto('http://localhost:5173/admin/login');
     await page.fill('input[name="username"]', 'admin');
     await page.fill('input[name="password"]', 'admin123');
     await page.click('button[type="submit"]');

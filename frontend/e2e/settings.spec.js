@@ -19,7 +19,7 @@ test.describe('Settings System E2E Tests', () => {
   // Login as admin before each test
   test.beforeEach(async ({ page }) => {
     // Navigate to login page
-    await page.goto(`${BASE_URL}/login`);
+    await page.goto(`${BASE_URL}/admin/login`);
 
     // Fill in login credentials
     await page.fill('input[name="username"]', TEST_USER.admin.username);

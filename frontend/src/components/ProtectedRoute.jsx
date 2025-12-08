@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../constants';
 import useAuthStore from '../store/authStore';
 
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading, initAuth } = useAuthStore();
+  const location = useLocation();
 
   useEffect(() => {
     initAuth();
@@ -29,9 +30,15 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (พร้อมส่ง path ปัจจุบัน)
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.LOGIN} replace />;
+    const redirectPath = location.pathname + location.search;
+    return (
+      <Navigate 
+        to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(redirectPath)}`} 
+        replace 
+      />
+    );
   }
 
   // Render children if authenticated
