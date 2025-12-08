@@ -231,113 +231,124 @@ export default function CustomerBookingPage() {
             <p className="text-indigo-600 font-medium animate-pulse">กำลังโหลดตารางเวลา...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {availability?.availability?.map((slot) => {
-              const isAvailable = slot.availableCount > 0;
-              const percentage = (slot.availableCount / slot.totalCourts) * 100;
-              const progressColor = getProgressBarColor(percentage);
-              const borderColor = getCardBorderTopColor(percentage);
-              
-              const price = player?.isMember
-                ? slot.pricing.member
-                : slot.pricing.normal;
+          <div className="overflow-x-auto rounded-2xl border border-indigo-100 shadow-sm bg-white">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-indigo-50/50 border-b border-indigo-100 text-xs uppercase tracking-wider text-indigo-900 font-semibold">
+                <th className="px-6 py-4 whitespace-nowrap">เวลา</th>
+                <th className="px-6 py-4 text-center whitespace-nowrap">ราคา</th>
+                <th className="px-6 py-4 text-center whitespace-nowrap">สถานะ</th>
+                <th className="px-6 py-4 text-right whitespace-nowrap">การดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-indigo-50">
+              {availability?.availability?.map((slot) => {
+                const isAvailable = slot.availableCount > 0;
+                const percentage = (slot.availableCount / slot.totalCourts) * 100;
+                
+                const price = player?.isMember
+                  ? slot.pricing.member
+                  : slot.pricing.normal;
 
-              return (
-                <div
-                  key={slot.timeSlotId}
-                  onClick={() => handleSlotClick(slot)}
-                  className={`group relative bg-white rounded-2xl border-x border-b border-t-[4px] shadow-sm transition-all duration-300 overflow-hidden ${
-                    borderColor
-                  } ${
-                    isAvailable 
-                      ? 'border-indigo-50 hover:shadow-xl hover:shadow-indigo-100 hover:-translate-y-1 cursor-pointer' 
-                      : 'border-slate-100 opacity-70 grayscale-[0.5] cursor-not-allowed bg-slate-50'
-                  }`}
-                >
-                  {/* Card Content */}
-                  <div className="p-5">
-                    <div className="flex justify-between items-start mb-4">
+                return (
+                  <tr 
+                    key={slot.timeSlotId} 
+                    className={`group transition-all duration-200 ${
+                      isAvailable ? 'hover:bg-indigo-50/30' : 'bg-slate-50 opacity-70'
+                    }`}
+                  >
+                    {/* Time Column */}
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm`}>
-                          <Clock size={20} className="stroke-[2.5]" />
+                        <div className={`p-2 rounded-lg ${isAvailable ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                          <Clock size={18} className="stroke-[2.5]" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-black text-slate-800 leading-none mb-1">
-                            {slot.startTime}
-                          </h3>
-                          <p className="text-xs font-medium text-slate-500">
-                            ถึง {slot.endTime.split(':')[0]}:00 น.
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className="flex flex-col items-end">
-                          <span className="block text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                            ฿{price}
-                          </span>
-                          {player?.isMember && (
-                            <span className="text-[0.6rem] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 mt-1">
-                              ราคาสมาชิก
+                          <div className="flex items-center gap-2">
+                            <span className={`text-base font-bold ${isAvailable ? 'text-slate-800' : 'text-slate-500'}`}>
+                              {slot.startTime} - {slot.endTime.split(':')[0]}:00 น.
                             </span>
-                          )}
+                            {slot.peakHour && (
+                              <div className="flex items-center gap-0.5 text-[0.6rem] text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full font-bold border border-orange-100">
+                                <Flame size={8} fill="currentColor" />
+                                PEAK
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </td>
 
-                    {/* Status Bar */}
-                    <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-slate-500 font-semibold">สถานะสนาม</span>
-                        <span className={`font-bold flex items-center gap-1 ${
+                    {/* Price Column */}
+                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                      <div className="flex flex-col items-center">
+                        <span className={`text-base font-bold ${
+                          isAvailable 
+                            ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600' 
+                            : 'text-slate-400'
+                        }`}>
+                          ฿{price}
+                        </span>
+                        {player?.isMember && (
+                          <span className="text-[0.6rem] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100 mt-0.5">
+                            ราคาสมาชิก
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Status Column */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col items-center gap-1.5">
+                         <span className={`text-xs font-bold flex items-center gap-1.5 ${
                           percentage > 50 ? 'text-emerald-600' : 
                           percentage >= 20 ? 'text-amber-600' : 'text-rose-600'
                         }`}>
                           {isAvailable ? (
                             <>
-                              <div className={`w-1.5 h-1.5 rounded-full ${
+                              <div className={`w-2 h-2 rounded-full ${
                                 percentage > 50 ? 'bg-emerald-500' : 
                                 percentage >= 20 ? 'bg-amber-500' : 'bg-rose-500'
                               }`}></div>
-                              {slot.availableCount} สนาม
+                              ว่าง {slot.availableCount} สนาม
                             </>
                           ) : 'เต็มแล้ว'}
                         </span>
+                        
+                        {/* Progress Bar */}
+                        <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              percentage > 50 ? 'bg-emerald-500' : 
+                              percentage >= 20 ? 'bg-amber-500' : 'bg-rose-500'
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${isAvailable ? progressColor : 'bg-slate-300'}`}
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
+                    </td>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-1">
-                      <div className="flex gap-2 min-h-[24px]">
-                         {slot.peakHour && (
-                          <div className="flex items-center gap-1 text-[0.65rem] text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full font-bold border border-orange-100 shadow-sm">
-                            <Flame size={10} fill="currentColor" />
-                            PEAK
-                          </div>
-                        )}
-                      </div>
-                      
+                    {/* Action Column */}
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
                       {isAvailable ? (
-                        <button className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 rounded-lg shadow-md shadow-blue-200 group-hover:shadow-lg group-hover:shadow-blue-300 transition-all active:scale-95">
+                        <button 
+                          onClick={() => handleSlotClick(slot)}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 rounded-lg shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-300 hover:-translate-y-0.5 transition-all active:scale-95"
+                        >
                           จองเลย <ChevronRight size={14} />
                         </button>
                       ) : (
-                        <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg">
-                          ไม่ว่าง
+                        <span className="inline-block text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                          เต็ม
                         </span>
                       )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         )}
         
         {/* Info Text */}
