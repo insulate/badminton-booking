@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Receipt } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { customerBookingsAPI } from '../../lib/api';
+import { customerBookingsAPI, playerAuthAPI } from '../../lib/api';
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -15,9 +15,19 @@ export default function MyBookingsPage() {
   const loadBookings = async () => {
     try {
       setLoading(true);
+      
+      // Verify token/session validity before fetching bookings
+      try {
+        await playerAuthAPI.getMe();
+      } catch (meError) {
+        // If getMe fails, we might have an invalid token, but we'll proceed 
+        // to let the main call handle it or fail gracefully
+      }
+
       const response = await customerBookingsAPI.getMyBookings({
         status: filter !== 'all' ? filter : undefined,
       });
+
       if (response.success) {
         setBookings(response.data);
       }
