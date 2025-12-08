@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/user.model');
+const Player = require('../models/player.model');
 
 // Protect routes - verify JWT token
 const protect = async (req, res, next) => {
@@ -61,4 +62,55 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+// Protect routes for Players - verify JWT token
+const protectPlayer = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Get player from token (exclude password)
+      req.player = await Player.findById(decoded.id).select('-password');
+
+      if (!req.player) {
+        return res.status(401).json({
+          success: false,
+          message: 'Player not found'
+        });
+      }
+
+      if (req.player.isDeleted) {
+        return res.status(401).json({
+          success: false,
+          message: 'Player account has been deleted'
+        });
+      }
+
+      if (req.player.status !== 'active') {
+        return res.status(401).json({
+          success: false,
+          message: 'Player account is inactive'
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Player auth middleware error:', error);
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized, token failed'
+      });
+    }
+  }
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: 'Not authorized, no token'
+    });
+  }
+};
+
+module.exports = { protect, admin, protectPlayer };

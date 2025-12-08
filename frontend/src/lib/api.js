@@ -64,6 +64,54 @@ export const authAPI = {
   },
 };
 
+// Player Authentication API
+export const playerAuthAPI = {
+  register: async (data) => {
+    const response = await api.post(API_ENDPOINTS.AUTH.PLAYER_REGISTER, data);
+    return response.data;
+  },
+
+  login: async (credentials) => {
+    const response = await api.post(API_ENDPOINTS.AUTH.PLAYER_LOGIN, credentials);
+    return response.data;
+  },
+
+  getMe: async () => {
+    const token = localStorage.getItem('playerToken');
+    const response = await api.get(API_ENDPOINTS.AUTH.PLAYER_ME, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+};
+
+// Customer Bookings API
+export const customerBookingsAPI = {
+  getAvailability: async (date) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.PUBLIC_AVAILABILITY, {
+      params: { date }
+    });
+    return response.data;
+  },
+
+  create: async (data) => {
+    const token = localStorage.getItem('playerToken');
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.CUSTOMER_CREATE, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  getMyBookings: async (params) => {
+    const token = localStorage.getItem('playerToken');
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.CUSTOMER_MY_BOOKINGS, {
+      params,
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+};
+
 // User API (Admin only)
 export const userAPI = {
   getAll: async (params) => {
@@ -267,6 +315,11 @@ export const bookingsAPI = {
 
   updatePayment: async (id, data) => {
     const response = await api.patch(API_ENDPOINTS.BOOKINGS.UPDATE_PAYMENT(id), data);
+    return response.data;
+  },
+
+  assignCourt: async (id, courtId) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.ASSIGN_COURT(id), { courtId });
     return response.data;
   },
 };

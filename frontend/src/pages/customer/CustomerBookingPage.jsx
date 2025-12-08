@@ -1,64 +1,53 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Flame } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { customerBookingsAPI } from '../../lib/api';
+import usePlayerAuthStore from '../../store/playerAuthStore';
+import BookingSlotModal from '../../components/customer/BookingSlotModal';
+import BookingSuccessModal from '../../components/customer/BookingSuccessModal';
+import { ROUTES } from '../../constants';
 
 export default function CustomerBookingPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated, player } = usePlayerAuthStore();
+
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [availability, setAvailability] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [showSlotModal, setShowSlotModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState(null);
 
-  // Mockup courts data
-  const courts = [
-    { id: 1, name: 'Court 1' },
-    { id: 2, name: 'Court 2' },
-    { id: 3, name: 'Court 3' },
-    { id: 4, name: 'Court 4' },
-    { id: 5, name: 'Court 5' },
-    { id: 6, name: 'Court 6' },
-    { id: 7, name: 'Court 7' },
-    { id: 8, name: 'Court 8' },
-  ];
+  // Load availability when date changes
+  useEffect(() => {
+    loadAvailability();
+  }, [selectedDate]);
 
-  // Time slots from 08:00 to 24:00
-  const timeSlots = [
-    '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
-    '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
-    '20:00', '21:00', '22:00', '23:00',
-  ];
-
-  // Check if selected date is Sunday (for operating hours)
-  const isSunday = selectedDate.getDay() === 0;
-  const availableSlots = isSunday
-    ? timeSlots.filter((slot) => {
-        const hour = parseInt(slot.split(':')[0]);
-        return hour < 22; // Sunday closes at 22:00
-      })
-    : timeSlots;
-
-  // Generate random mockup availability based on date seed
-  const mockupAvailability = useMemo(() => {
-    const dateString = selectedDate.toISOString().split('T')[0];
-    const seed = dateString.split('-').reduce((acc, val) => acc + parseInt(val), 0);
-
-    const availability = {};
-    courts.forEach((court) => {
-      availability[court.id] = {};
-      availableSlots.forEach((slot, index) => {
-        // Create deterministic "random" based on court, slot, and date
-        const hash = (court.id * 17 + index * 31 + seed * 13) % 100;
-        // More booked slots during peak hours (17:00-21:00)
-        const hour = parseInt(slot.split(':')[0]);
-        const isPeakHour = hour >= 17 && hour <= 21;
-        const threshold = isPeakHour ? 60 : 30;
-        availability[court.id][slot] = hash > threshold;
-      });
-    });
-    return availability;
-  }, [selectedDate, availableSlots]);
+  const loadAvailability = async () => {
+    try {
+      setLoading(true);
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const response = await customerBookingsAPI.getAvailability(dateStr);
+      if (response.success) {
+        setAvailability(response.data);
+      }
+    } catch (error) {
+      console.error('Load availability error:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลสนามว่างได้');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Navigate dates
   const handlePrevDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() - 1);
-    // Don't go before today
-    if (newDate >= new Date().setHours(0, 0, 0, 0)) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (newDate >= today) {
       setSelectedDate(newDate);
     }
   };
@@ -66,7 +55,6 @@ export default function CustomerBookingPage() {
   const handleNextDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + 1);
-    // Allow up to 2 months ahead
     const maxDate = new Date();
     maxDate.setMonth(maxDate.getMonth() + 2);
     if (newDate <= maxDate) {
@@ -74,55 +62,74 @@ export default function CustomerBookingPage() {
     }
   };
 
-  // Format date for display
+  // Format date
   const formatDate = (date) => {
-    const options = {
+    return date.toLocaleDateString('th-TH', {
       weekday: 'long',
-      year: 'numeric',
-      month: 'long',
       day: 'numeric',
-    };
-    return date.toLocaleDateString('th-TH', options);
+      month: 'long',
+      year: 'numeric',
+    });
   };
 
   const formatDateShort = (date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
+    const year = date.getFullYear() + 543;
     return `${day}/${month}/${year}`;
   };
 
-  // Count available slots
-  const availableCount = useMemo(() => {
-    let count = 0;
-    Object.values(mockupAvailability).forEach((courtSlots) => {
-      Object.values(courtSlots).forEach((isAvailable) => {
-        if (isAvailable) count++;
-      });
-    });
-    return count;
-  }, [mockupAvailability]);
+  // Get progress bar color
+  const getProgressColor = (available, total) => {
+    const percentage = (available / total) * 100;
+    if (percentage > 50) return 'bg-green-500';
+    if (percentage >= 20) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
 
-  const totalSlots = courts.length * availableSlots.length;
+  // Get status text color
+  const getStatusColor = (available, total) => {
+    const percentage = (available / total) * 100;
+    if (percentage > 50) return 'text-green-400';
+    if (percentage >= 20) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
+  // Handle slot click
+  const handleSlotClick = (slot) => {
+    if (slot.availableCount < 1) return;
+
+    if (!isAuthenticated) {
+      navigate(`${ROUTES.CUSTOMER.LOGIN}?redirect=${ROUTES.CUSTOMER.BOOKING}`);
+      return;
+    }
+
+    setSelectedSlot(slot);
+    setShowSlotModal(true);
+  };
+
+  // Handle booking success
+  const handleBookingSuccess = (booking) => {
+    setCreatedBooking(booking);
+    setShowSlotModal(false);
+    setShowSuccessModal(true);
+    loadAvailability(); // Refresh availability
+  };
 
   return (
     <div className="min-h-full p-4">
-      {/* Title */}
-      <div className="text-center mb-4">
-        <h1 className="text-2xl font-bold text-white mb-1">
-          Reservation Courts
-        </h1>
-        <p className="text-blue-200 text-sm">
-          ตารางการจองสนาม Lucky Badminton
-        </p>
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-white mb-1">จองสนาม</h1>
+        <p className="text-blue-200 text-sm">เลือกวันและเวลาที่ต้องการ</p>
       </div>
 
       {/* Date Picker */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4 max-w-xl mx-auto">
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 max-w-2xl mx-auto">
         <div className="flex items-center justify-between">
           <button
             onClick={handlePrevDay}
-            className="p-2 rounded-lg bg-blue-800/50 text-white hover:bg-blue-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg bg-blue-800/50 text-white hover:bg-blue-700/50 transition-colors disabled:opacity-50"
             disabled={selectedDate <= new Date().setHours(0, 0, 0, 0)}
           >
             <ChevronLeft size={20} />
@@ -132,9 +139,7 @@ export default function CustomerBookingPage() {
             <p className="text-yellow-400 font-bold text-lg">
               {formatDateShort(selectedDate)}
             </p>
-            <p className="text-blue-200 text-xs">
-              {formatDate(selectedDate)}
-            </p>
+            <p className="text-blue-200 text-xs">{formatDate(selectedDate)}</p>
           </div>
 
           <button
@@ -144,88 +149,158 @@ export default function CustomerBookingPage() {
             <ChevronRight size={20} />
           </button>
         </div>
-
-        {/* Availability Summary */}
-        <div className="mt-3 flex justify-center gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-green-500 rounded"></div>
-            <span className="text-white">ว่าง ({availableCount})</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 bg-red-500/80 rounded"></div>
-            <span className="text-white">จองแล้ว ({totalSlots - availableCount})</span>
-          </div>
-        </div>
-
-        {isSunday && (
-          <p className="text-center text-yellow-400 text-xs mt-2">
-            * วันอาทิตย์เปิด 08:00 - 22:00 น.
-          </p>
-        )}
       </div>
 
-      {/* Court Schedule Grid */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
-            {/* Header - Time Slots */}
-            <thead>
-              <tr className="bg-blue-950/50">
-                <th className="sticky left-0 bg-blue-950 px-3 py-2 text-left text-xs font-semibold text-yellow-400 min-w-[80px] z-10">
-                  สนาม
-                </th>
-                {availableSlots.map((slot) => (
-                  <th
-                    key={slot}
-                    className="px-1 py-2 text-center text-xs font-medium text-blue-200 min-w-[50px]"
+      {/* Table */}
+      <div className="max-w-2xl mx-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+          </div>
+        ) : (
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
+            {/* Table Header */}
+            <div className="bg-blue-950/50 px-4 py-3 border-b border-white/10">
+              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-300 uppercase">
+                <div className="col-span-2">เวลา</div>
+                <div className="col-span-5 hidden sm:block">สถานะ</div>
+                <div className="col-span-4 sm:col-span-2 text-center">ว่าง</div>
+                <div className="col-span-3 sm:col-span-2 text-center">ราคา</div>
+                <div className="col-span-3 sm:col-span-1 text-center"></div>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div className="divide-y divide-white/5">
+              {availability?.availability?.map((slot) => {
+                const isAvailable = slot.availableCount > 0;
+                const percentage = (slot.availableCount / slot.totalCourts) * 100;
+                const price = player?.isMember
+                  ? slot.pricing.member
+                  : slot.pricing.normal;
+
+                return (
+                  <div
+                    key={slot.timeSlotId}
+                    className={`px-4 py-3 transition-colors ${
+                      isAvailable ? 'hover:bg-white/5' : 'opacity-50'
+                    }`}
                   >
-                    {slot}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            {/* Body - Courts and Availability */}
-            <tbody className="divide-y divide-white/5">
-              {courts.map((court) => (
-                <tr key={court.id} className="hover:bg-white/5">
-                  <td className="sticky left-0 bg-blue-900/80 px-3 py-2 text-xs font-medium text-white z-10">
-                    {court.name}
-                  </td>
-                  {availableSlots.map((slot) => {
-                    const isAvailable = mockupAvailability[court.id]?.[slot];
-                    return (
-                      <td key={`${court.id}-${slot}`} className="px-1 py-1.5 text-center">
-                        <div
-                          className={`
-                            w-full h-8 rounded flex items-center justify-center text-xs font-medium
-                            ${isAvailable
-                              ? 'bg-green-500 text-white'
-                              : 'bg-red-500/80 text-white/80'
-                            }
-                          `}
-                        >
-                          {isAvailable ? 'ว่าง' : 'เต็ม'}
+                    <div className="grid grid-cols-12 gap-2 items-center">
+                      {/* Time */}
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-white font-medium text-sm">
+                            {slot.startTime}
+                          </span>
+                          {slot.peakHour && (
+                            <Flame className="w-3 h-3 text-orange-400" />
+                          )}
                         </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </div>
+
+                      {/* Progress Bar - Hidden on mobile */}
+                      <div className="col-span-5 hidden sm:block">
+                        <div className="flex items-center gap-2">
+                          {/* Progress Bar */}
+                          <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${getProgressColor(
+                                slot.availableCount,
+                                slot.totalCourts
+                              )}`}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-blue-300 w-10 text-right">
+                            {Math.round(percentage)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Available Count */}
+                      <div className="col-span-4 sm:col-span-2 text-center">
+                        {isAvailable ? (
+                          <span className={`text-sm font-medium ${getStatusColor(
+                            slot.availableCount,
+                            slot.totalCourts
+                          )}`}>
+                            {slot.availableCount}/{slot.totalCourts}
+                            <span className="text-blue-300 ml-1 hidden sm:inline">ว่าง</span>
+                          </span>
+                        ) : (
+                          <span className="text-sm font-medium text-red-400">
+                            เต็ม
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Price */}
+                      <div className="col-span-3 sm:col-span-2 text-center">
+                        <span className="text-white font-medium text-sm">
+                          ฿{price}
+                        </span>
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="col-span-3 sm:col-span-1 text-center">
+                        {isAvailable ? (
+                          <button
+                            onClick={() => handleSlotClick(slot)}
+                            className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-blue-900 text-xs font-semibold rounded-lg transition-colors"
+                          >
+                            จอง
+                          </button>
+                        ) : (
+                          <span className="text-gray-500 text-xs">-</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-blue-300">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span>ว่างมาก (&gt;50%)</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <span>ว่างน้อย</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <span>เต็ม</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Flame className="w-3 h-3 text-orange-400" />
+            <span>Peak Hour</span>
+          </div>
         </div>
       </div>
 
-      {/* Info Note */}
-      <div className="mt-4 text-center">
-        <p className="text-blue-200 text-xs">
-          * ข้อมูลการจองอาจมีการเปลี่ยนแปลง กรุณาติดต่อสอบถามก่อนเข้าใช้บริการ
-        </p>
-        <p className="text-yellow-400 text-sm mt-2 font-medium">
-          TEL: 099-999-9999 | LINE: @luckybadminton
-        </p>
-      </div>
+      {/* Slot Modal */}
+      <BookingSlotModal
+        isOpen={showSlotModal}
+        onClose={() => setShowSlotModal(false)}
+        slot={selectedSlot}
+        selectedDate={selectedDate}
+        player={player}
+        availability={availability?.availability}
+        onSuccess={handleBookingSuccess}
+      />
+
+      {/* Success Modal */}
+      <BookingSuccessModal
+        isOpen={showSuccessModal}
+        booking={createdBooking}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </div>
   );
 }

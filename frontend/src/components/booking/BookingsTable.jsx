@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { courtsAPI, bookingsAPI } from '../../lib/api';
 
 /**
  * BookingsTable Component
@@ -13,7 +16,42 @@ const BookingsTable = ({
   onCheckin,
   onCancel,
   onMarkAsPaid,
+  onReload,
 }) => {
+  const [courts, setCourts] = useState([]);
+  const [assigningCourt, setAssigningCourt] = useState(null);
+
+  useEffect(() => {
+    loadCourts();
+  }, []);
+
+  const loadCourts = async () => {
+    try {
+      const response = await courtsAPI.getAll({ status: 'available' });
+      if (response.success) {
+        setCourts(response.data);
+      }
+    } catch (error) {
+      console.error('Load courts error:', error);
+    }
+  };
+
+  const handleAssignCourt = async (bookingId, courtId) => {
+    if (!courtId) return;
+    try {
+      setAssigningCourt(bookingId);
+      const response = await bookingsAPI.assignCourt(bookingId, courtId);
+      if (response.success) {
+        toast.success('กำหนดสนามสำเร็จ');
+        if (onReload) onReload();
+      }
+    } catch (error) {
+      console.error('Assign court error:', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถกำหนดสนามได้');
+    } finally {
+      setAssigningCourt(null);
+    }
+  };
   // Get booking status badge
   const getStatusBadge = (status) => {
     const badges = {
@@ -176,10 +214,28 @@ const BookingsTable = ({
 
                   {/* Court */}
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {booking.court?.courtNumber || '-'}
-                    </div>
-                    <div className="text-xs text-gray-500">{booking.court?.name || ''}</div>
+                    {booking.court ? (
+                      <>
+                        <div className="text-sm font-medium text-gray-900">
+                          {booking.court.courtNumber || '-'}
+                        </div>
+                        <div className="text-xs text-gray-500">{booking.court.name || ''}</div>
+                      </>
+                    ) : (
+                      <select
+                        value=""
+                        onChange={(e) => handleAssignCourt(booking._id, e.target.value)}
+                        disabled={assigningCourt === booking._id}
+                        className="text-sm border border-orange-300 bg-orange-50 text-orange-800 rounded-lg px-2 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option value="" disabled>เลือกสนาม</option>
+                        {courts.map((court) => (
+                          <option key={court._id} value={court._id}>
+                            {court.name || `Court ${court.courtNumber}`}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </td>
 
                   {/* Customer */}

@@ -4,7 +4,7 @@ const Booking = require('../models/booking.model');
 const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
 const Setting = require('../models/setting.model');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, protectPlayer } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const {
   validateBookingRequest,
@@ -19,7 +19,182 @@ const {
   checkAvailability,
   getAvailableCourts,
   getCourtSchedule,
+  getAvailabilityByTimeSlot,
 } = require('../utils/availabilityChecker');
+
+/**
+ * @route   GET /api/bookings/public/availability
+ * @desc    Get availability count by time slot (public)
+ * @access  Public
+ */
+router.get('/public/availability', async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date parameter is required',
+      });
+    }
+
+    const availability = await getAvailabilityByTimeSlot(new Date(date));
+
+    res.status(200).json({
+      success: true,
+      data: availability,
+    });
+  } catch (error) {
+    console.error('Get public availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get availability',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/bookings/customer
+ * @desc    Create booking from customer (no court assigned)
+ * @access  Private (Player)
+ */
+router.post('/customer', protectPlayer, async (req, res) => {
+  try {
+    const { date, timeSlot, duration } = req.body;
+    const player = req.player;
+
+    // Validate input
+    if (!date || !timeSlot) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุวันที่และเวลา',
+      });
+    }
+
+    const bookingDate = new Date(date);
+    bookingDate.setHours(0, 0, 0, 0);
+
+    // Get time slot details
+    const timeSlotDoc = await TimeSlot.findById(timeSlot);
+    if (!timeSlotDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่พบช่วงเวลาที่เลือก',
+      });
+    }
+
+    // Check availability
+    const availability = await getAvailabilityByTimeSlot(bookingDate);
+    const slotAvailability = availability.availability.find(
+      a => a.timeSlotId.equals(timeSlot)
+    );
+
+    if (!slotAvailability || slotAvailability.availableCount < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'ช่วงเวลานี้ไม่มีสนามว่าง',
+      });
+    }
+
+    // Calculate price
+    const bookingDuration = duration || 1;
+    const pricePerHour = player.isMember 
+      ? slotAvailability.pricing.member 
+      : slotAvailability.pricing.normal;
+    const subtotal = pricePerHour * bookingDuration;
+
+    // Generate booking code
+    const bookingCode = await generateBookingCode(bookingDate);
+
+    // Create booking without court
+    const booking = await Booking.create({
+      bookingCode,
+      customer: {
+        name: player.name,
+        phone: player.phone,
+      },
+      player: player._id,
+      court: null, // Admin will assign later
+      date: bookingDate,
+      timeSlot,
+      duration: bookingDuration,
+      pricing: {
+        subtotal,
+        discount: 0,
+        deposit: 0,
+        total: subtotal,
+      },
+      bookingStatus: 'confirmed',
+      paymentStatus: 'pending',
+      bookingSource: 'customer',
+    });
+
+    // Populate before sending response
+    await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    res.status(201).json({
+      success: true,
+      message: 'จองสนามสำเร็จ',
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Create customer booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการจองสนาม',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/bookings/customer/my-bookings
+ * @desc    Get player's booking history
+ * @access  Private (Player)
+ */
+router.get('/customer/my-bookings', protectPlayer, async (req, res) => {
+  try {
+    const player = req.player;
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const query = {
+      player: player._id,
+      deletedAt: null,
+    };
+
+    if (status && status !== 'all') {
+      query.bookingStatus = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const bookings = await Booking.find(query)
+      .populate('court', 'courtNumber name')
+      .populate('timeSlot', 'startTime endTime peakHour')
+      .sort({ date: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Booking.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      data: bookings,
+    });
+  } catch (error) {
+    console.error('Get my bookings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถโหลดประวัติการจองได้',
+      error: error.message,
+    });
+  }
+});
 
 /**
  * @route   GET /api/bookings
@@ -622,6 +797,77 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update payment',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PATCH /api/bookings/:id/assign-court
+ * @desc    Assign court to booking (Admin only)
+ * @access  Private (Admin)
+ */
+router.patch('/:id/assign-court', protect, validateObjectId(), async (req, res) => {
+  try {
+    const { courtId } = req.body;
+
+    if (!courtId) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุสนาม',
+      });
+    }
+
+    // Validate court exists
+    const court = await Court.findById(courtId);
+    if (!court) {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่พบสนามที่ระบุ',
+      });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Check if court is available for this booking's date/time
+    const availability = await checkAvailability({
+      courtId,
+      date: booking.date,
+      timeSlotId: booking.timeSlot,
+      duration: booking.duration,
+      excludeBookingId: booking._id,
+    });
+
+    if (!availability.available) {
+      return res.status(400).json({
+        success: false,
+        message: 'สนามนี้ไม่ว่างในช่วงเวลาดังกล่าว',
+      });
+    }
+
+    // Assign court
+    booking.court = courtId;
+    await booking.save();
+
+    await booking.populate('court', 'courtNumber name');
+    await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    res.status(200).json({
+      success: true,
+      message: 'กำหนดสนามสำเร็จ',
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Assign court error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถกำหนดสนามได้',
       error: error.message,
     });
   }

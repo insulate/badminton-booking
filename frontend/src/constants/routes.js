@@ -10,10 +10,13 @@ export const ROUTES = {
     HOME: '/',
     RULES: '/rules',
     BOOKING: '/booking',
+    LOGIN: '/login',
+    REGISTER: '/register',
+    MY_BOOKINGS: '/my-bookings',
   },
 
-  // Authentication
-  LOGIN: '/login',
+  // Admin Authentication (ย้ายจาก /login)
+  LOGIN: '/admin/login',
 
   // Admin Routes
   ADMIN: {

@@ -70,6 +70,10 @@ const playerSchema = new mongoose.Schema(
       },
       default: 'active',
     },
+    isMember: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

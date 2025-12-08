@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ROUTES } from './constants';
@@ -8,11 +9,21 @@ import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import PlayersPage from './pages/admin/PlayersPage';
 
+// Auth Stores
+import useAuthStore from './store/authStore';
+import usePlayerAuthStore from './store/playerAuthStore';
+
 // Customer Pages
 import CustomerLayout from './components/customer/CustomerLayout';
 import HomePage from './pages/customer/HomePage';
 import RulesPage from './pages/customer/RulesPage';
 import CustomerBookingPage from './pages/customer/CustomerBookingPage';
+import CustomerLoginPage from './pages/customer/CustomerLoginPage';
+import CustomerRegisterPage from './pages/customer/CustomerRegisterPage';
+import MyBookingsPage from './pages/customer/MyBookingsPage';
+
+// Customer Protected Route
+import CustomerProtectedRoute from './components/customer/CustomerProtectedRoute';
 
 // Settings Pages
 import VenueSettingsPage from './pages/admin/settings/VenueSettingsPage';
@@ -52,6 +63,14 @@ import GroupPlayPage from './pages/admin/GroupPlayPage';
 import ReportsPage from './pages/admin/ReportsPage';
 
 function App() {
+  const { initAuth } = useAuthStore();
+  const { initAuth: initPlayerAuth } = usePlayerAuthStore();
+
+  useEffect(() => {
+    initAuth();
+    initPlayerAuth();
+  }, [initAuth, initPlayerAuth]);
+
   return (
     <Router>
       <Toaster
@@ -83,9 +102,16 @@ function App() {
           <Route path={ROUTES.CUSTOMER.HOME} element={<HomePage />} />
           <Route path={ROUTES.CUSTOMER.RULES} element={<RulesPage />} />
           <Route path={ROUTES.CUSTOMER.BOOKING} element={<CustomerBookingPage />} />
+          <Route path={ROUTES.CUSTOMER.LOGIN} element={<CustomerLoginPage />} />
+          <Route path={ROUTES.CUSTOMER.REGISTER} element={<CustomerRegisterPage />} />
+
+          {/* Customer Protected Routes */}
+          <Route element={<CustomerProtectedRoute />}>
+            <Route path={ROUTES.CUSTOMER.MY_BOOKINGS} element={<MyBookingsPage />} />
+          </Route>
         </Route>
 
-        {/* Auth Routes */}
+        {/* Admin Login (moved to /admin/login) */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
         {/* Protected Admin Routes */}

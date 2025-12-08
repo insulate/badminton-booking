@@ -1,9 +1,23 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { MapPin, FileText, Calendar } from 'lucide-react';
+import { useEffect } from 'react';
+import { Outlet, Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { MapPin, FileText, Calendar, User, LogOut, LogIn, UserPlus } from 'lucide-react';
+import usePlayerAuthStore from '../../store/playerAuthStore';
 import { ROUTES } from '../../constants';
 
 export default function CustomerLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, player, initAuth, logout } = usePlayerAuthStore();
+
+  // Initialize auth on mount
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.CUSTOMER.HOME);
+  };
 
   const navItems = [
     {
@@ -31,21 +45,56 @@ export default function CustomerLayout() {
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 flex flex-col">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 h-14 bg-blue-950/80 backdrop-blur-sm shadow-lg z-40">
-        <div className="h-full flex items-center justify-center px-4">
-          <div className="flex items-center gap-3">
-            {/* Badminton Icon */}
+        <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-blue-900"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <circle cx="12" cy="5" r="3" />
-                <path d="M12 8C10.34 8 9 9.34 9 11v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3z" />
-                <path d="M12 18c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
+              <span className="text-lg">🏸</span>
             </div>
-            <span className="text-white font-bold text-xl">Lucky Badminton</span>
+            <span className="text-white font-bold text-lg hidden sm:block">Lucky Badminton</span>
+          </div>
+
+          {/* Auth Actions */}
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <NavLink
+                  to={ROUTES.CUSTOMER.MY_BOOKINGS}
+                  className={({ isActive }) =>
+                    `flex items-center gap-1 px-3 py-1.5 text-sm transition-colors ${
+                      isActive ? 'text-yellow-400' : 'text-blue-200 hover:text-white'
+                    }`
+                  }
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">{player?.name}</span>
+                </NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-200 hover:text-white transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">ออก</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to={ROUTES.CUSTOMER.LOGIN}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-200 hover:text-white transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>เข้าสู่ระบบ</span>
+                </NavLink>
+                <NavLink
+                  to={ROUTES.CUSTOMER.REGISTER}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-yellow-400 hover:bg-yellow-500 text-blue-900 rounded-lg transition-colors"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">สมัคร</span>
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       </header>

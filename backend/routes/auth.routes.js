@@ -4,17 +4,23 @@ const {
   login,
   getMe,
   updateProfile,
-  changePassword
+  changePassword,
+  playerRegister,
+  playerLogin,
+  getPlayerMe
 } = require('../controllers/auth.controller');
-const { protect } = require('../middleware/auth');
+const { protect, protectPlayer } = require('../middleware/auth');
 const { authLimiter, strictLimiter } = require('../middleware/rateLimiter');
 
-// Public routes
+// Admin/Staff routes
 router.post('/login', authLimiter, login);
-
-// Private routes (require authentication)
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
 router.put('/password', protect, strictLimiter, changePassword);
+
+// Player routes
+router.post('/player/register', playerRegister);
+router.post('/player/login', authLimiter, playerLogin);
+router.get('/player/me', protectPlayer, getPlayerMe);
 
 module.exports = router;

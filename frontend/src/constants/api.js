@@ -14,6 +14,10 @@ export const API_ENDPOINTS = {
     ME: '/auth/me',
     UPDATE_PROFILE: '/auth/profile',
     CHANGE_PASSWORD: '/auth/password',
+    // Player Auth
+    PLAYER_REGISTER: '/auth/player/register',
+    PLAYER_LOGIN: '/auth/player/login',
+    PLAYER_ME: '/auth/player/me',
   },
 
   // User Management (Admin)
@@ -72,6 +76,11 @@ export const API_ENDPOINTS = {
     CHECKOUT: (id) => `/bookings/${id}/checkout`,
     CANCEL: (id) => `/bookings/${id}/cancel`,
     UPDATE_PAYMENT: (id) => `/bookings/${id}/payment`,
+    // Customer booking
+    PUBLIC_AVAILABILITY: '/bookings/public/availability',
+    CUSTOMER_CREATE: '/bookings/customer',
+    CUSTOMER_MY_BOOKINGS: '/bookings/customer/my-bookings',
+    ASSIGN_COURT: (id) => `/bookings/${id}/assign-court`,
   },
 
   // Products Management (Admin)

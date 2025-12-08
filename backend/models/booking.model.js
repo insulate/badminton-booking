@@ -28,7 +28,20 @@ const bookingSchema = new mongoose.Schema(
     court: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Court',
-      required: [true, 'Please provide court'],
+      default: null,
+    },
+    player: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Player',
+      default: null,
+    },
+    bookingSource: {
+      type: String,
+      enum: {
+        values: ['admin', 'customer'],
+        message: '{VALUE} is not a valid booking source',
+      },
+      default: 'admin',
     },
     date: {
       type: Date,
@@ -111,6 +124,8 @@ bookingSchema.index({ date: 1, court: 1 });
 bookingSchema.index({ 'customer.phone': 1 });
 bookingSchema.index({ bookingStatus: 1 });
 bookingSchema.index({ deletedAt: 1 });
+bookingSchema.index({ player: 1 });
+bookingSchema.index({ bookingSource: 1 });
 
 // Virtual for displaying date range
 bookingSchema.virtual('dateRange').get(function () {

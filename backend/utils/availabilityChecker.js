@@ -351,8 +351,130 @@ const getCourtSchedule = async (date, dayType) => {
   }
 };
 
+/**
+ * Get availability count by time slot for a specific date
+ * Used for customer booking page (shows count, not court names)
+ *
+ * @param {Date} date - Date to check
+ * @returns {Promise<Object>} Object with date, dayType, and availability array
+ */
+const getAvailabilityByTimeSlot = async (date) => {
+  try {
+    // Normalize date to start of day
+    const bookingDate = new Date(date);
+    bookingDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Determine day type
+    const dayOfWeek = bookingDate.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const dayType = isWeekend ? 'weekend' : 'weekday';
+    const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek];
+
+    // Get all active courts
+    const courts = await Court.find({
+      deletedAt: null,
+      status: 'available',
+    });
+
+    const totalCourts = courts.length;
+
+    // Get all active timeslots for the day type
+    const timeSlots = await TimeSlot.find({
+      deletedAt: null,
+      status: 'active',
+      dayType: dayType,
+    }).sort({ startTime: 1 });
+
+    // Get all bookings for this date
+    const bookings = await Booking.find({
+      date: { $gte: bookingDate, $lte: endOfDay },
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+    });
+
+    // Build availability for each time slot
+    const availability = await Promise.all(
+      timeSlots.map(async (timeSlot) => {
+        let bookedCount = 0;
+        let blockedByGroupPlayCount = 0;
+
+        // Count bookings for this time slot
+        // Need to consider duration - a booking can span multiple time slots
+        const allTimeSlots = timeSlots;
+        const timeSlotIndex = allTimeSlots.findIndex(ts => ts._id.equals(timeSlot._id));
+
+        for (const court of courts) {
+          // Check if booked
+          const isBooked = bookings.some(booking => {
+            if (!booking.court || !booking.court.equals(court._id)) return false;
+            
+            const bookingSlotIndex = allTimeSlots.findIndex(ts => 
+              booking.timeSlot && ts._id.equals(booking.timeSlot)
+            );
+            
+            if (bookingSlotIndex === -1) return false;
+            
+            // Check if current timeSlot falls within booking duration
+            return timeSlotIndex >= bookingSlotIndex && 
+                   timeSlotIndex < bookingSlotIndex + (booking.duration || 1);
+          });
+
+          if (isBooked) {
+            bookedCount++;
+            continue;
+          }
+
+          // Check if blocked by Group Play
+          const isBlocked = await GroupPlay.isTimeSlotBlocked(
+            court._id,
+            dayName,
+            timeSlot.startTime
+          );
+
+          if (isBlocked) {
+            blockedByGroupPlayCount++;
+          }
+        }
+
+        const availableCount = totalCourts - bookedCount - blockedByGroupPlayCount;
+
+        // Determine pricing based on peak hour
+        const pricing = timeSlot.peakHour
+          ? timeSlot.peakPricing
+          : timeSlot.pricing;
+
+        return {
+          timeSlotId: timeSlot._id,
+          startTime: timeSlot.startTime,
+          endTime: timeSlot.endTime,
+          peakHour: timeSlot.peakHour,
+          availableCount: Math.max(0, availableCount),
+          totalCourts,
+          pricing: {
+            normal: pricing.normal,
+            member: pricing.member,
+          },
+        };
+      })
+    );
+
+    return {
+      date: bookingDate,
+      dayType,
+      availability,
+    };
+  } catch (error) {
+    console.error('Error getting availability by time slot:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   checkAvailability,
   getAvailableCourts,
   getCourtSchedule,
+  getAvailabilityByTimeSlot,
 };

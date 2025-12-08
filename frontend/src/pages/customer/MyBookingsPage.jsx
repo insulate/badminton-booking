@@ -1,0 +1,156 @@
+import { useState, useEffect } from 'react';
+import { Calendar, Clock, MapPin, Receipt } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { customerBookingsAPI } from '../../lib/api';
+
+export default function MyBookingsPage() {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    loadBookings();
+  }, [filter]);
+
+  const loadBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await customerBookingsAPI.getMyBookings({
+        status: filter !== 'all' ? filter : undefined,
+      });
+      if (response.success) {
+        setBookings(response.data);
+      }
+    } catch (error) {
+      console.error('Load bookings error:', error);
+      toast.error('ไม่สามารถโหลดประวัติการจองได้');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('th-TH', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('th-TH').format(price);
+  };
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      confirmed: { bg: 'bg-blue-500', label: 'ยืนยันแล้ว' },
+      'checked-in': { bg: 'bg-purple-500', label: 'เช็คอินแล้ว' },
+      completed: { bg: 'bg-green-500', label: 'เสร็จสิ้น' },
+      cancelled: { bg: 'bg-red-500', label: 'ยกเลิก' },
+    };
+    return badges[status] || { bg: 'bg-gray-500', label: status };
+  };
+
+  const filters = [
+    { value: 'all', label: 'ทั้งหมด' },
+    { value: 'confirmed', label: 'รอใช้บริการ' },
+    { value: 'completed', label: 'เสร็จสิ้น' },
+    { value: 'cancelled', label: 'ยกเลิก' },
+  ];
+
+  return (
+    <div className="min-h-full p-4">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-white mb-1">ประวัติการจอง</h1>
+        <p className="text-blue-200 text-sm">ดูรายการจองของคุณ</p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+        {filters.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              filter === f.value
+                ? 'bg-yellow-400 text-blue-900'
+                : 'bg-white/10 text-white hover:bg-white/20'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Bookings List */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+        </div>
+      ) : bookings.length === 0 ? (
+        <div className="text-center py-12">
+          <Receipt className="w-12 h-12 text-blue-300 mx-auto mb-4" />
+          <p className="text-blue-200">ไม่พบรายการจอง</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {bookings.map((booking) => {
+            const statusBadge = getStatusBadge(booking.bookingStatus);
+            return (
+              <div
+                key={booking._id}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-yellow-400 font-bold">
+                    {booking.bookingCode}
+                  </span>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium text-white ${statusBadge.bg}`}
+                  >
+                    {statusBadge.label}
+                  </span>
+                </div>
+
+                {/* Details */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-blue-200">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(booking.date)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-200">
+                    <Clock className="w-4 h-4" />
+                    <span>
+                      {booking.timeSlot?.startTime} - {booking.timeSlot?.endTime}
+                      {booking.duration > 1 && ` (${booking.duration} ชม.)`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-200">
+                    <MapPin className="w-4 h-4" />
+                    <span>
+                      {booking.court
+                        ? `${booking.court.name || `Court ${booking.court.courtNumber}`}`
+                        : 'รอกำหนดสนาม'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-blue-200 text-sm">ยอดรวม</span>
+                  <span className="text-white font-bold">
+                    {formatPrice(booking.pricing?.total || 0)} บาท
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
