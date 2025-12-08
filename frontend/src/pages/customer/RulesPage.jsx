@@ -1,3 +1,5 @@
+import { MapPin, Phone, Facebook, Instagram } from 'lucide-react';
+
 export default function RulesPage() {
   const rules = [
     {
@@ -51,122 +53,114 @@ export default function RulesPage() {
   ];
 
   return (
-    <div className="min-h-full p-4">
-      {/* Title */}
-      <div className="text-center mb-6">
-        <div className="inline-block bg-blue-50 border-2 border-blue-200 rounded-xl px-6 py-3">
-          <h1 className="text-lg md:text-xl font-bold text-blue-700">
-            เงื่อนไขการจองสนามแบดมินตัน
-          </h1>
-        </div>
+    <div className="min-h-full bg-blue-700 font-sans">
+      {/* Background decoration lines - subtle overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-10">
+         <div className="absolute top-0 left-1/4 w-px h-full bg-white transform -skew-x-12"></div>
+         <div className="absolute top-0 right-1/4 w-px h-full bg-white transform -skew-x-12"></div>
       </div>
 
-      {/* Rules Content */}
-      <div className="max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Left Column (Rules 1-5) */}
-          <div className="space-y-4">
+      <div className="p-4 md:p-8 relative z-10 max-w-7xl mx-auto">
+        {/* Title */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-yellow-400 px-8 py-4 transform -skew-x-6 shadow-lg">
+            <h1 className="text-2xl md:text-4xl font-black text-blue-900 transform skew-x-6 uppercase tracking-wider">
+              เงื่อนไขการจองสนามแบดมินตัน
+            </h1>
+          </div>
+        </div>
+
+        {/* Rules Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 mb-16">
+          {/* Rules 1-5 */}
+          <div className="space-y-6">
             {rules.slice(0, 5).map((rule) => (
-              <div
-                key={rule.id}
-                className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-              >
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-full text-sm">
-                      {rule.id}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                    {rule.text}
-                  </p>
+              <div key={rule.id} className="flex gap-4 text-white">
+                <span className="flex-shrink-0 font-bold text-lg">{rule.id}.</span>
+                <div className="text-base md:text-lg leading-relaxed whitespace-pre-line font-medium opacity-95">
+                  {rule.text}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Right Column (Rules 6-10) */}
-          <div className="space-y-4">
+          {/* Rules 6-10 */}
+          <div className="space-y-6">
             {rules.slice(5, 10).map((rule) => (
-              <div
-                key={rule.id}
-                className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-              >
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-full text-sm">
-                      {rule.id}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                    {rule.text}
-                  </p>
+              <div key={rule.id} className="flex gap-4 text-white">
+                <span className="flex-shrink-0 font-bold text-lg">{rule.id}.</span>
+                <div className="text-base md:text-lg leading-relaxed whitespace-pre-line font-medium opacity-95">
+                  {rule.text}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Contact Information */}
-        <div className="mt-8 flex flex-col lg:flex-row lg:justify-end">
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm max-w-sm lg:ml-auto">
-            {/* Logo */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <circle cx="12" cy="5" r="3" />
-                  <path d="M12 8C10.34 8 9 9.34 9 11v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3z" />
-                  <path d="M12 18c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-              </div>
-              <span className="text-blue-600 font-bold text-lg">
-                Lucky Badminton
-              </span>
-            </div>
+        {/* Footer Section */}
+        <div className="flex flex-col lg:flex-row items-end justify-between border-t border-white/20 pt-8 gap-8">
+          {/* Left Footer - Complex Name */}
+          <div className="w-full lg:w-auto">
+             <div className="mb-4">
+               <h2 className="text-3xl font-black italic text-white leading-none transform -skew-x-6">
+                 <span className="block text-xl opacity-80">PHROMLIKHIT</span>
+                 COMPLEX
+                 <span className="block h-1 w-20 bg-yellow-400 mt-1"></span>
+               </h2>
+             </div>
+             
+             <div className="space-y-2 text-white font-medium">
+               <div className="flex items-center gap-3">
+                 <span className="bg-blue-800 px-2 py-0.5 rounded text-sm text-yellow-400 font-bold border border-yellow-400/30">MON-SAT</span>
+                 <span className="text-lg">09.00 - 23.00 น.</span>
+               </div>
+               <div className="flex items-center gap-3">
+                 <span className="bg-blue-800 px-2 py-0.5 rounded text-sm text-yellow-400 font-bold border border-yellow-400/30 w-[84px] text-center">SUN</span>
+                 <span className="text-lg">08.00 - 22.00 น.</span>
+               </div>
+             </div>
+          </div>
 
-            {/* Operating Hours */}
-            <div className="text-sm text-gray-700 space-y-1 mb-4">
-              <p className="flex items-center gap-2">
-                <span className="text-blue-600 font-medium">เวลาเปิด:</span>
-              </p>
-              <p className="pl-4">จ-ส 08:00-24:00 น.</p>
-              <p className="pl-4">อา 08:00-22:00 น.</p>
-            </div>
+          {/* Right Footer - Contact & QR */}
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 w-full lg:w-auto">
+            {/* QR Code */}
+             <div className="flex flex-col items-center">
+               <span className="text-white text-[10px] uppercase tracking-widest mb-1 opacity-80">Line Official Account</span>
+               <div className="bg-white p-2 rounded-lg shadow-xl">
+                 <div className="w-24 h-24 bg-gray-900 flex items-center justify-center">
+                    {/* Placeholder for QR */}
+                    <div className="text-white text-xs text-center p-2">
+                       <div className="w-full h-full border-2 border-white/30 flex items-center justify-center">
+                         QR CODE
+                       </div>
+                    </div>
+                 </div>
+               </div>
+             </div>
 
-            {/* LINE QR Placeholder */}
-            <div className="mb-4">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center mx-auto border border-gray-200">
-                <span className="text-gray-400 text-xs text-center">
-                  LINE QR
-                  <br />
-                  Code
-                </span>
-              </div>
-            </div>
+             {/* Contact Info */}
+             <div className="text-white text-right space-y-1">
+                <div className="flex items-center justify-end gap-2">
+                  <div className="text-right">
+                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Tel</p>
+                    <p className="text-lg font-bold">090-019-4444</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-end gap-2 mt-2">
+                  <div className="text-right">
+                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Facebook</p>
+                    <p className="font-medium">Phromlikhit Badminton</p>
+                  </div>
+                </div>
 
-            {/* Contact Details */}
-            <div className="text-sm space-y-2">
-              <p className="flex items-center gap-2 text-gray-700">
-                <span className="text-blue-600 font-medium">TEL:</span>
-                099-999-9999
-              </p>
-              <p className="flex items-center gap-2 text-gray-700">
-                <span className="text-blue-600 font-medium">LINE:</span>
-                @luckybadminton
-              </p>
-              <p className="flex items-center gap-2 text-gray-700">
-                <span className="text-blue-600 font-medium">FACEBOOK:</span>
-                Lucky Badminton
-              </p>
-              <p className="flex items-center gap-2 text-gray-700">
-                <span className="text-blue-600 font-medium">INSTAGRAM:</span>
-                @luckybadminton
-              </p>
-            </div>
+                <div className="flex items-center justify-end gap-2">
+                  <div className="text-right">
+                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Instagram</p>
+                    <p className="font-medium">phromlikhit_complex</p>
+                  </div>
+                </div>
+             </div>
           </div>
         </div>
       </div>
