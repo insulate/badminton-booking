@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  badminton-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: badminton-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://waste-mongodb:27017/badminton_db
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=30d
+      - CLIENT_URL=https://badminton-booking.vercel.app
+    volumes:
+      - badminton_uploads:/app/uploads
+    networks:
+      - waste-tax_waste-network
+
+volumes:
+  badminton_uploads:
+
+networks:
+  waste-tax_waste-network:
+    external: true

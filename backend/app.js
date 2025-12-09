@@ -30,10 +30,11 @@ const corsOptions = {
   // Allow specific origins or use environment variable
   origin: function (origin, callback) {
     const allowedOrigins = [
-      process.env.CLIENT_URL || 'http://localhost:5173',
+      process.env.CLIENT_URL,
       'http://localhost:5173',
-      'http://localhost:3000'
-    ];
+      'http://localhost:3000',
+      'https://badminton-booking.vercel.app'
+    ].filter(Boolean);
 
     // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
