@@ -33,7 +33,8 @@ const corsOptions = {
       process.env.CLIENT_URL,
       'http://localhost:5173',
       'http://localhost:3000',
-      'https://badminton-booking.vercel.app'
+      'https://badminton-booking.vercel.app',
+      'https://badminton-booking-ivory.vercel.app'
     ].filter(Boolean);
 
     // Allow requests with no origin (like mobile apps, curl, Postman)
