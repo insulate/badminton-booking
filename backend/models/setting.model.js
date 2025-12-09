@@ -21,6 +21,10 @@ const settingSchema = new mongoose.Schema(
         type: String,
         default: '',
       },
+      floorPlanImage: {
+        type: String,
+        default: '',
+      },
     },
 
     // เวลาทำการ

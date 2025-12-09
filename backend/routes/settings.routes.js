@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Setting = require('../models/setting.model');
 const { protect, admin } = require('../middleware/auth');
+const { uploadVenue, deleteImage } = require('../middleware/upload');
 
 /**
  * @route   GET /api/settings
@@ -259,6 +260,106 @@ router.post('/reset', protect, admin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการรีเซ็ตการตั้งค่า',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/settings/floor-plan
+ * @desc    Get floor plan image (Public - for customers)
+ * @access  Public
+ */
+router.get('/floor-plan', async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    res.json({
+      success: true,
+      data: {
+        floorPlanImage: settings.venue?.floorPlanImage || '',
+      },
+    });
+  } catch (error) {
+    console.error('Get floor plan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลรูปแผนผัง',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/settings/floor-plan
+ * @desc    Upload floor plan image
+ * @access  Private (Admin)
+ */
+router.post('/floor-plan', protect, admin, uploadVenue.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกไฟล์รูปภาพ',
+      });
+    }
+
+    const settings = await Setting.getSettings();
+
+    // Delete old image if exists
+    if (settings.venue?.floorPlanImage) {
+      await deleteImage(settings.venue.floorPlanImage);
+    }
+
+    // Update with new image path
+    const imagePath = `/uploads/venue/${req.file.filename}`;
+    settings.venue.floorPlanImage = imagePath;
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'อัพโหลดรูปแผนผังสำเร็จ',
+      data: {
+        floorPlanImage: imagePath,
+      },
+    });
+  } catch (error) {
+    console.error('Upload floor plan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการอัพโหลดรูปแผนผัง',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/settings/floor-plan
+ * @desc    Delete floor plan image
+ * @access  Private (Admin)
+ */
+router.delete('/floor-plan', protect, admin, async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    // Delete image file if exists
+    if (settings.venue?.floorPlanImage) {
+      await deleteImage(settings.venue.floorPlanImage);
+    }
+
+    // Clear image path in database
+    settings.venue.floorPlanImage = '';
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'ลบรูปแผนผังสำเร็จ',
+    });
+  } catch (error) {
+    console.error('Delete floor plan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการลบรูปแผนผัง',
       error: error.message,
     });
   }

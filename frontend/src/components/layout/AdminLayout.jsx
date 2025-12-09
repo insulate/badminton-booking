@@ -27,6 +27,7 @@ import {
   UserCircle2,
   BarChart3,
   Receipt,
+  Map,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -148,6 +149,11 @@ export default function AdminLayout() {
           name: 'การตั้งค่าทั่วไป',
           path: ROUTES.ADMIN.SETTINGS_GENERAL,
           icon: SettingsIcon,
+        },
+        {
+          name: 'รูปแผนผังสนาม',
+          path: ROUTES.ADMIN.SETTINGS_FLOOR_PLAN,
+          icon: Map,
         },
       ],
     },

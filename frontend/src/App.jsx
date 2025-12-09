@@ -31,6 +31,7 @@ import OperatingHoursPage from './pages/admin/settings/OperatingHoursPage';
 import BookingSettingsPage from './pages/admin/settings/BookingSettingsPage';
 import PaymentSettingsPage from './pages/admin/settings/PaymentSettingsPage';
 import GeneralSettingsPage from './pages/admin/settings/GeneralSettingsPage';
+import FloorPlanSettingsPage from './pages/admin/settings/FloorPlanSettingsPage';
 
 // Courts Pages
 import CourtsPage from './pages/admin/settings/courts/CourtsPage';
@@ -150,6 +151,7 @@ function App() {
           <Route path="settings/booking" element={<BookingSettingsPage />} />
           <Route path="settings/payment" element={<PaymentSettingsPage />} />
           <Route path="settings/general" element={<GeneralSettingsPage />} />
+          <Route path="settings/floor-plan" element={<FloorPlanSettingsPage />} />
 
           {/* Courts Routes */}
           <Route path="settings/courts" element={<CourtsPage />} />

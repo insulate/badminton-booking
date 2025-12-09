@@ -41,6 +41,7 @@ export const ROUTES = {
     SETTINGS_BOOKING: '/admin/settings/booking',
     SETTINGS_PAYMENT: '/admin/settings/payment',
     SETTINGS_GENERAL: '/admin/settings/general',
+    SETTINGS_FLOOR_PLAN: '/admin/settings/floor-plan',
   },
 
   // Redirect

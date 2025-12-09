@@ -3,11 +3,20 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../uploads/products');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure uploads directories exist
+const productUploadDir = path.join(__dirname, '../uploads/products');
+const venueUploadDir = path.join(__dirname, '../uploads/venue');
+
+if (!fs.existsSync(productUploadDir)) {
+  fs.mkdirSync(productUploadDir, { recursive: true });
 }
+
+if (!fs.existsSync(venueUploadDir)) {
+  fs.mkdirSync(venueUploadDir, { recursive: true });
+}
+
+// Legacy alias for backward compatibility
+const uploadDir = productUploadDir;
 
 // Configure storage
 const storage = multer.diskStorage({
@@ -35,9 +44,30 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create multer instance
+// Create multer instance for products
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max file size
+  },
+  fileFilter: fileFilter,
+});
+
+// Configure storage for venue images
+const venueStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, venueUploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    const ext = path.extname(file.originalname);
+    cb(null, 'venue-' + uniqueSuffix + ext);
+  },
+});
+
+// Create multer instance for venue images
+const uploadVenue = multer({
+  storage: venueStorage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB max file size
   },
@@ -78,4 +108,4 @@ const deleteImage = async (imagePath) => {
   }
 };
 
-module.exports = { upload, deleteImage };
+module.exports = { upload, uploadVenue, deleteImage };

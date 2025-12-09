@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
     UPDATE_PAYMENT: '/settings/payment',
     UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
+    FLOOR_PLAN: '/settings/floor-plan',
   },
 
   // Courts Management (Admin)

@@ -202,6 +202,21 @@ export const settingsAPI = {
     const response = await api.post(API_ENDPOINTS.SETTINGS.RESET);
     return response.data;
   },
+
+  getFloorPlan: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.FLOOR_PLAN);
+    return response.data;
+  },
+
+  uploadFloorPlan: async (formData) => {
+    const response = await api.post(API_ENDPOINTS.SETTINGS.FLOOR_PLAN, formData);
+    return response.data;
+  },
+
+  deleteFloorPlan: async () => {
+    const response = await api.delete(API_ENDPOINTS.SETTINGS.FLOOR_PLAN);
+    return response.data;
+  },
 };
 
 // Courts API (Admin only)

@@ -1,15 +1,70 @@
+import { useState, useEffect } from 'react';
+import { MapPin, ImageIcon } from 'lucide-react';
+import { settingsAPI } from '../../lib/api';
+import { API_BASE_URL } from '../../constants/api';
+
 export default function HomePage() {
-  // Mockup court layout - 8 courts
-  const courts = [
-    { id: 1, name: 'Court 1' },
-    { id: 2, name: 'Court 2' },
-    { id: 3, name: 'Court 3' },
-    { id: 4, name: 'Court 4' },
-    { id: 5, name: 'Court 5' },
-    { id: 6, name: 'Court 6' },
-    { id: 7, name: 'Court 7' },
-    { id: 8, name: 'Court 8' },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [floorPlanImage, setFloorPlanImage] = useState('');
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetchFloorPlan();
+  }, []);
+
+  const fetchFloorPlan = async () => {
+    try {
+      setLoading(true);
+      setError(false);
+      const response = await settingsAPI.getFloorPlan();
+      if (response.success && response.data.floorPlanImage) {
+        setFloorPlanImage(response.data.floorPlanImage);
+      }
+    } catch (err) {
+      console.error('Error fetching floor plan:', err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getImageUrl = (path) => {
+    if (!path) return '';
+    // Remove /api from base URL for static files
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    return `${baseUrl}${path}`;
+  };
+
+  // Placeholder component when no image
+  const PlaceholderContent = () => (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
+        <ImageIcon className="w-12 h-12 text-gray-400" />
+      </div>
+      <h3 className="text-lg font-medium text-gray-700 mb-2">
+        ยังไม่มีรูปแผนผัง
+      </h3>
+      <p className="text-gray-500 text-sm text-center max-w-xs">
+        รูปแผนผังสนามจะแสดงที่นี่เมื่อผู้ดูแลระบบอัพโหลด
+      </p>
+    </div>
+  );
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-full p-4">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            แผนผังสนาม
+          </h1>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full p-4">
@@ -18,138 +73,29 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           แผนผังสนาม
         </h1>
-        <p className="text-gray-500 text-sm">
-          Lucky Badminton - 8 Courts
-        </p>
+        <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
+          <MapPin className="w-4 h-4" />
+          <span>Lucky Badminton</span>
+        </div>
       </div>
 
-      {/* Court Layout SVG Diagram */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 max-w-4xl mx-auto">
-        {/* Floor Plan Container */}
-        <div className="relative bg-gradient-to-b from-green-600 to-green-500 rounded-xl p-4 overflow-hidden">
-          {/* Background pattern - court lines */}
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-2 border-2 border-white rounded"></div>
+      {/* Floor Plan Image */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 max-w-4xl mx-auto overflow-hidden">
+        {floorPlanImage ? (
+          <div className="relative">
+            <img
+              src={getImageUrl(floorPlanImage)}
+              alt="Floor Plan"
+              className="w-full h-auto"
+              onError={() => {
+                setError(true);
+                setFloorPlanImage('');
+              }}
+            />
           </div>
-
-          {/* Courts Grid - 2 rows x 4 cols */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
-            {courts.map((court) => (
-              <div
-                key={court.id}
-                className="aspect-[2/3] bg-green-400/50 rounded-lg border-2 border-yellow-400/70 p-2 flex flex-col"
-              >
-                {/* Court Number */}
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="relative w-full h-full">
-                    {/* Court lines */}
-                    <svg
-                      viewBox="0 0 100 150"
-                      className="w-full h-full"
-                      preserveAspectRatio="xMidYMid meet"
-                    >
-                      {/* Outer boundary */}
-                      <rect
-                        x="5"
-                        y="5"
-                        width="90"
-                        height="140"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="1"
-                      />
-                      {/* Center line */}
-                      <line
-                        x1="5"
-                        y1="75"
-                        x2="95"
-                        y2="75"
-                        stroke="white"
-                        strokeWidth="1"
-                      />
-                      {/* Service lines - top */}
-                      <line
-                        x1="5"
-                        y1="25"
-                        x2="95"
-                        y2="25"
-                        stroke="white"
-                        strokeWidth="0.5"
-                      />
-                      {/* Service lines - bottom */}
-                      <line
-                        x1="5"
-                        y1="125"
-                        x2="95"
-                        y2="125"
-                        stroke="white"
-                        strokeWidth="0.5"
-                      />
-                      {/* Center vertical line - top half */}
-                      <line
-                        x1="50"
-                        y1="25"
-                        x2="50"
-                        y2="75"
-                        stroke="white"
-                        strokeWidth="0.5"
-                      />
-                      {/* Center vertical line - bottom half */}
-                      <line
-                        x1="50"
-                        y1="75"
-                        x2="50"
-                        y2="125"
-                        stroke="white"
-                        strokeWidth="0.5"
-                      />
-                      {/* Net position indicator */}
-                      <line
-                        x1="5"
-                        y1="75"
-                        x2="95"
-                        y2="75"
-                        stroke="yellow"
-                        strokeWidth="2"
-                        strokeDasharray="2,2"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {/* Court label */}
-                <div className="text-center py-1">
-                  <span className="inline-block bg-blue-600 text-white font-bold text-xs md:text-sm px-2 py-1 rounded">
-                    {court.name}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-white">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 bg-yellow-400"></div>
-              <span>Net</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border border-white/70 rounded"></div>
-              <span>Court Area</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-6 text-center">
-          <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-            <p className="text-blue-700 text-sm">
-              <span className="font-bold text-blue-600">8</span> Courts Available
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Professional Standard Courts
-            </p>
-          </div>
-        </div>
+        ) : (
+          <PlaceholderContent />
+        )}
       </div>
 
       {/* Contact Info Preview */}
