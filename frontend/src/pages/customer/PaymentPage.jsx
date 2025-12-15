@@ -188,9 +188,9 @@ export default function PaymentPage() {
   };
 
   const generatePromptPayQR = () => {
-    if (!paymentInfo?.promptPay?.number || !booking?.pricing?.total) return null;
+    if (!paymentInfo?.promptPayNumber || !booking?.pricing?.total) return null;
 
-    const promptPayNumber = paymentInfo.promptPay.number.replace(/-/g, '');
+    const promptPayNumber = paymentInfo.promptPayNumber.replace(/-/g, '');
     const amount = booking.pricing.total.toFixed(2);
 
     // PromptPay QR format (simplified)
@@ -378,7 +378,7 @@ export default function PaymentPage() {
         <h3 className="font-semibold text-gray-800 mb-4">ช่องทางการชำระเงิน</h3>
 
         {/* PromptPay QR */}
-        {paymentInfo?.promptPay?.number && (
+        {paymentInfo?.promptPayNumber && (
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -389,29 +389,26 @@ export default function PaymentPage() {
 
             <div className="bg-gray-50 rounded-xl p-4 text-center">
               <QRCodeSVG
-                value={generatePromptPayQR() || paymentInfo.promptPay.number}
+                value={generatePromptPayQR() || paymentInfo.promptPayNumber}
                 size={180}
                 level="M"
                 className="mx-auto mb-3"
               />
               <div className="flex items-center justify-center gap-2">
-                <span className="text-lg font-semibold">{paymentInfo.promptPay.number}</span>
+                <span className="text-lg font-semibold">{paymentInfo.promptPayNumber}</span>
                 <button
-                  onClick={() => copyToClipboard(paymentInfo.promptPay.number, 'เลขพร้อมเพย์')}
+                  onClick={() => copyToClipboard(paymentInfo.promptPayNumber, 'เลขพร้อมเพย์')}
                   className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
               </div>
-              {paymentInfo.promptPay.name && (
-                <p className="text-sm text-gray-500 mt-1">{paymentInfo.promptPay.name}</p>
-              )}
             </div>
           </div>
         )}
 
         {/* Bank Transfer */}
-        {paymentInfo?.bankTransfer?.accountNumber && (
+        {paymentInfo?.bankAccount?.accountNumber && (
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -423,14 +420,14 @@ export default function PaymentPage() {
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">ธนาคาร</span>
-                <span className="font-medium">{paymentInfo.bankTransfer.bankName}</span>
+                <span className="font-medium">{paymentInfo.bankAccount.bankName}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">เลขบัญชี</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold">{paymentInfo.bankTransfer.accountNumber}</span>
+                  <span className="font-semibold">{paymentInfo.bankAccount.accountNumber}</span>
                   <button
-                    onClick={() => copyToClipboard(paymentInfo.bankTransfer.accountNumber, 'เลขบัญชี')}
+                    onClick={() => copyToClipboard(paymentInfo.bankAccount.accountNumber, 'เลขบัญชี')}
                     className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   >
                     <Copy className="w-4 h-4" />
@@ -439,7 +436,7 @@ export default function PaymentPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">ชื่อบัญชี</span>
-                <span className="font-medium">{paymentInfo.bankTransfer.accountName}</span>
+                <span className="font-medium">{paymentInfo.bankAccount.accountName}</span>
               </div>
             </div>
           </div>
