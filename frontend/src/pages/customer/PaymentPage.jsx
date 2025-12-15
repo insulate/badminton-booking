@@ -1,11 +1,111 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, AlertCircle, Upload, Image, Loader2, CheckCircle, Copy, Building2, CreditCard, Timer } from 'lucide-react';
+import { Calendar, Clock, MapPin, AlertCircle, Upload, Image, Loader2, CheckCircle, Copy, Timer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
 import { QRCodeSVG } from 'qrcode.react';
 
+// Thai banks logo data
+const thaiBanksLogo = {
+  KBANK: {
+    name: "กสิกรไทย",
+    nameLong: "ธนาคารกสิกรไทย",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/KBANK.png"
+  },
+  SCB: {
+    name: "ไทยพาณิชย์",
+    nameLong: "ธนาคารไทยพาณิชย์",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/SCB.png"
+  },
+  KTB: {
+    name: "กรุงไทย",
+    nameLong: "ธนาคารกรุงไทย",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/KTB.png"
+  },
+  BBL: {
+    name: "กรุงเทพ",
+    nameLong: "ธนาคารกรุงเทพ",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/BBL.png"
+  },
+  BAY: {
+    name: "กรุงศรีอยุธยา",
+    nameLong: "ธนาคารกรุงศรีอยุธยา",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/BAY.png"
+  },
+  TTB: {
+    name: "ทีเอ็มบีธนชาต",
+    nameLong: "ธนาคารทีเอ็มบีธนชาต",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/TTB.png"
+  },
+  GSB: {
+    name: "ออมสิน",
+    nameLong: "ธนาคารออมสิน",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/GSB.png"
+  },
+  BAAC: {
+    name: "ธ.ก.ส.",
+    nameLong: "ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/BAAC.png"
+  },
+  GHB: {
+    name: "ธ.อ.ส.",
+    nameLong: "ธนาคารอาคารสงเคราะห์",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/GHB.png"
+  },
+  UOB: {
+    name: "ยูโอบี",
+    nameLong: "ธนาคารยูโอบี",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/UOB.png"
+  },
+  CIMB: {
+    name: "ซีไอเอ็มบี",
+    nameLong: "ธนาคารซีไอเอ็มบี",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/CIMB.png"
+  },
+  TISCO: {
+    name: "ทิสโก้",
+    nameLong: "ธนาคารทิสโก้",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/TISCO.png"
+  },
+  KKP: {
+    name: "เกียรตินาคิน",
+    nameLong: "ธนาคารเกียรตินาคินภัทร",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/KKP.png"
+  },
+  LHB: {
+    name: "แลนด์ แอนด์ เฮ้าส์",
+    nameLong: "ธนาคารแลนด์ แอนด์ เฮ้าส์",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/LHB.png"
+  },
+  PromptPay: {
+    name: "พร้อมเพย์",
+    nameLong: "พร้อมเพย์",
+    icon: "https://raw.githubusercontent.com/casperstack/thai-banks-logo/master/icons/PromptPay.png"
+  },
+};
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+// Map Thai bank name to bank code
+const getBankInfo = (bankName) => {
+  if (!bankName) return null;
+
+  const bankNameLower = bankName.toLowerCase();
+
+  // Try to match by name
+  for (const [code, bank] of Object.entries(thaiBanksLogo)) {
+    if (
+      bankNameLower.includes(bank.name.toLowerCase()) ||
+      bankNameLower.includes(bank.nameLong?.toLowerCase()) ||
+      bank.name.toLowerCase().includes(bankNameLower.replace('ธนาคาร', '').trim()) ||
+      bank.nameLong?.toLowerCase().includes(bankNameLower.replace('ธนาคาร', '').trim())
+    ) {
+      return bank;
+    }
+  }
+
+  return null;
+};
 
 export default function PaymentPage() {
   const { bookingId } = useParams();
@@ -380,10 +480,12 @@ export default function PaymentPage() {
         {/* PromptPay QR */}
         {paymentInfo?.promptPayNumber && (
           <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-4 h-4 text-blue-600" />
-              </div>
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={thaiBanksLogo.PromptPay?.icon}
+                alt="PromptPay"
+                className="w-10 h-10 object-contain"
+              />
               <span className="font-medium text-gray-700">พร้อมเพย์ (PromptPay)</span>
             </div>
 
@@ -408,19 +510,34 @@ export default function PaymentPage() {
         )}
 
         {/* Bank Transfer */}
-        {paymentInfo?.bankAccount?.accountNumber && (
+        {paymentInfo?.bankAccount?.accountNumber && (() => {
+          const bankInfo = getBankInfo(paymentInfo.bankAccount.bankName);
+          return (
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-green-600" />
-              </div>
+            <div className="flex items-center gap-3 mb-3">
+              {bankInfo?.icon ? (
+                <img
+                  src={bankInfo.icon}
+                  alt={paymentInfo.bankAccount.bankName}
+                  className="w-10 h-10 object-contain"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <span className="text-green-600 font-bold text-xs">BANK</span>
+                </div>
+              )}
               <span className="font-medium text-gray-700">โอนผ่านธนาคาร</span>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">ธนาคาร</span>
-                <span className="font-medium">{paymentInfo.bankAccount.bankName}</span>
+                <div className="flex items-center gap-2">
+                  {bankInfo?.icon && (
+                    <img src={bankInfo.icon} alt="" className="w-5 h-5 object-contain" />
+                  )}
+                  <span className="font-medium">{paymentInfo.bankAccount.bankName}</span>
+                </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500 text-sm">เลขบัญชี</span>
@@ -440,7 +557,8 @@ export default function PaymentPage() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Upload Slip */}
