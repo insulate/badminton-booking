@@ -10,12 +10,15 @@ const api = axios.create({
 });
 
 // Request interceptor to add token
-// Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only add admin token if Authorization header is not already set
+    // This allows customerBookingsAPI to use playerToken without being overridden
+    if (!config.headers.Authorization) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     // If data is FormData, remove Content-Type header to let axios set it automatically
     if (config.data instanceof FormData) {
