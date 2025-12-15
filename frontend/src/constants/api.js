@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
     UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
     FLOOR_PLAN: '/settings/floor-plan',
+    PAYMENT_INFO: '/settings/payment-info', // Public
   },
 
   // Courts Management (Admin)
@@ -81,7 +82,11 @@ export const API_ENDPOINTS = {
     PUBLIC_AVAILABILITY: '/bookings/public/availability',
     CUSTOMER_CREATE: '/bookings/customer',
     CUSTOMER_MY_BOOKINGS: '/bookings/customer/my-bookings',
+    CUSTOMER_GET: (id) => `/bookings/customer/${id}`,
     ASSIGN_COURT: (id) => `/bookings/${id}/assign-court`,
+    // Payment slip
+    UPLOAD_SLIP: (id) => `/bookings/${id}/upload-slip`,
+    VERIFY_SLIP: (id) => `/bookings/${id}/verify-slip`,
   },
 
   // Products Management (Admin)

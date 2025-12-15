@@ -20,10 +20,18 @@ const playersRouter = require('./routes/players.routes');
 const groupplayRouter = require('./routes/groupplay.routes');
 const reportsRouter = require('./routes/reports.routes');
 
+// Jobs
+const { startCancelExpiredBookingsJob } = require('./jobs/cancelExpiredBookings');
+
 const app = express();
 
 // Connect to MongoDB
 connectDB();
+
+// Start background jobs (only in non-test environment)
+if (process.env.NODE_ENV !== 'test') {
+  startCancelExpiredBookingsJob(1); // Check every 1 minute
+}
 
 // CORS Configuration
 const corsOptions = {

@@ -39,6 +39,7 @@ api.interceptors.response.use(
       // Check if this is a customer or admin request
       const isCustomerPath = window.location.pathname.startsWith('/booking') ||
         window.location.pathname.startsWith('/my-bookings') ||
+        window.location.pathname.startsWith('/payment') ||
         window.location.pathname.startsWith('/login') ||
         window.location.pathname.startsWith('/register') ||
         window.location.pathname === '/' ||
@@ -127,6 +128,27 @@ export const customerBookingsAPI = {
       params,
       headers: { Authorization: `Bearer ${token}` }
     });
+    return response.data;
+  },
+
+  getBookingById: async (id) => {
+    const token = localStorage.getItem('playerToken');
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.CUSTOMER_GET(id), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  uploadSlip: async (bookingId, formData) => {
+    const token = localStorage.getItem('playerToken');
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.UPLOAD_SLIP(bookingId), formData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  },
+
+  getPaymentInfo: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.PAYMENT_INFO);
     return response.data;
   },
 };
@@ -354,6 +376,11 @@ export const bookingsAPI = {
 
   assignCourt: async (id, courtId) => {
     const response = await api.patch(API_ENDPOINTS.BOOKINGS.ASSIGN_COURT(id), { courtId });
+    return response.data;
+  },
+
+  verifySlip: async (id, action, rejectReason = '') => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.VERIFY_SLIP(id), { action, rejectReason });
     return response.data;
   },
 };

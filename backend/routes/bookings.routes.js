@@ -4,8 +4,9 @@ const Booking = require('../models/booking.model');
 const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
 const Setting = require('../models/setting.model');
-const { protect, protectPlayer } = require('../middleware/auth');
+const { protect, admin, protectPlayer } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
+const { uploadSlip, deleteImage } = require('../middleware/upload');
 const {
   validateBookingRequest,
   validateBookingUpdate,
@@ -146,7 +147,9 @@ router.post('/customer', protectPlayer, async (req, res) => {
     // Generate booking code
     const bookingCode = await generateBookingCode(bookingDate);
 
-    // Create booking without court
+    // Create booking without court - status: payment_pending until slip uploaded
+    const paymentDeadline = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
     const booking = await Booking.create({
       bookingCode,
       customer: {
@@ -164,8 +167,9 @@ router.post('/customer', protectPlayer, async (req, res) => {
         deposit: 0,
         total: subtotal,
       },
-      bookingStatus: 'confirmed',
+      bookingStatus: 'payment_pending',
       paymentStatus: 'pending',
+      paymentDeadline,
       bookingSource: 'customer',
     });
 
@@ -230,6 +234,46 @@ router.get('/customer/my-bookings', protectPlayer, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'ไม่สามารถโหลดประวัติการจองได้',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/bookings/customer/:id
+ * @desc    Get single booking by ID for payment page
+ * @access  Private (Player)
+ */
+router.get('/customer/:id', protectPlayer, validateObjectId(), async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('court', 'courtNumber name')
+      .populate('timeSlot', 'startTime endTime peakHour');
+
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Verify ownership
+    if (!booking.player || !booking.player.equals(req.player._id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'ไม่มีสิทธิ์ดูการจองนี้',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Get booking by id error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถโหลดข้อมูลการจองได้',
       error: error.message,
     });
   }
@@ -907,6 +951,182 @@ router.patch('/:id/assign-court', protect, validateObjectId(), async (req, res) 
     res.status(500).json({
       success: false,
       message: 'ไม่สามารถกำหนดสนามได้',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/bookings/:id/upload-slip
+ * @desc    Upload payment slip for booking
+ * @access  Private (Player)
+ */
+router.post('/:id/upload-slip', protectPlayer, validateObjectId(), uploadSlip.single('slip'), async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Verify ownership
+    if (!booking.player || !booking.player.equals(req.player._id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'ไม่มีสิทธิ์อัพโหลดสลิปสำหรับการจองนี้',
+      });
+    }
+
+    // Check if slip file exists
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกไฟล์สลิป',
+      });
+    }
+
+    // Check booking status
+    if (booking.bookingStatus === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่สามารถอัพโหลดสลิปสำหรับการจองที่ถูกยกเลิกได้',
+      });
+    }
+
+    // Check payment status
+    if (booking.paymentStatus === 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'การจองนี้ชำระเงินเรียบร้อยแล้ว',
+      });
+    }
+
+    // Delete old slip if exists
+    if (booking.paymentSlip?.image) {
+      await deleteImage(booking.paymentSlip.image);
+    }
+
+    // Update booking with new slip - auto confirm when uploaded
+    const imagePath = `/uploads/slips/${req.file.filename}`;
+    booking.paymentSlip = {
+      image: imagePath,
+      uploadedAt: new Date(),
+      verifiedAt: new Date(), // Auto verify
+      verifiedBy: null,
+      status: 'verified', // Auto verified
+      rejectReason: '',
+    };
+
+    // Auto confirm booking when slip uploaded
+    booking.bookingStatus = 'confirmed';
+    booking.paymentStatus = 'paid';
+    booking.pricing.deposit = booking.pricing.total;
+
+    await booking.save();
+
+    await booking.populate('court', 'courtNumber name');
+    await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    res.status(200).json({
+      success: true,
+      message: 'อัพโหลดสลิปสำเร็จ',
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Upload slip error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถอัพโหลดสลิปได้',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PATCH /api/bookings/:id/verify-slip
+ * @desc    Verify or reject payment slip (Admin only)
+ * @access  Private (Admin)
+ */
+router.patch('/:id/verify-slip', protect, admin, validateObjectId(), async (req, res) => {
+  try {
+    const { action, rejectReason } = req.body;
+
+    if (!action || !['verify', 'reject'].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุ action (verify หรือ reject)',
+      });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Check if slip exists
+    if (!booking.paymentSlip?.image || booking.paymentSlip.status === 'none') {
+      return res.status(400).json({
+        success: false,
+        message: 'ยังไม่มีสลิปที่อัพโหลด',
+      });
+    }
+
+    // Check if slip is already verified
+    if (booking.paymentSlip.status === 'verified') {
+      return res.status(400).json({
+        success: false,
+        message: 'สลิปนี้ได้รับการยืนยันแล้ว',
+      });
+    }
+
+    if (action === 'verify') {
+      // Verify slip and mark as paid
+      booking.paymentSlip.status = 'verified';
+      booking.paymentSlip.verifiedAt = new Date();
+      booking.paymentSlip.verifiedBy = req.user._id;
+      booking.paymentSlip.rejectReason = '';
+
+      // Update payment status to paid
+      booking.paymentStatus = 'paid';
+      booking.pricing.deposit = booking.pricing.total;
+    } else {
+      // Reject slip
+      if (!rejectReason) {
+        return res.status(400).json({
+          success: false,
+          message: 'กรุณาระบุเหตุผลในการปฏิเสธ',
+        });
+      }
+
+      booking.paymentSlip.status = 'rejected';
+      booking.paymentSlip.verifiedAt = new Date();
+      booking.paymentSlip.verifiedBy = req.user._id;
+      booking.paymentSlip.rejectReason = rejectReason;
+    }
+
+    await booking.save();
+
+    await booking.populate('court', 'courtNumber name');
+    await booking.populate('timeSlot', 'startTime endTime peakHour');
+    await booking.populate('paymentSlip.verifiedBy', 'username');
+
+    res.status(200).json({
+      success: true,
+      message: action === 'verify' ? 'ยืนยันสลิปสำเร็จ' : 'ปฏิเสธสลิปสำเร็จ',
+      data: booking,
+    });
+  } catch (error) {
+    console.error('Verify slip error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถตรวจสอบสลิปได้',
       error: error.message,
     });
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, DollarSign } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, ChevronLeft, ChevronRight, DollarSign, FileImage } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { courtsAPI, bookingsAPI } from '../../lib/api';
 
@@ -257,11 +257,23 @@ const BookingsTable = ({
 
                   {/* Payment Status */}
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${paymentBadge.bg} ${paymentBadge.text}`}
-                    >
-                      {paymentBadge.label}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${paymentBadge.bg} ${paymentBadge.text}`}
+                      >
+                        {paymentBadge.label}
+                      </span>
+                      {/* Slip pending indicator */}
+                      {booking.paymentSlip?.status === 'pending_verification' && (
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700"
+                          title="มีสลิปรอตรวจสอบ"
+                        >
+                          <FileImage size={12} />
+                          รอตรวจ
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Total */}

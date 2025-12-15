@@ -13,6 +13,7 @@ export const ROUTES = {
     LOGIN: '/login',
     REGISTER: '/register',
     MY_BOOKINGS: '/my-bookings',
+    PAYMENT: (bookingId) => `/payment/${bookingId}`,
   },
 
   // Admin Authentication (ย้ายจาก /login)

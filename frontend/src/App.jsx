@@ -21,6 +21,7 @@ import CustomerBookingPage from './pages/customer/CustomerBookingPage';
 import CustomerLoginPage from './pages/customer/CustomerLoginPage';
 import CustomerRegisterPage from './pages/customer/CustomerRegisterPage';
 import MyBookingsPage from './pages/customer/MyBookingsPage';
+import PaymentPage from './pages/customer/PaymentPage';
 
 // Customer Protected Route
 import CustomerProtectedRoute from './components/customer/CustomerProtectedRoute';
@@ -109,6 +110,7 @@ function App() {
           {/* Customer Protected Routes */}
           <Route element={<CustomerProtectedRoute />}>
             <Route path={ROUTES.CUSTOMER.MY_BOOKINGS} element={<MyBookingsPage />} />
+            <Route path="/payment/:bookingId" element={<PaymentPage />} />
           </Route>
         </Route>
 

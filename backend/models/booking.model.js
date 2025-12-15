@@ -92,16 +92,51 @@ const bookingSchema = new mongoose.Schema(
     bookingStatus: {
       type: String,
       enum: {
-        values: ['confirmed', 'checked-in', 'completed', 'cancelled'],
+        values: ['payment_pending', 'confirmed', 'checked-in', 'completed', 'cancelled'],
         message: '{VALUE} is not a valid booking status',
       },
       default: 'confirmed',
+    },
+    paymentDeadline: {
+      type: Date,
+      default: null,
     },
     paymentMethod: {
       type: String,
       enum: {
         values: ['cash', 'transfer', 'qr', 'card'],
         message: '{VALUE} is not a valid payment method',
+      },
+    },
+    paymentSlip: {
+      image: {
+        type: String,
+        default: '',
+      },
+      uploadedAt: {
+        type: Date,
+        default: null,
+      },
+      verifiedAt: {
+        type: Date,
+        default: null,
+      },
+      verifiedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+      status: {
+        type: String,
+        enum: {
+          values: ['none', 'pending_verification', 'verified', 'rejected'],
+          message: '{VALUE} is not a valid slip status',
+        },
+        default: 'none',
+      },
+      rejectReason: {
+        type: String,
+        default: '',
       },
     },
     notes: {

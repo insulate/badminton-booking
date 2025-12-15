@@ -365,4 +365,36 @@ router.delete('/floor-plan', protect, admin, async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/settings/payment-info
+ * @desc    Get payment info for customers (PromptPay, Bank Account)
+ * @access  Public
+ */
+router.get('/payment-info', async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    res.json({
+      success: true,
+      data: {
+        promptPayNumber: settings.payment?.promptPayNumber || '',
+        bankAccount: {
+          bankName: settings.payment?.bankAccount?.bankName || '',
+          accountNumber: settings.payment?.bankAccount?.accountNumber || '',
+          accountName: settings.payment?.bankAccount?.accountName || '',
+        },
+        acceptPromptPay: settings.payment?.acceptPromptPay || false,
+        acceptTransfer: settings.payment?.acceptTransfer || false,
+      },
+    });
+  } catch (error) {
+    console.error('Get payment info error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลการชำระเงิน',
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

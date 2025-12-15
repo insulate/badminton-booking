@@ -6,6 +6,7 @@ const crypto = require('crypto');
 // Ensure uploads directories exist
 const productUploadDir = path.join(__dirname, '../uploads/products');
 const venueUploadDir = path.join(__dirname, '../uploads/venue');
+const slipUploadDir = path.join(__dirname, '../uploads/slips');
 
 if (!fs.existsSync(productUploadDir)) {
   fs.mkdirSync(productUploadDir, { recursive: true });
@@ -13,6 +14,10 @@ if (!fs.existsSync(productUploadDir)) {
 
 if (!fs.existsSync(venueUploadDir)) {
   fs.mkdirSync(venueUploadDir, { recursive: true });
+}
+
+if (!fs.existsSync(slipUploadDir)) {
+  fs.mkdirSync(slipUploadDir, { recursive: true });
 }
 
 // Legacy alias for backward compatibility
@@ -74,6 +79,27 @@ const uploadVenue = multer({
   fileFilter: fileFilter,
 });
 
+// Configure storage for payment slips
+const slipStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, slipUploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    const ext = path.extname(file.originalname);
+    cb(null, 'slip-' + uniqueSuffix + ext);
+  },
+});
+
+// Create multer instance for payment slips
+const uploadSlip = multer({
+  storage: slipStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max file size
+  },
+  fileFilter: fileFilter,
+});
+
 // Helper function to delete old image file
 const deleteImage = async (imagePath) => {
   if (!imagePath) {
@@ -108,4 +134,4 @@ const deleteImage = async (imagePath) => {
   }
 };
 
-module.exports = { upload, uploadVenue, deleteImage };
+module.exports = { upload, uploadVenue, uploadSlip, deleteImage };

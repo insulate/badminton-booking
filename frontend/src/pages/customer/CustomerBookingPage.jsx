@@ -5,7 +5,6 @@ import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
 import usePlayerAuthStore from '../../store/playerAuthStore';
 import BookingSlotModal from '../../components/customer/BookingSlotModal';
-import BookingSuccessModal from '../../components/customer/BookingSuccessModal';
 import { ROUTES } from '../../constants';
 
 export default function CustomerBookingPage() {
@@ -22,8 +21,6 @@ export default function CustomerBookingPage() {
   const [loading, setLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showSlotModal, setShowSlotModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [createdBooking, setCreatedBooking] = useState(null);
   
   // Date strip state
   const [dateList, setDateList] = useState([]);
@@ -130,12 +127,11 @@ export default function CustomerBookingPage() {
     setShowSlotModal(true);
   };
 
-  // Handle booking success
+  // Handle booking success - redirect to payment page
   const handleBookingSuccess = (booking) => {
-    setCreatedBooking(booking);
     setShowSlotModal(false);
-    setShowSuccessModal(true);
-    loadAvailability(); // Refresh availability
+    // Redirect to payment page
+    navigate(ROUTES.CUSTOMER.PAYMENT(booking._id));
   };
 
   return (
@@ -388,13 +384,6 @@ export default function CustomerBookingPage() {
         player={player}
         availability={availability?.availability}
         onSuccess={handleBookingSuccess}
-      />
-
-      {/* Success Modal */}
-      <BookingSuccessModal
-        isOpen={showSuccessModal}
-        booking={createdBooking}
-        onClose={() => setShowSuccessModal(false)}
       />
     </div>
   );
