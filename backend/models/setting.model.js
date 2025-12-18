@@ -97,6 +97,12 @@ const settingSchema = new mongoose.Schema(
         min: 0,
         max: 100,
       },
+      minimumAdvanceHours: {
+        type: Number,
+        default: 0, // 0 = ไม่จำกัด
+        min: 0,
+        max: 168, // สูงสุด 7 วัน
+      },
     },
 
     // วิธีการชำระเงิน

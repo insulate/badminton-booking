@@ -12,6 +12,7 @@ const BookingSettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     advanceBookingDays: 7,
+    minimumAdvanceHours: 0,
     minBookingHours: 1,
     maxBookingHours: 3,
     cancellationHours: 24,
@@ -95,23 +96,45 @@ const BookingSettingsPage = () => {
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-6">
             {/* Advance Booking */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                จองล่วงหน้าได้กี่วัน <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="advanceBookingDays"
-                value={formData.advanceBookingDays}
-                onChange={handleChange}
-                min="1"
-                max="30"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <p className="text-gray-500 text-sm mt-1">
-                ลูกค้าสามารถจองล่วงหน้าได้ไม่เกิน {formData.advanceBookingDays} วัน
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  จองล่วงหน้าได้กี่วัน <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="advanceBookingDays"
+                  value={formData.advanceBookingDays}
+                  onChange={handleChange}
+                  min="1"
+                  max="30"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <p className="text-gray-500 text-sm mt-1">
+                  ลูกค้าสามารถจองล่วงหน้าได้ไม่เกิน {formData.advanceBookingDays} วัน
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ต้องจองล่วงหน้าอย่างน้อยกี่ชั่วโมง
+                </label>
+                <input
+                  type="number"
+                  name="minimumAdvanceHours"
+                  value={formData.minimumAdvanceHours}
+                  onChange={handleChange}
+                  min="0"
+                  max="168"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <p className="text-gray-500 text-sm mt-1">
+                  {formData.minimumAdvanceHours > 0
+                    ? `ลูกค้าต้องจองล่วงหน้าอย่างน้อย ${formData.minimumAdvanceHours} ชั่วโมง`
+                    : 'ไม่จำกัด (0 = จองได้ทันที)'}
+                </p>
+              </div>
             </div>
 
             {/* Min/Max Booking Hours */}

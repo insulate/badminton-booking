@@ -112,6 +112,24 @@ router.post('/customer', protectPlayer, async (req, res) => {
       });
     }
 
+    // เช็ค minimum advance booking hours
+    const minimumAdvanceHours = settings?.booking?.minimumAdvanceHours || 0;
+    if (minimumAdvanceHours > 0) {
+      const now = new Date();
+      const bookingDateTime = new Date(date);
+      const [hours, minutes] = timeSlotDoc.startTime.split(':');
+      bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const hoursDiff = (bookingDateTime - now) / (1000 * 60 * 60);
+
+      if (hoursDiff < minimumAdvanceHours) {
+        return res.status(400).json({
+          success: false,
+          message: `ต้องจองล่วงหน้าอย่างน้อย ${minimumAdvanceHours} ชั่วโมง`,
+        });
+      }
+    }
+
     // เช็ค dayType mismatch
     const dayOfWeek = bookingDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;

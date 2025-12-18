@@ -139,6 +139,23 @@ const validateBookingRequest = async (req, res, next) => {
         });
       }
 
+      // Check minimum advance booking hours
+      if (settings.booking.minimumAdvanceHours > 0 && timeSlotDoc) {
+        const now = new Date();
+        const bookingDateTime = new Date(date);
+        const [hours, minutes] = timeSlotDoc.startTime.split(':');
+        bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+        const hoursDiff = (bookingDateTime - now) / (1000 * 60 * 60);
+
+        if (hoursDiff < settings.booking.minimumAdvanceHours) {
+          return res.status(400).json({
+            success: false,
+            message: `ต้องจองล่วงหน้าอย่างน้อย ${settings.booking.minimumAdvanceHours} ชั่วโมง`,
+          });
+        }
+      }
+
       // Check duration limits
       if (duration < settings.booking.minBookingHours) {
         return res.status(400).json({
