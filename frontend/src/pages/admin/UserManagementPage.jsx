@@ -47,9 +47,9 @@ export default function Settings() {
     const filtered = users.filter((user) => {
       const searchLower = searchTerm.toLowerCase();
       return (
-        user.username.toLowerCase().includes(searchLower) ||
-        user.name.toLowerCase().includes(searchLower) ||
-        user.role.toLowerCase().includes(searchLower)
+        (user.username || '').toLowerCase().includes(searchLower) ||
+        (user.name || '').toLowerCase().includes(searchLower) ||
+        (user.role || '').toLowerCase().includes(searchLower)
       );
     });
     setFilteredUsers(filtered);
