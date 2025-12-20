@@ -214,9 +214,9 @@ describe('Players API Tests', () => {
 
   describe('GET /api/players', () => {
     beforeEach(async () => {
-      // Create test players
+      // Create test players (1 inactive, 3 active for filtering tests)
       await Player.create([
-        { name: 'Alice', phone: '0811111111', level: '5', status: 'active' },
+        { name: 'Alice', phone: '0811111111', level: '5', status: 'inactive' },
         { name: 'Bob', phone: '0822222222', level: '3', status: 'active' },
         { name: 'Charlie', phone: '0833333333', level: '5', status: 'active' },
         { name: 'David', phone: '0844444444', level: '7', status: 'active' },
@@ -287,7 +287,7 @@ describe('Players API Tests', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.count).toBe(1);
-      expect(response.body.data[0].name).toBe('Alice');
+      expect(response.body.data[0].name).toBe('Charlie');
     });
   });
 
@@ -508,9 +508,10 @@ describe('Players API Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.message).toContain('ลบผู้เล่นสำเร็จ');
 
-      // Verify player is deleted
-      const deletedPlayer = await Player.findById(testPlayer._id);
-      expect(deletedPlayer).toBeNull();
+      // Verify player is soft-deleted
+      const deletedPlayer = await Player.findById(testPlayer._id).select('+isDeleted +deletedAt');
+      expect(deletedPlayer.isDeleted).toBe(true);
+      expect(deletedPlayer.deletedAt).toBeTruthy();
     });
 
     it('should return 404 when deleting non-existent player', async () => {

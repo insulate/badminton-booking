@@ -103,6 +103,24 @@ const settingSchema = new mongoose.Schema(
         min: 0,
         max: 168, // สูงสุด 7 วัน
       },
+      // วันปิดการจอง (เช่น วันจัดแข่งขัน)
+      blockedDates: [
+        {
+          date: {
+            type: Date,
+            required: true,
+          },
+          reason: {
+            type: String,
+            default: '',
+            maxlength: 200,
+          },
+          createdAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
     },
 
     // วิธีการชำระเงิน

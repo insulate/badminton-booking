@@ -19,6 +19,12 @@ const generateToken = (userId) => {
   });
 };
 
+// Format date to YYYY-MM-DD using local timezone (avoid UTC conversion issues)
+const formatDateToString = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 describe('Bookings API Tests', () => {
   let adminUser;
   let regularUser;
@@ -207,7 +213,7 @@ describe('Bookings API Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('not available');
+      expect(response.body.message).toContain('ไม่สามารถจองสนาม');
     });
   });
 
@@ -710,7 +716,7 @@ describe('Bookings API Tests', () => {
         .post('/api/bookings/customer')
         .set('Authorization', `Bearer ${playerToken}`)
         .send({
-          date: yesterday.toISOString().split('T')[0],
+          date: formatDateToString(yesterday),
           timeSlot: weekdayTimeSlot._id.toString(),
           duration: 1,
         });
@@ -728,7 +734,7 @@ describe('Bookings API Tests', () => {
         .post('/api/bookings/customer')
         .set('Authorization', `Bearer ${playerToken}`)
         .send({
-          date: farFuture.toISOString().split('T')[0],
+          date: formatDateToString(farFuture),
           timeSlot: weekdayTimeSlot._id.toString(),
           duration: 1,
         });
@@ -748,7 +754,7 @@ describe('Bookings API Tests', () => {
         .post('/api/bookings/customer')
         .set('Authorization', `Bearer ${playerToken}`)
         .send({
-          date: nextSaturday.toISOString().split('T')[0],
+          date: formatDateToString(nextSaturday),
           timeSlot: weekdayTimeSlot._id.toString(), // weekday slot กับ weekend date
           duration: 1,
         });

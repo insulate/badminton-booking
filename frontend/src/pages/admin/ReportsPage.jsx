@@ -26,14 +26,12 @@ import {
   Award,
 } from 'lucide-react';
 import { PageContainer, PageHeader } from '../../components/common';
+import { formatDateToString, getTodayString } from '../../utils/dateUtils';
 
 const ReportsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('month'); // 'day', 'month', 'year'
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  });
+  const [selectedDate, setSelectedDate] = useState(() => getTodayString());
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
@@ -65,8 +63,8 @@ const ReportsPage = () => {
         const [year, month] = selectedMonth.split('-');
         const firstDay = new Date(year, month - 1, 1);
         const lastDay = new Date(year, month, 0);
-        startDate = firstDay.toISOString().split('T')[0];
-        endDate = lastDay.toISOString().split('T')[0];
+        startDate = formatDateToString(firstDay);
+        endDate = formatDateToString(lastDay);
       } else {
         startDate = `${selectedYear}-01-01`;
         endDate = `${selectedYear}-12-31`;

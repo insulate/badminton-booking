@@ -18,6 +18,12 @@ const generateToken = (userId) => {
   });
 };
 
+// Format date to YYYY-MM-DD using local timezone (avoid UTC conversion issues)
+const formatDateToString = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 describe('Sales/POS API Tests', () => {
   let adminUser;
   let regularUser;
@@ -366,8 +372,9 @@ describe('Sales/POS API Tests', () => {
 
   describe('GET /api/sales', () => {
     beforeEach(async () => {
-      // Create test sales
+      // Create test sales with explicit times to avoid timezone issues
       const today = new Date();
+      today.setHours(12, 0, 0, 0); // Set to noon to avoid timezone edge cases
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
@@ -428,7 +435,7 @@ describe('Sales/POS API Tests', () => {
 
     it('should filter sales by date range', async () => {
       const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
+      const todayStr = formatDateToString(today);
 
       const response = await request(app)
         .get(`/api/sales?startDate=${todayStr}&endDate=${todayStr}`)
@@ -534,7 +541,7 @@ describe('Sales/POS API Tests', () => {
 
     it('should get daily sales report', async () => {
       const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
+      const todayStr = formatDateToString(today);
 
       const response = await request(app)
         .get(`/api/sales/daily?date=${todayStr}`)
@@ -558,7 +565,7 @@ describe('Sales/POS API Tests', () => {
     });
 
     it('should deny access without token', async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDateToString(new Date());
       const response = await request(app).get(`/api/sales/daily?date=${today}`);
 
       expect(response.status).toBe(401);
@@ -616,7 +623,7 @@ describe('Sales/POS API Tests', () => {
       expect(listResponse.body.data.length).toBeGreaterThan(0);
 
       // 5. Get daily report
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDateToString(new Date());
       const reportResponse = await request(app)
         .get(`/api/sales/daily?date=${today}`)
         .set('Authorization', `Bearer ${adminToken}`);

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { X, Calendar, Clock, User, Phone, Flame } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
+import { formatDateToString } from '../../utils/dateUtils';
 
 export default function BookingSlotModal({
   isOpen,
@@ -69,7 +70,7 @@ export default function BookingSlotModal({
     try {
       setLoading(true);
       const response = await customerBookingsAPI.create({
-        date: selectedDate.toISOString().split('T')[0],
+        date: formatDateToString(selectedDate),
         timeSlot: slot.timeSlotId,
         duration: selectedDuration,
       });

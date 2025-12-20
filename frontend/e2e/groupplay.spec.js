@@ -31,8 +31,8 @@ test.describe('Group Play Feature Test', () => {
     await expect(page.getByRole('button', { name: 'สร้างกฎก๊วนใหม่' }).first()).toBeVisible();
     await expect(page.locator('text=รีเฟรช')).toBeVisible();
 
-    // Check for rule selector section
-    await expect(page.locator('text=เลือกกฎก๊วนสนาม')).toBeVisible();
+    // Check for rule section header (always visible)
+    await expect(page.getByRole('heading', { name: 'กฎก๊วนสนาม' })).toBeVisible();
 
     // Note: Action buttons (Check-in, เริ่มเกม, etc.) only appear when a rule is selected
   });
@@ -43,10 +43,11 @@ test.describe('Group Play Feature Test', () => {
     // Click create rule button
     await page.getByRole('button', { name: 'สร้างกฎก๊วนใหม่' }).first().click();
 
-    // Check if modal is visible
-    await expect(page.locator('text=สร้าง Session ใหม่').first()).toBeVisible();
+    // Check if modal is visible (heading matches button text)
+    await expect(page.locator('h2:has-text("สร้างกฎก๊วนใหม่")')).toBeVisible();
 
     // Check form fields - ชื่อ Session input
+    await expect(page.locator('text=ชื่อ Session')).toBeVisible();
     await expect(page.locator('input[type="text"]').first()).toBeVisible();
 
     // Check for court checkboxes section

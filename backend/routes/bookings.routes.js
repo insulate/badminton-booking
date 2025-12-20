@@ -22,6 +22,7 @@ const {
   getCourtSchedule,
   getAvailabilityByTimeSlot,
 } = require('../utils/availabilityChecker');
+const { isDateBlocked } = require('../utils/blockedDateChecker');
 
 /**
  * @route   GET /api/bookings/public/availability
@@ -75,6 +76,16 @@ router.post('/customer', protectPlayer, async (req, res) => {
 
     const bookingDate = new Date(date);
     bookingDate.setHours(0, 0, 0, 0);
+
+    // === Check Blocked Date ===
+    const blockCheck = await isDateBlocked(bookingDate);
+    if (blockCheck.isBlocked) {
+      return res.status(400).json({
+        success: false,
+        message: blockCheck.reason || 'วันนี้ไม่เปิดให้จอง',
+        isBlocked: true,
+      });
+    }
 
     // === Date Validation ===
     const today = new Date();
@@ -565,6 +576,16 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
   try {
     const { customer, court, date, timeSlot, duration, paymentMethod, paymentStatus, notes } = req.body;
     const { court: courtDoc, timeSlot: timeSlotDoc, bookingDate } = req.validatedData;
+
+    // Check if date is blocked
+    const blockCheck = await isDateBlocked(bookingDate);
+    if (blockCheck.isBlocked) {
+      return res.status(400).json({
+        success: false,
+        message: blockCheck.reason || 'วันนี้ไม่เปิดให้จอง',
+        isBlocked: true,
+      });
+    }
 
     // Check availability
     const availability = await checkAvailability({

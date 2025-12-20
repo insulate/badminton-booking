@@ -236,16 +236,19 @@ test.describe('Settings System E2E Tests', () => {
       await page.waitForSelector('input[name="acceptPromptPay"]');
 
       const promptPayCheckbox = page.locator('input[name="acceptPromptPay"]');
+      const promptPayNumberField = page.locator('input[name="promptPayNumber"]');
 
       // Uncheck PromptPay if checked
       if (await promptPayCheckbox.isChecked()) {
         await promptPayCheckbox.click();
-        await expect(page.locator('input[name="promptPayNumber"]')).not.toBeVisible();
+        await page.waitForTimeout(300);
+        await expect(promptPayNumberField).not.toBeVisible();
       }
 
       // Check PromptPay
       await promptPayCheckbox.click();
-      await expect(page.locator('input[name="promptPayNumber"]')).toBeVisible();
+      await page.waitForTimeout(300);
+      await expect(promptPayNumberField).toBeVisible();
     });
 
     test('should show/hide bank account fields', async ({ page }) => {

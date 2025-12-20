@@ -12,6 +12,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { salesAPI } from '../../lib/api';
 import { PageContainer, PageHeader } from '../../components/common';
+import { getTodayString } from '../../utils/dateUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -20,8 +21,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
  * หน้าประวัติการขาย (Sales History)
  */
 const SalesHistoryPage = () => {
-  // Get today's date
-  const getToday = () => new Date().toISOString().split('T')[0];
+  // Get today's date using local timezone
+  const getToday = () => getTodayString();
 
   // State
   const [sales, setSales] = useState([]);

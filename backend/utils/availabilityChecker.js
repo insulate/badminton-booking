@@ -2,6 +2,7 @@ const Booking = require('../models/booking.model');
 const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
 const GroupPlay = require('../models/groupplay.model');
+const { isDateBlocked } = require('./blockedDateChecker');
 
 /**
  * Check if a court is available for booking
@@ -367,6 +368,23 @@ const getAvailabilityByTimeSlot = async (date) => {
     const endOfDay = new Date(bookingDate);
     endOfDay.setHours(23, 59, 59, 999);
 
+    // Check if date is blocked
+    const blockCheck = await isDateBlocked(bookingDate);
+    if (blockCheck.isBlocked) {
+      // Return blocked status
+      const dayOfWeek = bookingDate.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const dayType = isWeekend ? 'weekend' : 'weekday';
+
+      return {
+        date: bookingDate,
+        dayType,
+        isBlocked: true,
+        blockedReason: blockCheck.reason,
+        availability: [],
+      };
+    }
+
     // Determine day type
     const dayOfWeek = bookingDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -464,6 +482,8 @@ const getAvailabilityByTimeSlot = async (date) => {
     return {
       date: bookingDate,
       dayType,
+      isBlocked: false,
+      blockedReason: null,
       availability,
     };
   } catch (error) {

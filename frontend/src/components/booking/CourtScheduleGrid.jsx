@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, CalendarX } from 'lucide-react';
 
 /**
  * CourtScheduleGrid Component
  * ตารางแสดงสนาม x ช่วงเวลา พร้อมสถานะว่าง/จองแล้ว
  */
-const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
+const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, blockedReason = '' }) => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   if (loading) {
     return (
@@ -58,6 +58,11 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   // Get slot status color
   const getSlotColor = (slot) => {
+    // Date is blocked - show all available slots as blocked
+    if (isBlocked && slot.available) {
+      return 'bg-gray-200 border-gray-400 cursor-not-allowed opacity-60';
+    }
+
     // Blocked by Group Play
     if (slot.blockedByGroupPlay) {
       return 'bg-purple-100 border-purple-400 cursor-not-allowed';
@@ -84,6 +89,12 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   // Handle slot click
   const handleSlotClick = (court, slot) => {
+    // Date is blocked - do nothing for available slots
+    if (isBlocked && slot.available) {
+      onSlotClick({ court, timeSlot: slot }); // Let parent handle the error message
+      return;
+    }
+
     // Blocked by Group Play - do nothing
     if (slot.blockedByGroupPlay) {
       return;
@@ -137,6 +148,23 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
 
   return (
     <div className="bg-white rounded-lg shadow">
+      {/* Blocked Date Warning Banner */}
+      {isBlocked && (
+        <div className="bg-red-50 border-b border-red-200 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 rounded-full">
+              <CalendarX className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-red-800">วันนี้ปิดการจอง</p>
+              <p className="text-sm text-red-600">
+                {blockedReason || 'ไม่สามารถจองสนามในวันนี้ได้'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="p-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-800">ตารางสนาม</h3>
         <div className="mt-3 flex flex-wrap gap-3">
@@ -159,6 +187,10 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-purple-100 border-2 border-purple-400 rounded"></div>
             <span className="text-sm text-gray-600">ก๊วนสนาม (Group Play)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-gray-200 border-2 border-gray-400 rounded opacity-60"></div>
+            <span className="text-sm text-gray-600">ปิดการจอง</span>
           </div>
         </div>
       </div>
@@ -208,6 +240,8 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
                         title={
                           slot.blockedByGroupPlay
                             ? 'ถูกบล็อกโดยก๊วนสนาม (Group Play)'
+                            : isBlocked && slot.available
+                            ? blockedReason || 'วันนี้ปิดการจอง'
                             : slot.available
                             ? 'คลิกเพื่อจอง'
                             : `จองโดย: ${slot.booking?.customerName || 'N/A'}`
@@ -216,6 +250,10 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading }) => {
                         {slot.blockedByGroupPlay ? (
                           <div className="text-xs font-semibold text-purple-700">
                             ก๊วนสนาม
+                          </div>
+                        ) : isBlocked && slot.available ? (
+                          <div className="text-xs font-semibold text-gray-500">
+                            ปิดการจอง
                           </div>
                         ) : slot.available ? (
                           <div className={`text-xs font-semibold ${

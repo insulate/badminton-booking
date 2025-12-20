@@ -5,20 +5,21 @@ import { useState } from 'react';
  * ปฏิทินสำหรับเลือกวันที่จอง
  */
 const BookingCalendar = ({ selectedDate, onDateChange }) => {
-  // Format date for input type="date" (YYYY-MM-DD)
+  // Format date for input type="date" (YYYY-MM-DD) using local timezone
   const formatDateForInput = (date) => {
     if (!date) return '';
     const d = new Date(date);
-    return d.toISOString().split('T')[0];
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  // Get today's date for min attribute
-  const today = new Date().toISOString().split('T')[0];
+  // Get today's date for min attribute (local timezone)
+  const todayDate = new Date();
+  const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
 
   // Get max date (30 days from today)
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 30);
-  const max = maxDate.toISOString().split('T')[0];
+  const max = `${maxDate.getFullYear()}-${String(maxDate.getMonth() + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
 
   // Handle date change
   const handleDateChange = (e) => {

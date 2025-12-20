@@ -397,4 +397,162 @@ router.get('/payment-info', async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/settings/blocked-dates
+ * @desc    Get all blocked dates
+ * @access  Public (for customers to see which dates are blocked)
+ */
+router.get('/blocked-dates', async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+    const blockedDates = settings.booking?.blockedDates || [];
+
+    // Sort by date ascending
+    const sortedDates = [...blockedDates].sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+
+    res.json({
+      success: true,
+      data: sortedDates.map((entry) => ({
+        date: entry.date,
+        reason: entry.reason || '',
+        createdAt: entry.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error('Get blocked dates error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลวันปิดการจอง',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/settings/blocked-dates
+ * @desc    Add a new blocked date
+ * @access  Private (Admin)
+ */
+router.post('/blocked-dates', protect, admin, async (req, res) => {
+  try {
+    const { date, reason } = req.body;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุวันที่',
+      });
+    }
+
+    // Validate date format
+    const blockedDate = new Date(date);
+    if (isNaN(blockedDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'รูปแบบวันที่ไม่ถูกต้อง',
+      });
+    }
+
+    // Normalize date to start of day
+    blockedDate.setHours(0, 0, 0, 0);
+
+    const settings = await Setting.getSettings();
+
+    // Check if date already exists
+    const existingDate = settings.booking.blockedDates.find((entry) => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() === blockedDate.getTime();
+    });
+
+    if (existingDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'วันนี้ถูกปิดการจองไปแล้ว',
+      });
+    }
+
+    // Add new blocked date
+    settings.booking.blockedDates.push({
+      date: blockedDate,
+      reason: reason || '',
+      createdAt: new Date(),
+    });
+
+    await settings.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'เพิ่มวันปิดการจองสำเร็จ',
+      data: {
+        date: blockedDate,
+        reason: reason || '',
+      },
+    });
+  } catch (error) {
+    console.error('Add blocked date error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการเพิ่มวันปิดการจอง',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/settings/blocked-dates/:date
+ * @desc    Remove a blocked date
+ * @access  Private (Admin)
+ */
+router.delete('/blocked-dates/:date', protect, admin, async (req, res) => {
+  try {
+    const { date } = req.params;
+
+    // Validate date format
+    const targetDate = new Date(date);
+    if (isNaN(targetDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'รูปแบบวันที่ไม่ถูกต้อง',
+      });
+    }
+
+    // Normalize date to start of day
+    targetDate.setHours(0, 0, 0, 0);
+
+    const settings = await Setting.getSettings();
+
+    // Find and remove the blocked date
+    const initialLength = settings.booking.blockedDates.length;
+    settings.booking.blockedDates = settings.booking.blockedDates.filter((entry) => {
+      const entryDate = new Date(entry.date);
+      entryDate.setHours(0, 0, 0, 0);
+      return entryDate.getTime() !== targetDate.getTime();
+    });
+
+    if (settings.booking.blockedDates.length === initialLength) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบวันปิดการจองที่ระบุ',
+      });
+    }
+
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'ลบวันปิดการจองสำเร็จ',
+    });
+  } catch (error) {
+    console.error('Delete blocked date error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการลบวันปิดการจอง',
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;

@@ -11,17 +11,15 @@ test.describe('Sales History Page', () => {
   });
 
   test('should display sales history page with correct theme', async ({ page }) => {
-    // Navigate to sales history
-    await page.click('text=ขายสินค้า');
-    await page.click('text=ประวัติการขาย');
-    await page.waitForURL('/admin/sales');
+    // Navigate directly to sales history page
+    await page.goto('/admin/sales');
 
     // Check gradient header exists
     const header = page.locator('h1:has-text("ประวัติการขาย")');
     await expect(header).toBeVisible();
 
-    // Check if gradient background is applied
-    const mainContainer = page.locator('div.bg-gradient-to-br');
+    // Check if gradient background is applied (multiple elements exist, just verify at least one)
+    const mainContainer = page.locator('div.bg-gradient-to-br').first();
     await expect(mainContainer).toBeVisible();
   });
 
@@ -99,12 +97,10 @@ test.describe('Sales History Page', () => {
   test('should search by sale code', async ({ page }) => {
     await page.goto('/admin/sales');
 
-    // Type in search box
+    // Type in search box and press Enter to search
     const searchInput = page.locator('input[placeholder="S-00001"]');
     await searchInput.fill('S-00001');
-
-    // Click search button
-    await page.locator('button:has(svg)').filter({ has: page.locator('svg') }).first().click();
+    await searchInput.press('Enter');
 
     // Wait for results
     await page.waitForTimeout(500);

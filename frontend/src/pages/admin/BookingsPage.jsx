@@ -8,17 +8,15 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { toast } from 'react-hot-toast';
 import { PageContainer, PageHeader } from '../../components/common';
 import { Calendar, RefreshCw } from 'lucide-react';
+import { getTodayString } from '../../utils/dateUtils';
 
 /**
  * BookingsPage
  * หน้าจัดการรายการจอง (Booking Management)
  */
 const BookingsPage = () => {
-  // Get today's date in YYYY-MM-DD format
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
+  // Get today's date in YYYY-MM-DD format using local timezone
+  const getTodayDate = () => getTodayString();
 
   // State
   const [bookings, setBookings] = useState([]);

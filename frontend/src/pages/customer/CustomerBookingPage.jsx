@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Flame, Calendar, Clock, Info, CheckCircle, Ticket } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flame, Calendar, Clock, Info, CheckCircle, Ticket, CalendarX } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { customerBookingsAPI } from '../../lib/api';
+import { customerBookingsAPI, settingsAPI } from '../../lib/api';
 import usePlayerAuthStore from '../../store/playerAuthStore';
 import BookingSlotModal from '../../components/customer/BookingSlotModal';
 import { ROUTES } from '../../constants';
@@ -24,21 +24,46 @@ export default function CustomerBookingPage() {
   
   // Date strip state
   const [dateList, setDateList] = useState([]);
+  const [blockedDates, setBlockedDates] = useState([]);
   const dateScrollRef = useRef(null);
 
-  // Initialize dates (next 14 days)
+  // Initialize dates (next 14 days) and fetch blocked dates
   useEffect(() => {
     const dates = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Ensure today starts at midnight for comparison
-    
+
     for (let i = 0; i < 14; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       dates.push(d);
     }
     setDateList(dates);
+
+    // Fetch blocked dates
+    const fetchBlockedDates = async () => {
+      try {
+        const response = await settingsAPI.getBlockedDates();
+        if (response.success) {
+          setBlockedDates(response.data.map(d => {
+            const date = new Date(d.date);
+            date.setHours(0, 0, 0, 0);
+            return date.getTime();
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching blocked dates:', error);
+      }
+    };
+    fetchBlockedDates();
   }, []);
+
+  // Check if a date is blocked
+  const isDateBlocked = (date) => {
+    const dateTime = new Date(date);
+    dateTime.setHours(0, 0, 0, 0);
+    return blockedDates.includes(dateTime.getTime());
+  };
 
   // Load availability when date changes
   useEffect(() => {
@@ -48,7 +73,8 @@ export default function CustomerBookingPage() {
   const loadAvailability = async () => {
     try {
       setLoading(true);
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Use local date format to avoid timezone issues
+      const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
       const response = await customerBookingsAPI.getAvailability(dateStr);
       if (response.success) {
         setAvailability(response.data);
@@ -187,30 +213,37 @@ export default function CustomerBookingPage() {
               {dateList.map((date, index) => {
                 const isSelected = isSameDay(date, selectedDate);
                 const isToday = isSameDay(date, new Date());
-                
+                const blocked = isDateBlocked(date);
+
                 return (
                   <button
                     key={index}
                     onClick={() => handleDateSelect(date)}
                     className={`flex-shrink-0 flex flex-col items-center justify-center min-w-[3.8rem] h-[5rem] rounded-2xl transition-all duration-300 border relative overflow-hidden ${
-                      isSelected 
-                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-transparent shadow-lg shadow-blue-500/30 scale-105 -translate-y-1' 
+                      blocked
+                        ? 'bg-red-50 text-red-400 border-red-200 opacity-80'
+                        : isSelected
+                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-transparent shadow-lg shadow-blue-500/30 scale-105 -translate-y-1'
                         : 'bg-white text-slate-500 border-indigo-50 hover:border-blue-300 hover:bg-blue-50 hover:-translate-y-0.5 hover:shadow-md'
                     }`}
                   >
                     {/* Background blob for unselected */}
-                    {!isSelected && (
+                    {!isSelected && !blocked && (
                       <div className="absolute -top-4 -right-4 w-8 h-8 bg-indigo-50 rounded-full blur-xl"></div>
                     )}
 
                     <span className="text-[0.7rem] font-semibold uppercase tracking-wider mb-0.5 opacity-90">{getDayName(date)}</span>
-                    <span className={`text-2xl font-black ${isSelected ? 'text-white' : 'text-slate-700'}`}>
+                    <span className={`text-2xl font-black ${blocked ? 'text-red-400' : isSelected ? 'text-white' : 'text-slate-700'}`}>
                       {getDateNumber(date)}
                     </span>
-                    {isToday && (
+                    {blocked ? (
+                      <span className="text-[0.55rem] mt-1 px-1.5 py-0.5 rounded-full font-bold bg-red-100 text-red-600">
+                        ปิด
+                      </span>
+                    ) : isToday && (
                       <span className={`text-[0.6rem] mt-1 px-2 py-0.5 rounded-full font-bold shadow-sm ${
-                        isSelected 
-                          ? 'bg-white/20 text-white backdrop-blur-sm' 
+                        isSelected
+                          ? 'bg-white/20 text-white backdrop-blur-sm'
                           : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'
                       }`}>
                         วันนี้
@@ -236,6 +269,17 @@ export default function CustomerBookingPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-100 border-t-indigo-600 mb-4"></div>
             <p className="text-indigo-600 font-medium animate-pulse">กำลังโหลดตารางเวลา...</p>
+          </div>
+        ) : availability?.isBlocked ? (
+          /* Show blocked message when date is blocked */
+          <div className="flex flex-col items-center justify-center py-16 bg-red-50 rounded-2xl border border-red-200">
+            <div className="p-4 bg-red-100 rounded-full mb-4">
+              <CalendarX className="w-12 h-12 text-red-500" />
+            </div>
+            <h3 className="text-xl font-bold text-red-700 mb-2">ไม่เปิดให้จองในวันนี้</h3>
+            <p className="text-red-600 text-center max-w-sm">
+              {availability?.blockedReason || 'วันนี้ไม่เปิดให้จอง กรุณาเลือกวันอื่น'}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-indigo-100 shadow-sm bg-white">

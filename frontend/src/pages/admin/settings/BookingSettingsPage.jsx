@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Save } from 'lucide-react';
+import { Calendar, Save } from 'lucide-react';
 import { settingsAPI } from '../../../lib/api';
 import toast from 'react-hot-toast';
 import { ROUTES } from '../../../constants';

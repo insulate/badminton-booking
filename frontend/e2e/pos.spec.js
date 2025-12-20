@@ -525,18 +525,18 @@ test.describe('POS System E2E Tests', () => {
           await checkoutButton.first().click();
           await page.waitForTimeout(1000);
 
-          // Find close button (X button in modal)
-          const closeButton = page.locator('button').filter({ has: page.locator('svg') }).last();
+          // Find cancel button (ยกเลิก) in modal - more reliable than X button
+          const cancelButton = page.locator('button:has-text("ยกเลิก")');
 
-          if (await closeButton.isVisible()) {
-            await closeButton.click();
+          if (await cancelButton.count() > 0 && await cancelButton.first().isVisible()) {
+            await cancelButton.first().click();
             await page.waitForTimeout(1000);
 
-            // Modal should be closed
-            const paymentModal = page.locator('[class*="fixed"][class*="inset-0"]').filter({ hasText: /ชำระเงิน|Payment/i });
-            const modalVisible = await paymentModal.isVisible().catch(() => false);
+            // Modal should be closed - check heading is not visible
+            const paymentHeading = page.locator('h2:has-text("ชำระเงิน")');
+            const headingVisible = await paymentHeading.isVisible().catch(() => false);
 
-            expect(modalVisible).toBeFalsy();
+            expect(headingVisible).toBeFalsy();
           }
         }
       }
@@ -559,21 +559,28 @@ test.describe('POS System E2E Tests', () => {
           await checkoutButton.first().click();
           await page.waitForTimeout(1000);
 
-          // Fill customer info (optional)
-          const nameInput = page.locator('input[name="name"], input[placeholder*="ชื่อ"]');
-          if (await nameInput.count() > 0 && await nameInput.first().isVisible()) {
-            await nameInput.first().fill('Test Customer');
+          // Select payment method (required) - choose พร้อมเพย์
+          const promptPayButton = page.locator('button:has-text("พร้อมเพย์")');
+          if (await promptPayButton.count() > 0 && await promptPayButton.first().isVisible()) {
+            await promptPayButton.first().click();
+            await page.waitForTimeout(500);
           }
 
-          const phoneInput = page.locator('input[name="phone"], input[placeholder*="เบอร์"], input[type="tel"]');
-          if (await phoneInput.count() > 0 && await phoneInput.first().isVisible()) {
-            await phoneInput.first().fill('0812345678');
+          // Fill customer info (optional)
+          const nameInput = page.getByRole('textbox', { name: 'ชื่อลูกค้า' });
+          if (await nameInput.count() > 0 && await nameInput.isVisible()) {
+            await nameInput.fill('Test Customer');
+          }
+
+          const phoneInput = page.getByRole('textbox', { name: 'เบอร์โทร' });
+          if (await phoneInput.count() > 0 && await phoneInput.isVisible()) {
+            await phoneInput.fill('0812345678');
           }
 
           await page.waitForTimeout(500);
 
-          // Submit payment
-          const submitButton = page.locator('button[type="submit"]').filter({ hasText: /ชำระ|ยืนยัน|Confirm|Pay/i });
+          // Submit payment - use correct button selector
+          const submitButton = page.locator('button:has-text("ยืนยันการชำระเงิน")');
 
           if (await submitButton.count() > 0 && await submitButton.first().isVisible()) {
             await submitButton.first().click();

@@ -242,6 +242,22 @@ export const settingsAPI = {
     const response = await api.delete(API_ENDPOINTS.SETTINGS.FLOOR_PLAN);
     return response.data;
   },
+
+  // Blocked Dates (วันปิดการจอง)
+  getBlockedDates: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.BLOCKED_DATES);
+    return response.data;
+  },
+
+  addBlockedDate: async (date, reason = '') => {
+    const response = await api.post(API_ENDPOINTS.SETTINGS.BLOCKED_DATES, { date, reason });
+    return response.data;
+  },
+
+  removeBlockedDate: async (date) => {
+    const response = await api.delete(API_ENDPOINTS.SETTINGS.BLOCKED_DATE(date));
+    return response.data;
+  },
 };
 
 // Courts API (Admin only)
