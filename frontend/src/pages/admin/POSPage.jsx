@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   ShoppingCart,
   Search,
@@ -430,6 +430,23 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
   const [customer, setCustomer] = useState({ name: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState(null);
+  const [receivedAmount, setReceivedAmount] = useState('');
+
+  // Quick Cash amounts
+  const QUICK_CASH_AMOUNTS = [20, 50, 100, 500, 1000];
+
+  // Calculate change amount
+  const changeAmount = useMemo(() => {
+    const received = parseFloat(receivedAmount) || 0;
+    return received >= total ? received - total : 0;
+  }, [receivedAmount, total]);
+
+  // Check if received amount is valid
+  const isReceivedValid = useMemo(() => {
+    if (paymentMethod !== 'cash') return true;
+    const received = parseFloat(receivedAmount) || 0;
+    return received >= total;
+  }, [paymentMethod, receivedAmount, total]);
 
   // Fetch payment settings
   useEffect(() => {
@@ -467,6 +484,12 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate cash payment
+    if (paymentMethod === 'cash' && !isReceivedValid) {
+      toast.error('กรุณากรอกจำนวนเงินที่รับให้ถูกต้อง');
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -481,6 +504,10 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
         customer: customer.name || customer.phone ? { ...customer, type: 'walk-in' } : null,
         paymentMethod,
         total,
+        // Send receivedAmount only for cash payment
+        ...(paymentMethod === 'cash' && receivedAmount && {
+          receivedAmount: parseFloat(receivedAmount)
+        }),
       };
 
       const response = await salesAPI.create(saleData);
@@ -588,6 +615,66 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
             )}
           </div>
 
+          {/* Cash Payment Section */}
+          {paymentMethod === 'cash' && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-800 mb-3">รับเงิน</h3>
+
+              {/* Quick Cash Buttons */}
+              <div className="grid grid-cols-5 gap-2 mb-4">
+                {QUICK_CASH_AMOUNTS.map((amount) => (
+                  <button
+                    key={amount}
+                    type="button"
+                    onClick={() => setReceivedAmount(String(amount))}
+                    className={`py-3 rounded-lg border-2 font-semibold transition-all ${
+                      parseFloat(receivedAmount) === amount
+                        ? 'border-green-600 bg-green-50 text-green-600'
+                        : 'border-gray-200 hover:border-green-400 hover:bg-green-50'
+                    }`}
+                  >
+                    {amount}
+                  </button>
+                ))}
+              </div>
+
+              {/* Exact Amount Button */}
+              <button
+                type="button"
+                onClick={() => setReceivedAmount(String(total))}
+                className="w-full mb-4 py-3 rounded-lg border-2 border-blue-200 bg-blue-50 text-blue-600 font-semibold hover:border-blue-400 transition-all"
+              >
+                พอดี ({total.toFixed(2)})
+              </button>
+
+              {/* Manual Input */}
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">฿</span>
+                <input
+                  type="number"
+                  value={receivedAmount}
+                  onChange={(e) => setReceivedAmount(e.target.value)}
+                  placeholder="กรอกจำนวนเงินที่รับ"
+                  min="0"
+                  step="0.01"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Change Display */}
+              {parseFloat(receivedAmount) > 0 && (
+                <div className={`mt-4 p-4 rounded-xl ${isReceivedValid ? 'bg-green-50 border-2 border-green-200' : 'bg-red-50 border-2 border-red-200'}`}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-gray-700">เงินทอน</span>
+                    <span className={`text-2xl font-bold ${isReceivedValid ? 'text-green-600' : 'text-red-600'}`}>
+                      {isReceivedValid ? `฿${changeAmount.toFixed(2)}` : 'เงินไม่พอ'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex gap-3">
             <button
@@ -601,7 +688,7 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
             <button
               type="submit"
               className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              disabled={loading}
+              disabled={loading || (paymentMethod === 'cash' && !isReceivedValid)}
             >
               {loading ? (
                 <>

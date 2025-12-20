@@ -262,6 +262,106 @@ describe('Sales/POS API Tests', () => {
       expect(response.body.data.items[0].subtotal).toBe(1350);
       expect(response.body.data.items[1].subtotal).toBe(50);
     });
+
+    // Change calculation tests
+    it('should create sale with receivedAmount and calculate changeAmount for cash payment', async () => {
+      const response = await request(app)
+        .post('/api/sales')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            {
+              product: testProduct1._id.toString(),
+              quantity: 2, // 450 * 2 = 900
+            },
+          ],
+          paymentMethod: 'cash',
+          receivedAmount: 1000,
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.receivedAmount).toBe(1000);
+      expect(response.body.data.changeAmount).toBe(100); // 1000 - 900
+    });
+
+    it('should allow cash payment without receivedAmount (backward compatibility)', async () => {
+      const response = await request(app)
+        .post('/api/sales')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            {
+              product: testProduct1._id.toString(),
+              quantity: 1,
+            },
+          ],
+          paymentMethod: 'cash',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.receivedAmount).toBeNull();
+      expect(response.body.data.changeAmount).toBeNull();
+    });
+
+    it('should accept exact payment amount with zero change', async () => {
+      const response = await request(app)
+        .post('/api/sales')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            {
+              product: testProduct1._id.toString(),
+              quantity: 2, // 450 * 2 = 900
+            },
+          ],
+          paymentMethod: 'cash',
+          receivedAmount: 900,
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.receivedAmount).toBe(900);
+      expect(response.body.data.changeAmount).toBe(0);
+    });
+
+    it('should reject cash payment with insufficient receivedAmount', async () => {
+      const response = await request(app)
+        .post('/api/sales')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            {
+              product: testProduct1._id.toString(),
+              quantity: 2, // 450 * 2 = 900
+            },
+          ],
+          paymentMethod: 'cash',
+          receivedAmount: 500, // Less than 900
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('Received amount must be greater than or equal to total');
+    });
+
+    it('should ignore receivedAmount for non-cash payment methods', async () => {
+      const response = await request(app)
+        .post('/api/sales')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          items: [
+            {
+              product: testProduct1._id.toString(),
+              quantity: 1,
+            },
+          ],
+          paymentMethod: 'promptpay',
+          receivedAmount: 1000, // Should be ignored
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.receivedAmount).toBeNull();
+      expect(response.body.data.changeAmount).toBeNull();
+    });
   });
 
   describe('GET /api/sales', () => {

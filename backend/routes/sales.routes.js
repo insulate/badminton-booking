@@ -175,7 +175,7 @@ router.post('/', protect, async (req, res) => {
   let saleId = null;
 
   try {
-    const { items, customer, paymentMethod, relatedBooking } = req.body;
+    const { items, customer, paymentMethod, relatedBooking, receivedAmount } = req.body;
 
     // Validate items
     if (!items || items.length === 0) {
@@ -225,6 +225,21 @@ router.post('/', protect, async (req, res) => {
     // Calculate total
     const total = processedItems.reduce((sum, item) => sum + item.subtotal, 0);
 
+    // Calculate change for cash payment
+    let finalReceivedAmount = null;
+    let finalChangeAmount = null;
+
+    if (paymentMethod === 'cash' && receivedAmount !== undefined && receivedAmount !== null) {
+      if (receivedAmount < total) {
+        return res.status(400).json({
+          success: false,
+          message: 'Received amount must be greater than or equal to total',
+        });
+      }
+      finalReceivedAmount = receivedAmount;
+      finalChangeAmount = receivedAmount - total;
+    }
+
     // Create sale
     const sale = await Sale.create({
       saleCode,
@@ -234,6 +249,8 @@ router.post('/', protect, async (req, res) => {
       relatedBooking,
       createdBy: req.user._id,
       total,
+      receivedAmount: finalReceivedAmount,
+      changeAmount: finalChangeAmount,
     });
 
     saleId = sale._id;

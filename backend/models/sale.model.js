@@ -58,6 +58,16 @@ const saleSchema = new mongoose.Schema(
       required: [true, 'Payment method is required'],
       default: 'cash',
     },
+    receivedAmount: {
+      type: Number,
+      min: [0, 'Received amount cannot be negative'],
+      default: null,
+    },
+    changeAmount: {
+      type: Number,
+      min: [0, 'Change amount cannot be negative'],
+      default: null,
+    },
     relatedBooking: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Booking',

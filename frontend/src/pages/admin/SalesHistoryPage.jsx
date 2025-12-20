@@ -300,6 +300,9 @@ const SalesHistoryPage = () => {
                         ยอดรวม
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        รับเงิน/ทอน
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         วิธีชำระเงิน
                       </th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -333,6 +336,16 @@ const SalesHistoryPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                           ฿{formatPrice(sale.total)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {sale.paymentMethod === 'cash' && sale.receivedAmount != null ? (
+                            <div>
+                              <p className="font-medium">รับ: ฿{formatPrice(sale.receivedAmount)}</p>
+                              <p className="text-green-600 text-xs">ทอน: ฿{formatPrice(sale.changeAmount || 0)}</p>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getPaymentMethodBadge(sale.paymentMethod)}
@@ -530,6 +543,22 @@ const SalesHistoryPage = () => {
                   </span>
                 </div>
               </div>
+
+              {/* Payment Details - Cash only */}
+              {selectedSale.paymentMethod === 'cash' && selectedSale.receivedAmount != null && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mt-4 border border-green-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm text-gray-600">รับเงิน</span>
+                      <p className="text-xl font-bold text-gray-900">฿{formatPrice(selectedSale.receivedAmount)}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-600">เงินทอน</span>
+                      <p className="text-xl font-bold text-green-600">฿{formatPrice(selectedSale.changeAmount || 0)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
