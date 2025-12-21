@@ -57,6 +57,7 @@ import SalesHistoryPage from './pages/admin/SalesHistoryPage';
 // Booking Pages
 import BookingPage from './pages/admin/BookingPage';
 import BookingsPage from './pages/admin/BookingsPage';
+import RecurringBookingsPage from './pages/admin/RecurringBookingsPage';
 
 // Group Play Page
 import GroupPlayPage from './pages/admin/GroupPlayPage';
@@ -137,6 +138,7 @@ function App() {
           {/* Booking Routes */}
           <Route path="booking" element={<BookingPage />} />
           <Route path="bookings" element={<BookingsPage />} />
+          <Route path="recurring-bookings" element={<RecurringBookingsPage />} />
 
           {/* POS Route */}
           <Route path="pos" element={<POSPage />} />

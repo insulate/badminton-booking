@@ -143,6 +143,20 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // Recurring booking fields
+    isRecurring: {
+      type: Boolean,
+      default: false,
+    },
+    recurringGroupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RecurringBookingGroup',
+      default: null,
+    },
+    recurringSequence: {
+      type: Number,
+      default: null,
+    },
     deletedAt: {
       type: Date,
       default: null,
@@ -161,6 +175,8 @@ bookingSchema.index({ bookingStatus: 1 });
 bookingSchema.index({ deletedAt: 1 });
 bookingSchema.index({ player: 1 });
 bookingSchema.index({ bookingSource: 1 });
+bookingSchema.index({ isRecurring: 1 });
+bookingSchema.index({ recurringGroupId: 1 });
 
 // Virtual for displaying date range
 bookingSchema.virtual('dateRange').get(function () {

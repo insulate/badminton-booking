@@ -28,6 +28,7 @@ import {
   BarChart3,
   Receipt,
   Map,
+  Repeat,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -72,6 +73,11 @@ export default function AdminLayout() {
           name: 'รายการจอง',
           path: '/admin/bookings',
           icon: ClipboardList,
+        },
+        {
+          name: 'การจองประจำ',
+          path: '/admin/recurring-bookings',
+          icon: Repeat,
         },
       ],
     },

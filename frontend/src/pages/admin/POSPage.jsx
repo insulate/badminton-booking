@@ -352,6 +352,7 @@ const POSPage = () => {
                           <button
                             onClick={() => removeFromCart(item.product._id)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-all"
+                            title="ลบจากตะกร้า"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -542,6 +543,7 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            title="ปิด"
           >
             <X className="w-6 h-6" />
           </button>

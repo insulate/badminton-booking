@@ -19,6 +19,7 @@ const categoriesRouter = require('./routes/categories.routes');
 const playersRouter = require('./routes/players.routes');
 const groupplayRouter = require('./routes/groupplay.routes');
 const reportsRouter = require('./routes/reports.routes');
+const recurringBookingsRouter = require('./routes/recurringBookings.routes');
 
 // Jobs
 const { startCancelExpiredBookingsJob } = require('./jobs/cancelExpiredBookings');
@@ -95,6 +96,7 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/players', playersRouter);
 app.use('/api/groupplay', groupplayRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/recurring-bookings', recurringBookingsRouter);
 
 // Error handling
 app.use((err, _req, res, _next) => {

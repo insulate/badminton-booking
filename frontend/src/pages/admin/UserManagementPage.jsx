@@ -207,6 +207,7 @@ export default function Settings() {
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg
               hover:bg-slate-50 transition-colors disabled:opacity-50"
+            title="รีเฟรช"
           >
             <RefreshCw className={loading ? 'animate-spin' : ''} size={20} />
             <span className="hidden sm:inline">รีเฟรช</span>

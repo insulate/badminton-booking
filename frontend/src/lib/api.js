@@ -630,4 +630,49 @@ export const reportsAPI = {
   },
 };
 
+// Recurring Bookings API
+export const recurringBookingsAPI = {
+  preview: async (data) => {
+    const response = await api.post('/recurring-bookings/preview', data);
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post('/recurring-bookings', data);
+    return response.data;
+  },
+
+  getAll: async (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.status) queryParams.append('status', params.status);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+
+    const url = `/recurring-bookings${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(`/recurring-bookings/${id}`);
+    return response.data;
+  },
+
+  getBookingsInGroup: async (id) => {
+    const response = await api.get(`/recurring-bookings/${id}/bookings`);
+    return response.data;
+  },
+
+  cancel: async (id) => {
+    const response = await api.patch(`/recurring-bookings/${id}/cancel`);
+    return response.data;
+  },
+
+  updatePayment: async (id, data) => {
+    const response = await api.patch(`/recurring-bookings/${id}/payment`, data);
+    return response.data;
+  },
+};
+
 export default api;
