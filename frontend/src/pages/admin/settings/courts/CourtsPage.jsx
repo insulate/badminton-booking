@@ -196,15 +196,15 @@ const CourtsPage = () => {
                                 : `/admin/settings/courts/edit/${court._id}`
                             )
                           }
-                          className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
-                          title="แก้ไข"
+                          className="tooltip text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
+                          data-tooltip="แก้ไข"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(court)}
-                          className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
-                          title="ลบ"
+                          className="tooltip text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
+                          data-tooltip="ลบ"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -184,8 +184,8 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                title="ปิดหน้าต่าง"
+                className="tooltip text-gray-400 hover:text-gray-600 transition-colors"
+                data-tooltip="ปิดหน้าต่าง"
               >
                 <X size={24} />
               </button>
@@ -372,8 +372,8 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                   {!isEditingPayment && (
                     <button
                       onClick={() => setIsEditingPayment(true)}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                      title="แก้ไขข้อมูลการชำระเงิน"
+                      className="tooltip text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      data-tooltip="แก้ไขข้อมูลการชำระเงิน"
                     >
                       แก้ไข
                     </button>
@@ -423,15 +423,15 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     <div className="flex gap-3">
                       <button
                         onClick={handleUpdatePayment}
-                        className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                        title="บันทึกการเปลี่ยนแปลง"
+                        className="tooltip tooltip-bottom flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        data-tooltip="บันทึกการเปลี่ยนแปลง"
                       >
                         บันทึก
                       </button>
                       <button
                         onClick={() => setIsEditingPayment(false)}
-                        className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        title="ยกเลิกการแก้ไข"
+                        className="tooltip tooltip-bottom flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        data-tooltip="ยกเลิกการแก้ไข"
                       >
                         ยกเลิก
                       </button>
@@ -510,8 +510,8 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
             <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end">
               <button
                 onClick={onClose}
-                className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                title="ปิดหน้าต่าง"
+                className="tooltip tooltip-left px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                data-tooltip="ปิดหน้าต่าง"
               >
                 ปิด
               </button>

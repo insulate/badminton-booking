@@ -205,9 +205,9 @@ export default function Settings() {
           <button
             onClick={fetchUsers}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg
+            className="tooltip flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg
               hover:bg-slate-50 transition-colors disabled:opacity-50"
-            title="รีเฟรช"
+            data-tooltip="รีเฟรช"
           >
             <RefreshCw className={loading ? 'animate-spin' : ''} size={20} />
             <span className="hidden sm:inline">รีเฟรช</span>
@@ -273,8 +273,8 @@ export default function Settings() {
                         {user.deletedAt ? (
                           <button
                             onClick={() => handleRestore(user._id, user.username)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="กู้คืนผู้ใช้"
+                            className="tooltip p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            data-tooltip="กู้คืนผู้ใช้"
                           >
                             <UserCheck size={18} />
                           </button>
@@ -282,15 +282,15 @@ export default function Settings() {
                           <>
                             <button
                               onClick={() => handleOpenEditModal(user)}
-                              className="p-2 text-primary-blue hover:bg-blue-50 rounded-lg transition-colors"
-                              title="แก้ไข"
+                              className="tooltip p-2 text-primary-blue hover:bg-blue-50 rounded-lg transition-colors"
+                              data-tooltip="แก้ไข"
                             >
                               <Edit2 size={18} />
                             </button>
                             <button
                               onClick={() => handleDelete(user._id, user.username)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="ลบ"
+                              className="tooltip p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              data-tooltip="ลบ"
                             >
                               <Trash2 size={18} />
                             </button>

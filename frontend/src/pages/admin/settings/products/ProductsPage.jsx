@@ -307,7 +307,7 @@ const ProductsPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-900">{product.sku}</span>
                         {isLowStock(product) && (
-                          <AlertTriangle className="w-4 h-4 text-yellow-600" title="สต็อกต่ำ" />
+                          <AlertTriangle className="tooltip w-4 h-4 text-yellow-600" data-tooltip="สต็อกต่ำ" />
                         )}
                       </div>
                     </td>
@@ -341,15 +341,15 @@ const ProductsPage = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-700 p-2.5 hover:bg-blue-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
-                          title="แก้ไข"
+                          className="tooltip text-blue-600 hover:text-blue-700 p-2.5 hover:bg-blue-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
+                          data-tooltip="แก้ไข"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:text-red-700 p-2.5 hover:bg-red-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
-                          title="ลบ"
+                          className="tooltip text-red-600 hover:text-red-700 p-2.5 hover:bg-red-50 rounded-lg transition-all hover:shadow-md hover:scale-105"
+                          data-tooltip="ลบ"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

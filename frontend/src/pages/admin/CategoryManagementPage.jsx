@@ -218,15 +218,15 @@ export default function CategoryManagementPage() {
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                       <button
                         onClick={() => handleEditClick(category)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110 shadow-md hover:shadow-lg"
-                        title="แก้ไข"
+                        className="tooltip p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110 shadow-md hover:shadow-lg"
+                        data-tooltip="แก้ไข"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(category._id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110 shadow-md hover:shadow-lg"
-                        title="ลบ"
+                        className="tooltip p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110 shadow-md hover:shadow-lg"
+                        data-tooltip="ลบ"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

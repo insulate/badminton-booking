@@ -172,8 +172,8 @@ const BookingFilters = ({ filters, onFilterChange }) => {
         {hasActiveFilters() && (
           <button
             onClick={handleClearFilters}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            title="ล้างฟิลเตอร์ทั้งหมด"
+            className="tooltip tooltip-bottom inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            data-tooltip="ล้างฟิลเตอร์ทั้งหมด"
           >
             <X size={16} className="mr-2" />
             ล้างฟิลเตอร์
@@ -181,8 +181,8 @@ const BookingFilters = ({ filters, onFilterChange }) => {
         )}
         <button
           onClick={handleApplyFilters}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          title="ค้นหารายการจอง"
+          className="tooltip tooltip-bottom inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          data-tooltip="ค้นหารายการจอง"
         >
           <Search size={16} className="mr-2" />
           ค้นหา

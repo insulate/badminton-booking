@@ -318,8 +318,8 @@ const BookingPage = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveBlockedDate(formatDateToString(new Date(item.date)))}
-                      className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                      title="ลบ"
+                      className="tooltip p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                      data-tooltip="ลบ"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -338,8 +338,8 @@ const BookingPage = () => {
                       type="button"
                       onClick={() => setBlockedDatesPage((prev) => Math.max(prev - 1, 1))}
                       disabled={blockedDatesPage === 1}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="หน้าก่อน"
+                      className="tooltip p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-tooltip="หน้าก่อน"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -366,8 +366,8 @@ const BookingPage = () => {
                       type="button"
                       onClick={() => setBlockedDatesPage((prev) => Math.min(prev + 1, totalBlockedPages))}
                       disabled={blockedDatesPage === totalBlockedPages}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="หน้าถัดไป"
+                      className="tooltip p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-tooltip="หน้าถัดไป"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>

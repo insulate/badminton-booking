@@ -30,9 +30,9 @@ export default function PlayerLevelBadge({ level, size = 'md', showDescription =
   return (
     <div className="inline-flex items-center gap-2">
       <span
-        className={`inline-flex items-center rounded-full font-medium text-white ${sizeClass}`}
+        className={`tooltip inline-flex items-center rounded-full font-medium text-white ${sizeClass}`}
         style={{ backgroundColor: levelInfo.color }}
-        title={levelInfo.description}
+        data-tooltip={levelInfo.description}
       >
         {levelInfo.name}
       </span>

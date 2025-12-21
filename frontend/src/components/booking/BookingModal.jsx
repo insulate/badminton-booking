@@ -237,8 +237,8 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
             <h3 className="text-lg font-semibold text-gray-900">สร้างการจองใหม่</h3>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              title="ปิดหน้าต่าง"
+              className="tooltip tooltip-bottom text-gray-400 hover:text-gray-600 transition-colors"
+              data-tooltip="ปิดหน้าต่าง"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -394,12 +394,12 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'pending' }))}
-                  className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
+                  className={`tooltip flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                     formData.paymentStatus === 'pending'
                       ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
-                  title="เลือกสถานะ: ยังไม่ชำระเงิน"
+                  data-tooltip="เลือกสถานะ: ยังไม่ชำระเงิน"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <div className={`w-3.5 h-3.5 rounded-full border-2 ${
@@ -417,12 +417,12 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, paymentStatus: 'paid' }))}
-                  className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
+                  className={`tooltip flex-1 px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                     formData.paymentStatus === 'paid'
                       ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
                       : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                   }`}
-                  title="เลือกสถานะ: ชำระเงินแล้ว"
+                  data-tooltip="เลือกสถานะ: ชำระเงินแล้ว"
                 >
                   <div className="flex items-center justify-center gap-1.5">
                     <div className={`w-3.5 h-3.5 rounded-full border-2 ${
@@ -488,9 +488,9 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="tooltip tooltip-bottom px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               disabled={loading}
-              title="ยกเลิกและปิดหน้าต่าง"
+              data-tooltip="ยกเลิกและปิดหน้าต่าง"
             >
               ยกเลิก
             </button>
@@ -498,8 +498,8 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
               type="submit"
               form="booking-form"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="บันทึกการจองใหม่"
+              className="tooltip tooltip-bottom px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              data-tooltip="บันทึกการจองใหม่"
             >
               {loading ? 'กำลังบันทึก...' : 'ยืนยันการจอง'}
             </button>

@@ -444,8 +444,8 @@ export default function PlayersPage() {
                           {showDeleted ? (
                             <button
                               onClick={() => handleRestore(player)}
-                              className="flex items-center gap-2 px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border border-green-200"
-                              title="กู้คืนข้อมูล"
+                              className="tooltip flex items-center gap-2 px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border border-green-200"
+                              data-tooltip="กู้คืนข้อมูล"
                             >
                               <RotateCcw className="w-4 h-4" />
                               <span className="text-sm font-medium">กู้คืน</span>
@@ -454,15 +454,15 @@ export default function PlayersPage() {
                             <>
                               <button
                                 onClick={() => handleOpenEditForm(player)}
-                                className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                                title="แก้ไข"
+                                className="tooltip p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                data-tooltip="แก้ไข"
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(player)}
-                                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                                title="ลบ"
+                                className="tooltip p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                                data-tooltip="ลบ"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>

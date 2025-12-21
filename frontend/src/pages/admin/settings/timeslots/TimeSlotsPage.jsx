@@ -287,10 +287,10 @@ const TimeSlotsPage = () => {
                               <button
                                 type="button"
                                 onClick={() => handleTogglePeakHour(timeslot)}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                                className={`tooltip relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                                   timeslot.peakHour ? 'bg-orange-600' : 'bg-gray-300'
                                 }`}
-                                title={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
+                                data-tooltip={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
                               >
                                 <span
                                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -316,15 +316,15 @@ const TimeSlotsPage = () => {
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={() => handleEdit(timeslot)}
-                                  className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
-                                  title="แก้ไข"
+                                  className="tooltip text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
+                                  data-tooltip="แก้ไข"
                                 >
                                   <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(timeslot)}
-                                  className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
-                                  title="ลบ"
+                                  className="tooltip text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
+                                  data-tooltip="ลบ"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -398,10 +398,10 @@ const TimeSlotsPage = () => {
                         <button
                           type="button"
                           onClick={() => handleTogglePeakHour(timeslot)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                          className={`tooltip relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                             timeslot.peakHour ? 'bg-orange-600' : 'bg-gray-300'
                           }`}
-                          title={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
+                          data-tooltip={timeslot.peakHour ? 'ปิด Peak Hour' : 'เปิด Peak Hour'}
                         >
                           <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -427,15 +427,15 @@ const TimeSlotsPage = () => {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleEdit(timeslot)}
-                            className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
-                            title="แก้ไข"
+                            className="tooltip text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition"
+                            data-tooltip="แก้ไข"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(timeslot)}
-                            className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
-                            title="ลบ"
+                            className="tooltip text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded transition"
+                            data-tooltip="ลบ"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

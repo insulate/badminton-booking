@@ -354,8 +354,8 @@ const SalesHistoryPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                           <button
                             onClick={() => handleViewDetails(sale)}
-                            className="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
-                            title="ดูรายละเอียด"
+                            className="tooltip inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
+                            data-tooltip="ดูรายละเอียด"
                           >
                             <Eye className="w-4 h-4" />
                             <span>ดูรายละเอียด</span>

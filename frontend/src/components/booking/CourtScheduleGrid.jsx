@@ -234,10 +234,10 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
                     <td key={`${court.courtId}-${index}`} className="px-2 py-2">
                       <div
                         onClick={() => handleSlotClick(court, slot)}
-                        className={`p-3 rounded-lg border-2 text-center transition-all ${getSlotColor(
+                        className={`tooltip p-3 rounded-lg border-2 text-center transition-all ${getSlotColor(
                           slot
                         )}`}
-                        title={
+                        data-tooltip={
                           slot.blockedByGroupPlay
                             ? 'ถูกบล็อกโดยก๊วนสนาม (Group Play)'
                             : isBlocked && slot.available
@@ -312,8 +312,8 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
               <h3 className="text-lg font-semibold text-gray-900">รายละเอียดการจอง</h3>
               <button
                 onClick={() => setSelectedBooking(null)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                title="ปิดหน้าต่าง"
+                className="tooltip text-gray-400 hover:text-gray-600 transition-colors"
+                data-tooltip="ปิดหน้าต่าง"
               >
                 <X size={24} />
               </button>
@@ -437,8 +437,8 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
             <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => setSelectedBooking(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                title="ปิดหน้าต่าง"
+                className="tooltip tooltip-left px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                data-tooltip="ปิดหน้าต่าง"
               >
                 ปิด
               </button>

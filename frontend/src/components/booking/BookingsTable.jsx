@@ -266,8 +266,8 @@ const BookingsTable = ({
                       {/* Slip pending indicator */}
                       {booking.paymentSlip?.status === 'pending_verification' && (
                         <span
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700"
-                          title="มีสลิปรอตรวจสอบ"
+                          className="tooltip inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700"
+                          data-tooltip="มีสลิปรอตรวจสอบ"
                         >
                           <FileImage size={12} />
                           รอตรวจ
@@ -289,8 +289,8 @@ const BookingsTable = ({
                       {/* View Detail */}
                       <button
                         onClick={() => onViewDetail(booking._id)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="ดูรายละเอียด"
+                        className="tooltip p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        data-tooltip="ดูรายละเอียด"
                       >
                         <Eye size={18} />
                       </button>
@@ -299,8 +299,8 @@ const BookingsTable = ({
                       {canMarkAsPaid(booking) && (
                         <button
                           onClick={() => onMarkAsPaid(booking._id)}
-                          className="p-1 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                          title="อัพเดตชำระเงินแล้ว"
+                          className="tooltip p-1 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                          data-tooltip="อัพเดตชำระเงินแล้ว"
                         >
                           <DollarSign size={18} />
                         </button>
@@ -310,8 +310,8 @@ const BookingsTable = ({
                       {canCheckin(booking) && (
                         <button
                           onClick={() => onCheckin(booking._id)}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
-                          title="เช็คอิน"
+                          className="tooltip p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                          data-tooltip="เช็คอิน"
                         >
                           <CheckCircle size={18} />
                         </button>
@@ -321,8 +321,8 @@ const BookingsTable = ({
                       {canCancel(booking) && (
                         <button
                           onClick={() => onCancel(booking._id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          title="ยกเลิก"
+                          className="tooltip p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          data-tooltip="ยกเลิก"
                         >
                           <XCircle size={18} />
                         </button>
@@ -349,8 +349,8 @@ const BookingsTable = ({
               <button
                 onClick={() => onPageChange(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="ไปหน้าก่อนหน้า"
+                className="tooltip tooltip-bottom inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                data-tooltip="ไปหน้าก่อนหน้า"
               >
                 <ChevronLeft size={16} className="mr-1" />
                 ก่อนหน้า
@@ -361,8 +361,8 @@ const BookingsTable = ({
               <button
                 onClick={() => onPageChange(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="ไปหน้าถัดไป"
+                className="tooltip tooltip-bottom inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                data-tooltip="ไปหน้าถัดไป"
               >
                 ถัดไป
                 <ChevronRight size={16} className="ml-1" />

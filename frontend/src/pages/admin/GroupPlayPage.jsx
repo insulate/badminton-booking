@@ -651,64 +651,50 @@ export default function GroupPlayPage() {
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <div className="flex items-center justify-center gap-2">
-                                  <div className="relative group inline-block">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedPlayer(player);
-                                        setShowPlayerCostModal(true);
-                                      }}
-                                      className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                                    >
-                                      <Eye size={16} />
-                                    </button>
-                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                      ดูรายละเอียด
-                                    </div>
-                                  </div>
-                                  <div className="relative group inline-block">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedPlayerForProduct(player);
-                                        setShowAddProductModal(true);
-                                      }}
-                                      className="inline-flex items-center justify-center p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                                    >
-                                      <ShoppingCart size={16} />
-                                    </button>
-                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                      เพิ่มสินค้า
-                                    </div>
-                                  </div>
-                                  <div className="relative group inline-block">
-                                    {(() => {
-                                      const hasPlayingGames = player.games?.some(g => g.status === 'playing');
-                                      const isDisabled = player.checkedOut || hasPlayingGames;
-                                      const tooltipText = player.checkedOut
-                                        ? 'Check Out แล้ว'
-                                        : hasPlayingGames
-                                          ? 'กำลังอยู่ในเกม'
-                                          : 'Check Out คิดเงิน';
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPlayer(player);
+                                      setShowPlayerCostModal(true);
+                                    }}
+                                    className="tooltip inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                    data-tooltip="ดูรายละเอียด"
+                                  >
+                                    <Eye size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPlayerForProduct(player);
+                                      setShowAddProductModal(true);
+                                    }}
+                                    className="tooltip inline-flex items-center justify-center p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                    data-tooltip="เพิ่มสินค้า"
+                                  >
+                                    <ShoppingCart size={16} />
+                                  </button>
+                                  {(() => {
+                                    const hasPlayingGames = player.games?.some(g => g.status === 'playing');
+                                    const isDisabled = player.checkedOut || hasPlayingGames;
+                                    const tooltipText = player.checkedOut
+                                      ? 'Check Out แล้ว'
+                                      : hasPlayingGames
+                                        ? 'กำลังอยู่ในเกม'
+                                        : 'Check Out คิดเงิน';
 
-                                      return (
-                                        <>
-                                          <button
-                                            onClick={() => handleCheckout(player)}
-                                            disabled={isDisabled}
-                                            className={`inline-flex items-center justify-center p-2 rounded-lg transition-colors ${
-                                              isDisabled
-                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                : 'bg-purple-500 text-white hover:bg-purple-600'
-                                            }`}
-                                          >
-                                            <Receipt size={16} />
-                                          </button>
-                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                            {tooltipText}
-                                          </div>
-                                        </>
-                                      );
-                                    })()}
-                                  </div>
+                                    return (
+                                      <button
+                                        onClick={() => handleCheckout(player)}
+                                        disabled={isDisabled}
+                                        className={`tooltip inline-flex items-center justify-center p-2 rounded-lg transition-colors ${
+                                          isDisabled
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-purple-500 text-white hover:bg-purple-600'
+                                        }`}
+                                        data-tooltip={tooltipText}
+                                      >
+                                        <Receipt size={16} />
+                                      </button>
+                                    );
+                                  })()}
                                 </div>
                               </td>
                             </tr>

@@ -59,4 +59,55 @@
   .gradient-blue-light {
     background: linear-gradient(135deg, #4D94FF 0%, #0066CC 100%);
   }
+
+  /* CSS Tooltip - displays instantly on hover */
+  .tooltip {
+    @apply relative;
+  }
+
+  .tooltip::after {
+    content: attr(data-tooltip);
+    @apply absolute z-50 px-2 py-1 text-xs font-medium text-white bg-gray-800 rounded whitespace-nowrap;
+    @apply opacity-0 invisible transition-all duration-150;
+    @apply bottom-full left-1/2 -translate-x-1/2 mb-2;
+    pointer-events: none;
+  }
+
+  .tooltip::before {
+    content: '';
+    @apply absolute z-50 border-4 border-transparent border-t-gray-800;
+    @apply opacity-0 invisible transition-all duration-150;
+    @apply bottom-full left-1/2 -translate-x-1/2 mb-0;
+    pointer-events: none;
+  }
+
+  .tooltip:hover::after,
+  .tooltip:hover::before {
+    @apply opacity-100 visible;
+  }
+
+  /* Tooltip positions */
+  .tooltip-bottom::after {
+    @apply bottom-auto top-full mt-2 mb-0;
+  }
+
+  .tooltip-bottom::before {
+    @apply bottom-auto top-full mt-0 mb-0 border-t-transparent border-b-gray-800;
+  }
+
+  .tooltip-left::after {
+    @apply bottom-auto left-auto right-full top-1/2 -translate-y-1/2 translate-x-0 mr-2 mb-0;
+  }
+
+  .tooltip-left::before {
+    @apply bottom-auto left-auto right-full top-1/2 -translate-y-1/2 translate-x-0 mr-0 mb-0 border-t-transparent border-l-gray-800;
+  }
+
+  .tooltip-right::after {
+    @apply bottom-auto right-auto left-full top-1/2 -translate-y-1/2 translate-x-0 ml-2 mb-0;
+  }
+
+  .tooltip-right::before {
+    @apply bottom-auto right-auto left-full top-1/2 -translate-y-1/2 translate-x-0 ml-0 mb-0 border-t-transparent border-r-gray-800;
+  }
 }
