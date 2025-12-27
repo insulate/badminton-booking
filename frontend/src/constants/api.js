@@ -152,6 +152,31 @@ export const API_ENDPOINTS = {
     PRODUCTS_SALES: '/reports/products/sales',
     COURTS_USAGE: '/reports/courts/usage',
   },
+
+  // Attendance Management
+  ATTENDANCE: {
+    LIST: '/attendance',
+    MY: '/attendance/my',
+    TODAY: '/attendance/today',
+    CLOCK_IN: '/attendance/clock-in',
+    CLOCK_OUT: '/attendance/clock-out',
+    UPDATE: (id) => `/attendance/${id}`,
+    REPORT: '/attendance/report',
+  },
+
+  // Shift Management
+  SHIFTS: {
+    LIST: '/shifts',
+    CURRENT: '/shifts/current',
+    GET: (id) => `/shifts/${id}`,
+    OPEN: '/shifts/open',
+    ADD_EXPENSE: (id) => `/shifts/${id}/expense`,
+    REMOVE_EXPENSE: (id, expenseId) => `/shifts/${id}/expense/${expenseId}`,
+    CLOSE: (id) => `/shifts/${id}/close`,
+    SUMMARY: (id) => `/shifts/${id}/summary`,
+    UPDATE: (id) => `/shifts/${id}`,
+    REPORT: '/shifts/report',
+  },
 };
 
 export default API_ENDPOINTS;

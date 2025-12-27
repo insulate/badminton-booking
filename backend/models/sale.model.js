@@ -76,6 +76,11 @@ const saleSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    shift: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Shift',
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -86,6 +91,7 @@ const saleSchema = new mongoose.Schema(
 // saleCode already has unique index from schema definition
 saleSchema.index({ createdAt: -1 });
 saleSchema.index({ relatedBooking: 1 });
+saleSchema.index({ shift: 1 });
 
 // Pre-save hook to calculate total
 saleSchema.pre('save', function (next) {

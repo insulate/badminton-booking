@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Sale = require('../models/sale.model');
 const Product = require('../models/product.model');
+const Shift = require('../models/shift.model');
 const { generateSaleCode } = require('../utils/saleCodeGenerator');
 const { protect, admin } = require('../middleware/auth');
 
@@ -177,6 +178,16 @@ router.post('/', protect, async (req, res) => {
   try {
     const { items, customer, paymentMethod, relatedBooking, receivedAmount } = req.body;
 
+    // Check if user has an open shift (required for creating sales)
+    const openShift = await Shift.findOpenShift(req.user._id);
+    if (!openShift) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเปิดกะก่อนขายสินค้า',
+        requireShift: true,
+      });
+    }
+
     // Validate items
     if (!items || items.length === 0) {
       return res.status(400).json({
@@ -240,7 +251,7 @@ router.post('/', protect, async (req, res) => {
       finalChangeAmount = receivedAmount - total;
     }
 
-    // Create sale
+    // Create sale with shift reference
     const sale = await Sale.create({
       saleCode,
       items: processedItems,
@@ -248,6 +259,7 @@ router.post('/', protect, async (req, res) => {
       paymentMethod,
       relatedBooking,
       createdBy: req.user._id,
+      shift: openShift._id,
       total,
       receivedAmount: finalReceivedAmount,
       changeAmount: finalChangeAmount,

@@ -65,6 +65,10 @@ import GroupPlayPage from './pages/admin/GroupPlayPage';
 // Reports Page
 import ReportsPage from './pages/admin/ReportsPage';
 
+// Attendance & Shift Pages
+import AttendancePage from './pages/admin/AttendancePage';
+import ShiftPage from './pages/admin/ShiftPage';
+
 function App() {
   const { initAuth } = useAuthStore();
   const { initAuth: initPlayerAuth } = usePlayerAuthStore();
@@ -131,6 +135,10 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="players" element={<PlayersPage />} />
+
+          {/* Attendance & Shift Routes */}
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="shifts" element={<ShiftPage />} />
 
           {/* Group Play Route */}
           <Route path="groupplay" element={<GroupPlayPage />} />

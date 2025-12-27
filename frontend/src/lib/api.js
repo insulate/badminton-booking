@@ -630,6 +630,97 @@ export const reportsAPI = {
   },
 };
 
+// Attendance API
+export const attendanceAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.ATTENDANCE.LIST, { params });
+    return response.data;
+  },
+
+  getMy: async (params) => {
+    const response = await api.get(API_ENDPOINTS.ATTENDANCE.MY, { params });
+    return response.data;
+  },
+
+  getToday: async () => {
+    const response = await api.get(API_ENDPOINTS.ATTENDANCE.TODAY);
+    return response.data;
+  },
+
+  clockIn: async (note = '') => {
+    const response = await api.post(API_ENDPOINTS.ATTENDANCE.CLOCK_IN, { note });
+    return response.data;
+  },
+
+  clockOut: async (note = '') => {
+    const response = await api.post(API_ENDPOINTS.ATTENDANCE.CLOCK_OUT, { note });
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.ATTENDANCE.UPDATE(id), data);
+    return response.data;
+  },
+
+  getReport: async (params) => {
+    const response = await api.get(API_ENDPOINTS.ATTENDANCE.REPORT, { params });
+    return response.data;
+  },
+};
+
+// Shifts API
+export const shiftsAPI = {
+  getAll: async (params) => {
+    const response = await api.get(API_ENDPOINTS.SHIFTS.LIST, { params });
+    return response.data;
+  },
+
+  getCurrent: async () => {
+    const response = await api.get(API_ENDPOINTS.SHIFTS.CURRENT);
+    return response.data;
+  },
+
+  getById: async (id) => {
+    const response = await api.get(API_ENDPOINTS.SHIFTS.GET(id));
+    return response.data;
+  },
+
+  open: async (openingCash) => {
+    const response = await api.post(API_ENDPOINTS.SHIFTS.OPEN, { openingCash });
+    return response.data;
+  },
+
+  addExpense: async (id, data) => {
+    const response = await api.post(API_ENDPOINTS.SHIFTS.ADD_EXPENSE(id), data);
+    return response.data;
+  },
+
+  removeExpense: async (id, expenseId) => {
+    const response = await api.delete(API_ENDPOINTS.SHIFTS.REMOVE_EXPENSE(id, expenseId));
+    return response.data;
+  },
+
+  close: async (id, data) => {
+    const response = await api.post(API_ENDPOINTS.SHIFTS.CLOSE(id), data);
+    return response.data;
+  },
+
+  getSummary: async (id) => {
+    const response = await api.get(API_ENDPOINTS.SHIFTS.SUMMARY(id));
+    return response.data;
+  },
+
+  update: async (id, data) => {
+    const response = await api.put(API_ENDPOINTS.SHIFTS.UPDATE(id), data);
+    return response.data;
+  },
+
+  getReport: async (params) => {
+    const response = await api.get(API_ENDPOINTS.SHIFTS.REPORT, { params });
+    return response.data;
+  },
+};
+
 // Recurring Bookings API
 export const recurringBookingsAPI = {
   preview: async (data) => {

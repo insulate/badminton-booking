@@ -29,6 +29,8 @@ import {
   Receipt,
   Map,
   Repeat,
+  UserCheck,
+  Calculator,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -59,6 +61,22 @@ export default function AdminLayout() {
       name: 'ระบบตีก๊วน',
       path: ROUTES.ADMIN.GROUPPLAY,
       icon: Users,
+    },
+    {
+      name: 'จัดการกะ',
+      icon: Clock,
+      children: [
+        {
+          name: 'ลงเวลางาน',
+          path: ROUTES.ADMIN.ATTENDANCE,
+          icon: UserCheck,
+        },
+        {
+          name: 'เช็คเงินกะ',
+          path: ROUTES.ADMIN.SHIFTS,
+          icon: Calculator,
+        },
+      ],
     },
     {
       name: 'การจอง',

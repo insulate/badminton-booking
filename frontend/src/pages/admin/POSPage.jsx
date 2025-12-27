@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
   Search,
@@ -9,15 +10,19 @@ import {
   DollarSign,
   Package,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { productsAPI, salesAPI, categoriesAPI, settingsAPI } from '../../lib/api';
+import { productsAPI, salesAPI, categoriesAPI, settingsAPI, shiftsAPI } from '../../lib/api';
 import { PageContainer, PageHeader } from '../../components/common';
+import { ROUTES } from '../../constants';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const POSPage = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
@@ -26,8 +31,35 @@ const POSPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+  // Shift state
+  const [currentShift, setCurrentShift] = useState(null);
+  const [shiftLoading, setShiftLoading] = useState(true);
+  const [showNoShiftModal, setShowNoShiftModal] = useState(false);
+
+  // Fetch current shift status
+  const fetchCurrentShift = async () => {
+    try {
+      setShiftLoading(true);
+      const response = await shiftsAPI.getCurrent();
+      if (response.success && response.data) {
+        setCurrentShift(response.data);
+        setShowNoShiftModal(false);
+      } else {
+        setCurrentShift(null);
+        setShowNoShiftModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching current shift:', error);
+      setCurrentShift(null);
+      setShowNoShiftModal(true);
+    } finally {
+      setShiftLoading(false);
+    }
+  };
+
   // Fetch products and categories
   useEffect(() => {
+    fetchCurrentShift();
     fetchProducts();
     fetchCategories();
   }, []);
@@ -406,6 +438,59 @@ const POSPage = () => {
             </div>
           </div>
         </div>
+
+      {/* No Shift Modal - บังคับเปิดกะก่อนขาย */}
+      {showNoShiftModal && !shiftLoading && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <AlertTriangle className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">กรุณาเปิดกะก่อน</h2>
+                  <p className="text-white/80 text-sm">ต้องเปิดกะก่อนจึงจะขายสินค้าได้</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-amber-800 font-medium">ทำไมต้องเปิดกะ?</p>
+                    <ul className="text-amber-700 text-sm mt-2 space-y-1">
+                      <li>• ระบบจะติดตามยอดขายของคุณ</li>
+                      <li>• บันทึกเงินเปิดกะสำหรับเช็คเงินตอนปิดกะ</li>
+                      <li>• ช่วยให้การเช็คเงินถูกต้องแม่นยำ</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+                >
+                  กลับหน้าหลัก
+                </button>
+                <button
+                  onClick={() => navigate(ROUTES.ADMIN.SHIFTS)}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Clock className="w-5 h-5" />
+                  ไปเปิดกะ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPaymentModal && (

@@ -43,6 +43,9 @@ export const ROUTES = {
     SETTINGS_PAYMENT: '/admin/settings/payment',
     SETTINGS_GENERAL: '/admin/settings/general',
     SETTINGS_FLOOR_PLAN: '/admin/settings/floor-plan',
+    // Shift Management
+    ATTENDANCE: '/admin/attendance',
+    SHIFTS: '/admin/shifts',
   },
 
   // Redirect
