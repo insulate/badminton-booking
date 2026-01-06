@@ -158,8 +158,7 @@ const recurringBookingGroupSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-recurringBookingGroupSchema.index({ groupCode: 1 });
+// Indexes (groupCode index is auto-created by unique: true in schema)
 recurringBookingGroupSchema.index({ 'customer.phone': 1 });
 recurringBookingGroupSchema.index({ status: 1 });
 recurringBookingGroupSchema.index({ createdBy: 1 });

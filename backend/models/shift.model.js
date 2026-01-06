@@ -140,8 +140,7 @@ const shiftSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-shiftSchema.index({ shiftCode: 1 }, { unique: true });
+// Indexes (shiftCode index is auto-created by unique: true in schema)
 shiftSchema.index({ user: 1, date: -1 });
 shiftSchema.index({ status: 1 });
 shiftSchema.index({ startTime: -1 });
