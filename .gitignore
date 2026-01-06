@@ -38,3 +38,6 @@ coverage/
 # OpenCode
 .opencode/
 opencode.json
+
+# Claude Code
+.claude/
