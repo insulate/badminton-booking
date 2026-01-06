@@ -39,5 +39,7 @@ coverage/
 .opencode/
 opencode.json
 
-# Claude Code
+# Claude Code / AI
 .claude/
+.mcp.json
+nul
