@@ -32,6 +32,7 @@ import {
   Repeat,
   UserCheck,
   Calculator,
+  Bell,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -253,19 +254,45 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* Right: User Profile */}
-          <div className="flex items-center gap-3">
-            <div className="hidden md:block text-right">
-              <p className="text-white text-sm font-medium">{user?.name || 'User'}</p>
-              <p className="text-white/70 text-xs">
-                {user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน'}
-              </p>
+          {/* Right: Notification + User Profile + Logout */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Notification Bell */}
+            <Link
+              to="/admin/bookings"
+              className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="สลิปรอตรวจสอบ"
+            >
+              <Bell size={22} />
+              {pendingSlipsCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                  {pendingSlipsCount > 99 ? '99+' : pendingSlipsCount}
+                </span>
+              )}
+            </Link>
+
+            {/* User Profile */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden md:block text-right">
+                <p className="text-white text-sm font-medium">{user?.name || 'User'}</p>
+                <p className="text-white/70 text-xs">
+                  {user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน'}
+                </p>
+              </div>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm sm:text-base">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="text-white font-semibold">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </span>
-            </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="ออกจากระบบ"
+            >
+              <LogOut size={22} />
+            </button>
           </div>
         </div>
       </header>
@@ -370,18 +397,6 @@ export default function AdminLayout() {
             })}
           </div>
 
-          {/* Bottom Section */}
-          <div className="border-t border-slate-700 p-3 space-y-1">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg
-                text-slate-300 hover:bg-bg-sidebar-hover hover:text-white
-                transition-colors duration-200"
-            >
-              <LogOut size={20} />
-              <span className="font-medium">ออกจากระบบ</span>
-            </button>
-          </div>
         </nav>
       </aside>
 
