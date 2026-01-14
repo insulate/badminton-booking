@@ -366,6 +366,81 @@ router.delete('/floor-plan', protect, admin, async (req, res) => {
 });
 
 /**
+ * @route   POST /api/settings/qr-code
+ * @desc    Upload QR Code image for payment
+ * @access  Private (Admin)
+ */
+router.post('/qr-code', protect, admin, uploadVenue.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกไฟล์รูปภาพ',
+      });
+    }
+
+    const settings = await Setting.getSettings();
+
+    // Delete old image if exists
+    if (settings.payment?.qrCodeImage) {
+      await deleteImage(settings.payment.qrCodeImage);
+    }
+
+    // Update with new image path
+    const imagePath = `/uploads/venue/${req.file.filename}`;
+    settings.payment.qrCodeImage = imagePath;
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'อัพโหลด QR Code สำเร็จ',
+      data: {
+        qrCodeImage: imagePath,
+      },
+    });
+  } catch (error) {
+    console.error('Upload QR Code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการอัพโหลด QR Code',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/settings/qr-code
+ * @desc    Delete QR Code image
+ * @access  Private (Admin)
+ */
+router.delete('/qr-code', protect, admin, async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    // Delete image file if exists
+    if (settings.payment?.qrCodeImage) {
+      await deleteImage(settings.payment.qrCodeImage);
+    }
+
+    // Clear image path in database
+    settings.payment.qrCodeImage = '';
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'ลบ QR Code สำเร็จ',
+    });
+  } catch (error) {
+    console.error('Delete QR Code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการลบ QR Code',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   GET /api/settings/payment-info
  * @desc    Get payment info for customers (PromptPay, Bank Account)
  * @access  Public
@@ -378,13 +453,15 @@ router.get('/payment-info', async (req, res) => {
       success: true,
       data: {
         promptPayNumber: settings.payment?.promptPayNumber || '',
+        qrCodeImage: settings.payment?.qrCodeImage || '',
         bankAccount: {
           bankName: settings.payment?.bankAccount?.bankName || '',
           accountNumber: settings.payment?.bankAccount?.accountNumber || '',
           accountName: settings.payment?.bankAccount?.accountName || '',
         },
-        acceptPromptPay: settings.payment?.acceptPromptPay || false,
-        acceptTransfer: settings.payment?.acceptTransfer || false,
+        acceptPromptPay: settings.payment?.acceptPromptPay ?? false,
+        acceptTransfer: settings.payment?.acceptTransfer ?? false,
+        acceptQRCode: settings.payment?.acceptQRCode ?? false,
       },
     });
   } catch (error) {

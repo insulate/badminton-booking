@@ -84,7 +84,8 @@ const thaiBanksLogo = {
   },
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// ใช้ base URL สำหรับ static files (ไม่มี /api)
+const STATIC_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '');
 
 // Map Thai bank name to bank code
 const getBankInfo = (bankName) => {
@@ -132,7 +133,7 @@ export default function PaymentPage() {
       try {
         setLoading(true);
         const [bookingRes, paymentRes] = await Promise.all([
-          customerBookingsAPI.getBookingById(bookingId),
+          customerBookingsAPI.getBookingForPayment(bookingId),
           customerBookingsAPI.getPaymentInfo(),
         ]);
 
@@ -252,7 +253,7 @@ export default function PaymentPage() {
       const formData = new FormData();
       formData.append('slip', selectedFile);
 
-      const response = await customerBookingsAPI.uploadSlip(booking._id, formData);
+      const response = await customerBookingsAPI.uploadSlipPublic(booking._id, formData);
 
       if (response.success) {
         setUploadSuccess(true);
@@ -477,8 +478,17 @@ export default function PaymentPage() {
       <div className="bg-white rounded-xl p-4 mb-4 shadow-sm">
         <h3 className="font-semibold text-gray-800 mb-4">ช่องทางการชำระเงิน</h3>
 
-        {/* PromptPay QR */}
-        {paymentInfo?.promptPayNumber && (
+        {/* No payment methods available */}
+        {!paymentInfo?.acceptPromptPay && !paymentInfo?.acceptTransfer && !paymentInfo?.acceptQRCode && (
+          <div className="text-center py-4 text-gray-500">
+            <AlertCircle className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+            <p>ยังไม่มีช่องทางการชำระเงินที่เปิดใช้งาน</p>
+            <p className="text-sm">กรุณาติดต่อทางร้านเพื่อชำระเงิน</p>
+          </div>
+        )}
+
+        {/* PromptPay */}
+        {paymentInfo?.acceptPromptPay && (
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-3">
               <img
@@ -489,36 +499,69 @@ export default function PaymentPage() {
               <span className="font-medium text-gray-700">พร้อมเพย์ (PromptPay)</span>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <QRCodeSVG
-                value={generatePromptPayQR() || paymentInfo.promptPayNumber}
-                size={180}
-                level="M"
-                className="mx-auto mb-3"
-              />
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-lg font-semibold">{paymentInfo.promptPayNumber}</span>
-                <button
-                  onClick={() => copyToClipboard(paymentInfo.promptPayNumber, 'เลขพร้อมเพย์')}
-                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
+            {paymentInfo?.promptPayNumber ? (
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <QRCodeSVG
+                  value={generatePromptPayQR() || paymentInfo.promptPayNumber}
+                  size={180}
+                  level="M"
+                  className="mx-auto mb-3"
+                />
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-lg font-semibold">{paymentInfo.promptPayNumber}</span>
+                  <button
+                    onClick={() => copyToClipboard(paymentInfo.promptPayNumber, 'เลขพร้อมเพย์')}
+                    className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-500">
+                <p className="text-sm">กรุณาติดต่อทางร้านเพื่อขอหมายเลขพร้อมเพย์</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* QR Code Image */}
+        {paymentInfo?.acceptQRCode && (
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 font-bold text-xs">QR</span>
+              </div>
+              <span className="font-medium text-gray-700">QR Code</span>
             </div>
+
+            {paymentInfo?.qrCodeImage ? (
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <img
+                  src={`${STATIC_BASE_URL}${paymentInfo.qrCodeImage}`}
+                  alt="QR Code สำหรับชำระเงิน"
+                  className="max-w-[200px] mx-auto rounded-lg"
+                />
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-500">
+                <p className="text-sm">กรุณาติดต่อทางร้านเพื่อขอ QR Code</p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Bank Transfer */}
-        {paymentInfo?.bankAccount?.accountNumber && (() => {
-          const bankInfo = getBankInfo(paymentInfo.bankAccount.bankName);
+        {paymentInfo?.acceptTransfer && (() => {
+          const bankInfo = getBankInfo(paymentInfo.bankAccount?.bankName);
+          const hasAccountInfo = paymentInfo.bankAccount?.accountNumber;
           return (
-          <div>
+          <div className="mb-6">
             <div className="flex items-center gap-3 mb-3">
               {bankInfo?.icon ? (
                 <img
                   src={bankInfo.icon}
-                  alt={paymentInfo.bankAccount.bankName}
+                  alt={paymentInfo.bankAccount?.bankName}
                   className="w-10 h-10 object-contain"
                 />
               ) : (
@@ -529,33 +572,39 @@ export default function PaymentPage() {
               <span className="font-medium text-gray-700">โอนผ่านธนาคาร</span>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500 text-sm">ธนาคาร</span>
-                <div className="flex items-center gap-2">
-                  {bankInfo?.icon && (
-                    <img src={bankInfo.icon} alt="" className="w-5 h-5 object-contain" />
-                  )}
-                  <span className="font-medium">{paymentInfo.bankAccount.bankName}</span>
+            {hasAccountInfo ? (
+              <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-sm">ธนาคาร</span>
+                  <div className="flex items-center gap-2">
+                    {bankInfo?.icon && (
+                      <img src={bankInfo.icon} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    <span className="font-medium">{paymentInfo.bankAccount.bankName}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-sm">เลขบัญชี</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{paymentInfo.bankAccount.accountNumber}</span>
+                    <button
+                      onClick={() => copyToClipboard(paymentInfo.bankAccount.accountNumber, 'เลขบัญชี')}
+                      className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-sm">ชื่อบัญชี</span>
+                  <span className="font-medium">{paymentInfo.bankAccount.accountName}</span>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500 text-sm">เลขบัญชี</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{paymentInfo.bankAccount.accountNumber}</span>
-                  <button
-                    onClick={() => copyToClipboard(paymentInfo.bankAccount.accountNumber, 'เลขบัญชี')}
-                    className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                </div>
+            ) : (
+              <div className="bg-gray-50 rounded-xl p-4 text-center text-gray-500">
+                <p className="text-sm">กรุณาติดต่อทางร้านเพื่อขอข้อมูลบัญชีธนาคาร</p>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500 text-sm">ชื่อบัญชี</span>
-                <span className="font-medium">{paymentInfo.bankAccount.accountName}</span>
-              </div>
-            </div>
+            )}
           </div>
           );
         })()}

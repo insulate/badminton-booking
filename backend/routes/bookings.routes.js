@@ -269,6 +269,52 @@ router.get('/customer/my-bookings', protectPlayer, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/bookings/payment/:id
+ * @desc    Get booking by ID for payment page (Public - accessed via booking link)
+ * @access  Public
+ */
+router.get('/payment/:id', validateObjectId(), async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('court', 'courtNumber name')
+      .populate('timeSlot', 'startTime endTime peakHour');
+
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Return limited info for payment page (no sensitive data)
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: booking._id,
+        bookingCode: booking.bookingCode,
+        date: booking.date,
+        court: booking.court,
+        timeSlot: booking.timeSlot,
+        duration: booking.duration,
+        pricing: booking.pricing,
+        bookingStatus: booking.bookingStatus,
+        paymentDeadline: booking.paymentDeadline,
+        customer: {
+          name: booking.customer?.name,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Get booking for payment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถโหลดข้อมูลการจองได้',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   GET /api/bookings/customer/:id
  * @desc    Get single booking by ID for payment page
  * @access  Private (Player)
@@ -1076,6 +1122,92 @@ router.post('/:id/upload-slip', protectPlayer, validateObjectId(), uploadSlip.si
     });
   } catch (error) {
     console.error('Upload slip error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'ไม่สามารถอัพโหลดสลิปได้',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/bookings/payment/:id/upload-slip
+ * @desc    Upload payment slip for booking (Public - accessed via payment link)
+ * @access  Public
+ */
+router.post('/payment/:id/upload-slip', validateObjectId(), uploadSlip.single('slip'), async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking || booking.deletedAt) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบการจอง',
+      });
+    }
+
+    // Check if slip file exists
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกไฟล์สลิป',
+      });
+    }
+
+    // Check booking status
+    if (booking.bookingStatus === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่สามารถอัพโหลดสลิปสำหรับการจองที่ถูกยกเลิกได้',
+      });
+    }
+
+    // Check payment status
+    if (booking.paymentStatus === 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'การจองนี้ชำระเงินเรียบร้อยแล้ว',
+      });
+    }
+
+    // Delete old slip if exists
+    if (booking.paymentSlip?.image) {
+      await deleteImage(booking.paymentSlip.image);
+    }
+
+    // Update booking with new slip - auto confirm when uploaded
+    const imagePath = `/uploads/slips/${req.file.filename}`;
+    booking.paymentSlip = {
+      image: imagePath,
+      uploadedAt: new Date(),
+      verifiedAt: new Date(), // Auto verify
+      verifiedBy: null,
+      status: 'verified', // Auto verified
+      rejectReason: '',
+    };
+
+    // Auto confirm booking when slip uploaded
+    booking.bookingStatus = 'confirmed';
+    booking.paymentStatus = 'paid';
+    booking.pricing.deposit = booking.pricing.total;
+
+    await booking.save();
+
+    await booking.populate('court', 'courtNumber name');
+    await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    res.status(200).json({
+      success: true,
+      message: 'อัพโหลดสลิปสำเร็จ',
+      data: {
+        _id: booking._id,
+        bookingCode: booking.bookingCode,
+        bookingStatus: booking.bookingStatus,
+        paymentStatus: booking.paymentStatus,
+      },
+    });
+  } catch (error) {
+    console.error('Public upload slip error:', error);
     res.status(500).json({
       success: false,
       message: 'ไม่สามารถอัพโหลดสลิปได้',

@@ -139,11 +139,23 @@ export const customerBookingsAPI = {
     return response.data;
   },
 
+  // Public - get booking for payment page (no auth required)
+  getBookingForPayment: async (id) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.PAYMENT_GET(id));
+    return response.data;
+  },
+
   uploadSlip: async (bookingId, formData) => {
     const token = localStorage.getItem('playerToken');
     const response = await api.post(API_ENDPOINTS.BOOKINGS.UPLOAD_SLIP(bookingId), formData, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    return response.data;
+  },
+
+  // Public - upload slip for payment page (no auth required)
+  uploadSlipPublic: async (bookingId, formData) => {
+    const response = await api.post(API_ENDPOINTS.BOOKINGS.PAYMENT_UPLOAD_SLIP(bookingId), formData);
     return response.data;
   },
 
@@ -240,6 +252,17 @@ export const settingsAPI = {
 
   deleteFloorPlan: async () => {
     const response = await api.delete(API_ENDPOINTS.SETTINGS.FLOOR_PLAN);
+    return response.data;
+  },
+
+  // QR Code upload
+  uploadQRCode: async (formData) => {
+    const response = await api.post(API_ENDPOINTS.SETTINGS.QR_CODE, formData);
+    return response.data;
+  },
+
+  deleteQRCode: async () => {
+    const response = await api.delete(API_ENDPOINTS.SETTINGS.QR_CODE);
     return response.data;
   },
 

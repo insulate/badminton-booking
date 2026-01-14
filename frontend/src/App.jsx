@@ -111,11 +111,11 @@ function App() {
           <Route path={ROUTES.CUSTOMER.BOOKING} element={<CustomerBookingPage />} />
           <Route path={ROUTES.CUSTOMER.LOGIN} element={<CustomerLoginPage />} />
           <Route path={ROUTES.CUSTOMER.REGISTER} element={<CustomerRegisterPage />} />
+          <Route path="/payment/:bookingId" element={<PaymentPage />} />
 
           {/* Customer Protected Routes */}
           <Route element={<CustomerProtectedRoute />}>
             <Route path={ROUTES.CUSTOMER.MY_BOOKINGS} element={<MyBookingsPage />} />
-            <Route path="/payment/:bookingId" element={<PaymentPage />} />
           </Route>
         </Route>
 

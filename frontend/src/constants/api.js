@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
     UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
     FLOOR_PLAN: '/settings/floor-plan',
+    QR_CODE: '/settings/qr-code',
     PAYMENT_INFO: '/settings/payment-info', // Public
     BLOCKED_DATES: '/settings/blocked-dates', // Public GET, Admin POST/DELETE
     BLOCKED_DATE: (date) => `/settings/blocked-dates/${date}`, // Admin DELETE
@@ -89,6 +90,9 @@ export const API_ENDPOINTS = {
     // Payment slip
     UPLOAD_SLIP: (id) => `/bookings/${id}/upload-slip`,
     VERIFY_SLIP: (id) => `/bookings/${id}/verify-slip`,
+    // Public payment page
+    PAYMENT_GET: (id) => `/bookings/payment/${id}`,
+    PAYMENT_UPLOAD_SLIP: (id) => `/bookings/payment/${id}/upload-slip`,
   },
 
   // Products Management (Admin)

@@ -133,15 +133,19 @@ const settingSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
-      acceptCreditCard: {
-        type: Boolean,
-        default: false,
-      },
       acceptPromptPay: {
         type: Boolean,
         default: true,
       },
+      acceptQRCode: {
+        type: Boolean,
+        default: true,
+      },
       promptPayNumber: {
+        type: String,
+        default: '',
+      },
+      qrCodeImage: {
         type: String,
         default: '',
       },
