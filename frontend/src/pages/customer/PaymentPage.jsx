@@ -257,7 +257,7 @@ export default function PaymentPage() {
 
       if (response.success) {
         setUploadSuccess(true);
-        toast.success('ชำระเงินสำเร็จ! การจองได้รับการยืนยันแล้ว');
+        toast.success('อัพโหลดสลิปสำเร็จ! รอเจ้าหน้าที่ตรวจสอบ');
       } else {
         toast.error(response.message || 'ไม่สามารถอัพโหลดสลิปได้');
       }
@@ -336,12 +336,15 @@ export default function PaymentPage() {
     return (
       <div className="min-h-full bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-green-600" />
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Clock className="w-10 h-10 text-amber-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">จองสำเร็จ!</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">อัพโหลดสลิปสำเร็จ!</h2>
           <p className="text-gray-600 mb-6">
-            การจองของคุณได้รับการยืนยันแล้ว
+            รอเจ้าหน้าที่ตรวจสอบการชำระเงิน
+          </p>
+          <p className="text-sm text-amber-600 mb-4">
+            โดยปกติจะใช้เวลาไม่เกิน 15 นาที
           </p>
 
           {/* Booking Summary */}

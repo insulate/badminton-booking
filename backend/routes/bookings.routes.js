@@ -57,6 +57,32 @@ router.get('/public/availability', async (req, res) => {
 });
 
 /**
+ * @route   GET /api/bookings/pending-slips-count
+ * @desc    Get count of bookings with pending slip verification
+ * @access  Private (Admin)
+ */
+router.get('/pending-slips-count', protect, admin, async (req, res) => {
+  try {
+    const count = await Booking.countDocuments({
+      'paymentSlip.status': 'pending_verification',
+      deletedAt: null,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: { count },
+    });
+  } catch (error) {
+    console.error('Get pending slips count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get pending slips count',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   POST /api/bookings/customer
  * @desc    Create booking from customer (no court assigned)
  * @access  Private (Player)
@@ -1094,21 +1120,19 @@ router.post('/:id/upload-slip', protectPlayer, validateObjectId(), uploadSlip.si
       await deleteImage(booking.paymentSlip.image);
     }
 
-    // Update booking with new slip - auto confirm when uploaded
+    // Update booking with new slip - set to pending verification
     const imagePath = `/uploads/slips/${req.file.filename}`;
     booking.paymentSlip = {
       image: imagePath,
       uploadedAt: new Date(),
-      verifiedAt: new Date(), // Auto verify
+      verifiedAt: null,
       verifiedBy: null,
-      status: 'verified', // Auto verified
+      status: 'pending_verification',
       rejectReason: '',
     };
 
-    // Auto confirm booking when slip uploaded
-    booking.bookingStatus = 'confirmed';
-    booking.paymentStatus = 'paid';
-    booking.pricing.deposit = booking.pricing.total;
+    // Keep booking pending until slip is verified
+    // Don't change bookingStatus or paymentStatus here
 
     await booking.save();
 
@@ -1117,7 +1141,7 @@ router.post('/:id/upload-slip', protectPlayer, validateObjectId(), uploadSlip.si
 
     res.status(200).json({
       success: true,
-      message: 'อัพโหลดสลิปสำเร็จ',
+      message: 'อัพโหลดสลิปสำเร็จ รอการตรวจสอบจากเจ้าหน้าที่',
       data: booking,
     });
   } catch (error) {
@@ -1175,21 +1199,19 @@ router.post('/payment/:id/upload-slip', validateObjectId(), uploadSlip.single('s
       await deleteImage(booking.paymentSlip.image);
     }
 
-    // Update booking with new slip - auto confirm when uploaded
+    // Update booking with new slip - set to pending verification
     const imagePath = `/uploads/slips/${req.file.filename}`;
     booking.paymentSlip = {
       image: imagePath,
       uploadedAt: new Date(),
-      verifiedAt: new Date(), // Auto verify
+      verifiedAt: null,
       verifiedBy: null,
-      status: 'verified', // Auto verified
+      status: 'pending_verification',
       rejectReason: '',
     };
 
-    // Auto confirm booking when slip uploaded
-    booking.bookingStatus = 'confirmed';
-    booking.paymentStatus = 'paid';
-    booking.pricing.deposit = booking.pricing.total;
+    // Keep booking pending until slip is verified
+    // Don't change bookingStatus or paymentStatus here
 
     await booking.save();
 
@@ -1198,12 +1220,15 @@ router.post('/payment/:id/upload-slip', validateObjectId(), uploadSlip.single('s
 
     res.status(200).json({
       success: true,
-      message: 'อัพโหลดสลิปสำเร็จ',
+      message: 'อัพโหลดสลิปสำเร็จ รอการตรวจสอบจากเจ้าหน้าที่',
       data: {
         _id: booking._id,
         bookingCode: booking.bookingCode,
         bookingStatus: booking.bookingStatus,
         paymentStatus: booking.paymentStatus,
+        paymentSlip: {
+          status: booking.paymentSlip.status,
+        },
       },
     });
   } catch (error) {

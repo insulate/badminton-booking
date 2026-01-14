@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ROUTES } from '../../constants';
 import useAuthStore from '../../store/authStore';
+import { bookingsAPI } from '../../lib/api';
 import {
   LayoutDashboard,
   Users,
@@ -36,9 +37,37 @@ import {
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState({});
+  const [pendingSlipsCount, setPendingSlipsCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+
+  // Fetch pending slips count
+  const fetchPendingSlipsCount = useCallback(async () => {
+    try {
+      const response = await bookingsAPI.getPendingSlipsCount();
+      if (response.success) {
+        setPendingSlipsCount(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching pending slips count:', error);
+    }
+  }, []);
+
+  // Fetch on mount and periodically
+  useEffect(() => {
+    fetchPendingSlipsCount();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchPendingSlipsCount, 30000);
+    return () => clearInterval(interval);
+  }, [fetchPendingSlipsCount]);
+
+  // Refresh when navigating to bookings page
+  useEffect(() => {
+    if (location.pathname === '/admin/bookings') {
+      fetchPendingSlipsCount();
+    }
+  }, [location.pathname, fetchPendingSlipsCount]);
 
   const handleLogout = () => {
     logout();
@@ -81,6 +110,7 @@ export default function AdminLayout() {
     {
       name: 'การจอง',
       icon: CalendarDays,
+      badge: pendingSlipsCount > 0 ? pendingSlipsCount : null,
       children: [
         {
           name: 'จองสนาม',
@@ -91,6 +121,7 @@ export default function AdminLayout() {
           name: 'รายการจอง',
           path: '/admin/bookings',
           icon: ClipboardList,
+          badge: pendingSlipsCount > 0 ? pendingSlipsCount : null,
         },
         {
           name: 'การจองประจำ',
@@ -275,6 +306,11 @@ export default function AdminLayout() {
                       <div className="flex items-center gap-3">
                         <Icon size={20} />
                         <span className="font-medium">{item.name}</span>
+                        {item.badge && (
+                          <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                            {item.badge > 99 ? '99+' : item.badge}
+                          </span>
+                        )}
                       </div>
                       {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
@@ -319,6 +355,11 @@ export default function AdminLayout() {
                           >
                             <ChildIcon size={18} />
                             <span className="font-medium text-sm">{child.name}</span>
+                            {child.badge && (
+                              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center ml-auto">
+                                {child.badge > 99 ? '99+' : child.badge}
+                              </span>
+                            )}
                           </Link>
                         );
                       })}

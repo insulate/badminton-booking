@@ -90,6 +90,7 @@ export const API_ENDPOINTS = {
     // Payment slip
     UPLOAD_SLIP: (id) => `/bookings/${id}/upload-slip`,
     VERIFY_SLIP: (id) => `/bookings/${id}/verify-slip`,
+    PENDING_SLIPS_COUNT: '/bookings/pending-slips-count',
     // Public payment page
     PAYMENT_GET: (id) => `/bookings/payment/${id}`,
     PAYMENT_UPLOAD_SLIP: (id) => `/bookings/payment/${id}/upload-slip`,

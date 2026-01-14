@@ -422,6 +422,11 @@ export const bookingsAPI = {
     const response = await api.patch(API_ENDPOINTS.BOOKINGS.VERIFY_SLIP(id), { action, rejectReason });
     return response.data;
   },
+
+  getPendingSlipsCount: async () => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.PENDING_SLIPS_COUNT);
+    return response.data;
+  },
 };
 
 // Products API (Admin only)

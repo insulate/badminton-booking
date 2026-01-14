@@ -3,7 +3,8 @@ import { X, Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, DollarSign, 
 import { toast } from 'react-hot-toast';
 import { settingsAPI, bookingsAPI } from '../../lib/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// ใช้ base URL สำหรับ static files (ไม่มี /api)
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '');
 
 /**
  * BookingDetailModal Component
