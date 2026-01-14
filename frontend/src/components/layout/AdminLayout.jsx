@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ROUTES } from '../../constants';
 import useAuthStore from '../../store/authStore';
+import useSocket from '../../hooks/useSocket';
 import { bookingsAPI } from '../../lib/api';
 import {
   LayoutDashboard,
@@ -39,6 +40,8 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState({});
   const [pendingSlipsCount, setPendingSlipsCount] = useState(0);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -69,6 +72,60 @@ export default function AdminLayout() {
       fetchPendingSlipsCount();
     }
   }, [location.pathname, fetchPendingSlipsCount]);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Socket event handlers for realtime notifications
+  const handleNewBooking = useCallback((data) => {
+    toast.success(
+      <div>
+        <p className="font-semibold">การจองใหม่!</p>
+        <p className="text-sm">{data.booking?.bookingCode} - {data.booking?.customerName}</p>
+      </div>,
+      { duration: 5000, icon: '📅' }
+    );
+    // Refresh pending slips count
+    fetchPendingSlipsCount();
+  }, [fetchPendingSlipsCount]);
+
+  const handleSlipUploaded = useCallback((data) => {
+    toast.success(
+      <div>
+        <p className="font-semibold">สลิปใหม่รอตรวจสอบ!</p>
+        <p className="text-sm">{data.booking?.bookingCode} - {data.booking?.customerName}</p>
+      </div>,
+      { duration: 5000, icon: '💳' }
+    );
+    // Refresh pending slips count
+    fetchPendingSlipsCount();
+  }, [fetchPendingSlipsCount]);
+
+  const handleBookingCancelled = useCallback((data) => {
+    toast(
+      <div>
+        <p className="font-semibold">การจองถูกยกเลิก</p>
+        <p className="text-sm">{data.booking?.bookingCode}</p>
+      </div>,
+      { duration: 4000, icon: '❌' }
+    );
+  }, []);
+
+  // Initialize socket connection
+  useSocket({
+    onNewBooking: handleNewBooking,
+    onSlipUploaded: handleSlipUploaded,
+    onBookingCancelled: handleBookingCancelled,
+  });
 
   const handleLogout = () => {
     logout();
@@ -254,7 +311,7 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* Right: Notification + User Profile + Logout */}
+          {/* Right: Notification + User Profile Dropdown */}
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Notification Bell */}
             <Link
@@ -270,29 +327,48 @@ export default function AdminLayout() {
               )}
             </Link>
 
-            {/* User Profile */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden md:block text-right">
-                <p className="text-white text-sm font-medium">{user?.name || 'User'}</p>
-                <p className="text-white/70 text-xs">
-                  {user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน'}
-                </p>
-              </div>
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm sm:text-base">
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              </div>
-            </div>
+            {/* User Profile Dropdown */}
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <div className="hidden md:block text-right">
+                  <p className="text-white text-sm font-medium">{user?.name || 'User'}</p>
+                  <p className="text-white/70 text-xs">
+                    {user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน'}
+                  </p>
+                </div>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm sm:text-base">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <ChevronDown
+                  size={18}
+                  className={`text-white transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-              title="ออกจากระบบ"
-            >
-              <LogOut size={22} />
-            </button>
+              {/* Dropdown Menu */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 border-b md:hidden">
+                    <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut size={18} />
+                    <span>ออกจากระบบ</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

@@ -23,6 +23,7 @@ const {
   getAvailabilityByTimeSlot,
 } = require('../utils/availabilityChecker');
 const { isDateBlocked } = require('../utils/blockedDateChecker');
+const { notifyNewBooking, notifySlipUploaded } = require('../services/socket.service');
 
 /**
  * @route   GET /api/bookings/public/availability
@@ -230,6 +231,20 @@ router.post('/customer', protectPlayer, async (req, res) => {
 
     // Populate before sending response
     await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    // Notify admins about new booking via Socket.IO
+    notifyNewBooking({
+      _id: booking._id,
+      bookingCode: booking.bookingCode,
+      customerName: booking.customer.name,
+      customerPhone: booking.customer.phone,
+      date: booking.date,
+      startTime: booking.timeSlot.startTime,
+      endTime: booking.timeSlot.endTime,
+      totalPrice: booking.pricing.total,
+      paymentStatus: booking.paymentStatus,
+      createdAt: booking.createdAt,
+    });
 
     res.status(201).json({
       success: true,
@@ -1139,6 +1154,15 @@ router.post('/:id/upload-slip', protectPlayer, validateObjectId(), uploadSlip.si
     await booking.populate('court', 'courtNumber name');
     await booking.populate('timeSlot', 'startTime endTime peakHour');
 
+    // Notify admins about new slip upload via Socket.IO
+    notifySlipUploaded({
+      _id: booking._id,
+      bookingCode: booking.bookingCode,
+      customerName: booking.customer.name,
+      customerPhone: booking.customer.phone,
+      paymentSlip: booking.paymentSlip,
+    });
+
     res.status(200).json({
       success: true,
       message: 'อัพโหลดสลิปสำเร็จ รอการตรวจสอบจากเจ้าหน้าที่',
@@ -1217,6 +1241,15 @@ router.post('/payment/:id/upload-slip', validateObjectId(), uploadSlip.single('s
 
     await booking.populate('court', 'courtNumber name');
     await booking.populate('timeSlot', 'startTime endTime peakHour');
+
+    // Notify admins about new slip upload via Socket.IO
+    notifySlipUploaded({
+      _id: booking._id,
+      bookingCode: booking.bookingCode,
+      customerName: booking.customer.name,
+      customerPhone: booking.customer.phone,
+      paymentSlip: booking.paymentSlip,
+    });
 
     res.status(200).json({
       success: true,
