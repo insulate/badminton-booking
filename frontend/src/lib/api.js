@@ -240,6 +240,11 @@ export const settingsAPI = {
     return response.data;
   },
 
+  getVenueInfo: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.VENUE_INFO);
+    return response.data;
+  },
+
   getFloorPlan: async () => {
     const response = await api.get(API_ENDPOINTS.SETTINGS.FLOOR_PLAN);
     return response.data;

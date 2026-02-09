@@ -74,11 +74,12 @@ const TimeSlotModal = ({ timeslot, onClose, onSuccess }) => {
   const validateForm = () => {
     // Validate time format
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    const endTimeRegex = /^(([0-1]?[0-9]|2[0-3]):[0-5][0-9]|24:00)$/;
     if (!timeRegex.test(formData.startTime)) {
       toast.error('รูปแบบเวลาเริ่มต้นไม่ถูกต้อง (ใช้รูปแบบ HH:MM)');
       return false;
     }
-    if (!timeRegex.test(formData.endTime)) {
+    if (!endTimeRegex.test(formData.endTime)) {
       toast.error('รูปแบบเวลาสิ้นสุดไม่ถูกต้อง (ใช้รูปแบบ HH:MM)');
       return false;
     }

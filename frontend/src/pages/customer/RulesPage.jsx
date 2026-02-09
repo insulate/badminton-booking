@@ -1,6 +1,26 @@
-import { MapPin, Phone, Facebook, Instagram } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { settingsAPI } from '../../lib/api';
 
 export default function RulesPage() {
+  const [venueInfo, setVenueInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVenueInfo = async () => {
+      try {
+        const response = await settingsAPI.getVenueInfo();
+        if (response.success) {
+          setVenueInfo(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching venue info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVenueInfo();
+  }, []);
+
   const rules = [
     {
       id: 1,
@@ -52,6 +72,30 @@ export default function RulesPage() {
     },
   ];
 
+  const venueName = venueInfo?.venue?.name || '';
+  const venuePhone = venueInfo?.venue?.phone || '';
+  const openTime = venueInfo?.operating?.openTime || '';
+  const closeTime = venueInfo?.operating?.closeTime || '';
+  const daysOpen = venueInfo?.operating?.daysOpen || [];
+
+  // Format time for display (09:00 → 09.00)
+  const formatTime = (time) => {
+    if (!time) return '';
+    return time.replace(':', '.') + ' น.';
+  };
+
+  // Get days label
+  const getDaysLabel = () => {
+    if (daysOpen.length === 7) return 'เปิดทุกวัน';
+    if (daysOpen.length === 0) return '';
+
+    const dayNames = {
+      monday: 'จ.', tuesday: 'อ.', wednesday: 'พ.',
+      thursday: 'พฤ.', friday: 'ศ.', saturday: 'ส.', sunday: 'อา.',
+    };
+    return daysOpen.map(d => dayNames[d] || d).join(', ');
+  };
+
   return (
     <div className="min-h-full bg-blue-700 font-sans">
       {/* Background decoration lines - subtle overlay */}
@@ -99,68 +143,37 @@ export default function RulesPage() {
 
         {/* Footer Section */}
         <div className="flex flex-col lg:flex-row items-end justify-between border-t border-white/20 pt-8 gap-8">
-          {/* Left Footer - Complex Name */}
+          {/* Left Footer - Venue Name & Hours */}
           <div className="w-full lg:w-auto">
-             <div className="mb-4">
-               <h2 className="text-3xl font-black italic text-white leading-none transform -skew-x-6">
-                 <span className="block text-xl opacity-80">PHROMLIKHIT</span>
-                 COMPLEX
-                 <span className="block h-1 w-20 bg-yellow-400 mt-1"></span>
-               </h2>
-             </div>
-             
-             <div className="space-y-2 text-white font-medium">
-               <div className="flex items-center gap-3">
-                 <span className="bg-blue-800 px-2 py-0.5 rounded text-sm text-yellow-400 font-bold border border-yellow-400/30">MON-SAT</span>
-                 <span className="text-lg">09.00 - 23.00 น.</span>
+             {venueName && (
+               <div className="mb-4">
+                 <h2 className="text-2xl font-black text-white leading-tight">
+                   {venueName}
+                   <span className="block h-1 w-20 bg-yellow-400 mt-1"></span>
+                 </h2>
                </div>
-               <div className="flex items-center gap-3">
-                 <span className="bg-blue-800 px-2 py-0.5 rounded text-sm text-yellow-400 font-bold border border-yellow-400/30 w-[84px] text-center">SUN</span>
-                 <span className="text-lg">08.00 - 22.00 น.</span>
-               </div>
-             </div>
-          </div>
+             )}
 
-          {/* Right Footer - Contact & QR */}
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 w-full lg:w-auto">
-            {/* QR Code */}
-             <div className="flex flex-col items-center">
-               <span className="text-white text-[10px] uppercase tracking-widest mb-1 opacity-80">Line Official Account</span>
-               <div className="bg-white p-2 rounded-lg shadow-xl">
-                 <div className="w-24 h-24 bg-gray-900 flex items-center justify-center">
-                    {/* Placeholder for QR */}
-                    <div className="text-white text-xs text-center p-2">
-                       <div className="w-full h-full border-2 border-white/30 flex items-center justify-center">
-                         QR CODE
-                       </div>
-                    </div>
+             {openTime && closeTime && (
+               <div className="space-y-2 text-white font-medium">
+                 <div className="flex items-center gap-3">
+                   <span className="bg-blue-800 px-2 py-0.5 rounded text-sm text-yellow-400 font-bold border border-yellow-400/30">
+                     {getDaysLabel()}
+                   </span>
+                   <span className="text-lg">{formatTime(openTime)} - {formatTime(closeTime)}</span>
                  </div>
                </div>
-             </div>
+             )}
+          </div>
 
-             {/* Contact Info */}
-             <div className="text-white text-right space-y-1">
-                <div className="flex items-center justify-end gap-2">
-                  <div className="text-right">
-                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Tel</p>
-                    <p className="text-lg font-bold">090-019-4444</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-end gap-2 mt-2">
-                  <div className="text-right">
-                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Facebook</p>
-                    <p className="font-medium">Phromlikhit Badminton</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-2">
-                  <div className="text-right">
-                    <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Instagram</p>
-                    <p className="font-medium">phromlikhit_complex</p>
-                  </div>
-                </div>
-             </div>
+          {/* Right Footer - Contact Info */}
+          <div className="flex flex-col items-center md:items-end gap-4 w-full lg:w-auto">
+             {venuePhone && (
+               <div className="text-white text-right">
+                 <p className="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Tel</p>
+                 <p className="text-lg font-bold">{venuePhone}</p>
+               </div>
+             )}
           </div>
         </div>
       </div>

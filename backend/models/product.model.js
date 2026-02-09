@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: ['shuttlecock', 'beverage', 'snack', 'equipment', 'other'],
+      enum: ['shuttlecock', 'drink', 'snack', 'equipment', 'other'],
       default: 'other',
     },
     price: {

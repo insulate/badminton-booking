@@ -25,23 +25,36 @@ export default function CustomerBookingPage() {
   // Date strip state
   const [dateList, setDateList] = useState([]);
   const [blockedDates, setBlockedDates] = useState([]);
+  const [advanceBookingDays, setAdvanceBookingDays] = useState(14);
   const dateScrollRef = useRef(null);
 
-  // Initialize dates (next 14 days) and fetch blocked dates
+  // Initialize dates and fetch settings + blocked dates
   useEffect(() => {
-    const dates = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Ensure today starts at midnight for comparison
+    const initDatesAndSettings = async () => {
+      // Fetch advance booking days from settings
+      let days = 14;
+      try {
+        const venueRes = await settingsAPI.getVenueInfo();
+        if (venueRes.success && venueRes.data?.booking?.advanceBookingDays) {
+          days = venueRes.data.booking.advanceBookingDays;
+          setAdvanceBookingDays(days);
+        }
+      } catch (error) {
+        console.error('Error fetching venue info:', error);
+      }
 
-    for (let i = 0; i < 14; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      dates.push(d);
-    }
-    setDateList(dates);
+      // Generate date list based on settings
+      const dates = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      for (let i = 0; i < days; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        dates.push(d);
+      }
+      setDateList(dates);
 
-    // Fetch blocked dates
-    const fetchBlockedDates = async () => {
+      // Fetch blocked dates
       try {
         const response = await settingsAPI.getBlockedDates();
         if (response.success) {
@@ -55,7 +68,7 @@ export default function CustomerBookingPage() {
         console.error('Error fetching blocked dates:', error);
       }
     };
-    fetchBlockedDates();
+    initDatesAndSettings();
   }, []);
 
   // Check if a date is blocked
@@ -412,7 +425,7 @@ export default function CustomerBookingPage() {
                <h4 className="font-bold text-blue-900 mb-1">คำแนะนำการจอง</h4>
                <p className="text-sm text-blue-700/80 leading-relaxed">
                  เลือกเวลาที่ต้องการจองเพื่อดูรายละเอียดสนาม หากเป็นสมาชิกจะได้รับส่วนลดพิเศษทันที 
-                 สามารถจองล่วงหน้าได้สูงสุด 14 วัน กรุณามาก่อนเวลาจองอย่างน้อย 10 นาที
+                 สามารถจองล่วงหน้าได้สูงสุด {advanceBookingDays} วัน กรุณามาก่อนเวลาจองอย่างน้อย 10 นาที
                </p>
              </div>
           </div>

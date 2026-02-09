@@ -300,11 +300,15 @@ router.delete('/:id', protect, admin, validateObjectId(), async (req, res) => {
       });
     }
 
-    // Check if timeslot has active bookings
+    // Check if timeslot has upcoming active bookings (pending/confirmed only)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const activeBookings = await Booking.countDocuments({
       timeSlot: req.params.id,
       deletedAt: null,
-      bookingStatus: { $ne: 'cancelled' },
+      bookingStatus: { $in: ['pending', 'confirmed'] },
+      date: { $gte: today },
     });
 
     if (activeBookings > 0) {

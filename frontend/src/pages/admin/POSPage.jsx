@@ -555,15 +555,15 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
     fetchPaymentSettings();
   }, []);
 
-  // Get available payment methods based on settings
+  // Get available payment methods for POS
+  // POS always allows cash and transfer (in-person sales)
   const getAvailablePaymentMethods = (settings) => {
-    if (!settings) return [];
-
-    const methods = [];
-    if (settings.acceptCash) methods.push({ value: 'cash', label: 'เงินสด' });
-    if (settings.acceptPromptPay) methods.push({ value: 'promptpay', label: 'พร้อมเพย์' });
-    if (settings.acceptTransfer) methods.push({ value: 'transfer', label: 'โอนเงิน' });
-    if (settings.acceptCreditCard) methods.push({ value: 'credit_card', label: 'บัตรเครดิต' });
+    const methods = [
+      { value: 'cash', label: 'เงินสด' },
+      { value: 'transfer', label: 'โอนเงิน (Mobile Banking)' },
+    ];
+    if (settings?.acceptPromptPay) methods.push({ value: 'promptpay', label: 'พร้อมเพย์' });
+    if (settings?.acceptCreditCard) methods.push({ value: 'credit_card', label: 'บัตรเครดิต' });
     return methods;
   };
 

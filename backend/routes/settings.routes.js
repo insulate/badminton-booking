@@ -266,6 +266,44 @@ router.post('/reset', protect, admin, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/settings/venue-info
+ * @desc    Get venue, operating hours, and booking settings (Public - for customers)
+ * @access  Public
+ */
+router.get('/venue-info', async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    res.json({
+      success: true,
+      data: {
+        venue: {
+          name: settings.venue?.name || '',
+          phone: settings.venue?.phone || '',
+          email: settings.venue?.email || '',
+          address: settings.venue?.address || '',
+        },
+        operating: {
+          openTime: settings.operating?.openTime || '09:00',
+          closeTime: settings.operating?.closeTime || '22:00',
+          daysOpen: settings.operating?.daysOpen || [],
+        },
+        booking: {
+          advanceBookingDays: settings.booking?.advanceBookingDays || 7,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Get venue info error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสนาม',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   GET /api/settings/floor-plan
  * @desc    Get floor plan image (Public - for customers)
  * @access  Public

@@ -6,22 +6,29 @@ import { API_BASE_URL } from '../../constants/api';
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [floorPlanImage, setFloorPlanImage] = useState('');
+  const [venueInfo, setVenueInfo] = useState(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetchFloorPlan();
+    fetchData();
   }, []);
 
-  const fetchFloorPlan = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(false);
-      const response = await settingsAPI.getFloorPlan();
-      if (response.success && response.data.floorPlanImage) {
-        setFloorPlanImage(response.data.floorPlanImage);
+      const [floorPlanRes, venueRes] = await Promise.all([
+        settingsAPI.getFloorPlan(),
+        settingsAPI.getVenueInfo(),
+      ]);
+      if (floorPlanRes.success && floorPlanRes.data.floorPlanImage) {
+        setFloorPlanImage(floorPlanRes.data.floorPlanImage);
+      }
+      if (venueRes.success) {
+        setVenueInfo(venueRes.data);
       }
     } catch (err) {
-      console.error('Error fetching floor plan:', err);
+      console.error('Error fetching data:', err);
       setError(true);
     } finally {
       setLoading(false);
@@ -50,6 +57,9 @@ export default function HomePage() {
     </div>
   );
 
+  const venueName = venueInfo?.venue?.name || 'สนามแบดมินตัน';
+  const venuePhone = venueInfo?.venue?.phone || '';
+
   // Loading state
   if (loading) {
     return (
@@ -75,7 +85,7 @@ export default function HomePage() {
         </h1>
         <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
           <MapPin className="w-4 h-4" />
-          <span>Lucky Badminton</span>
+          <span>{venueName}</span>
         </div>
       </div>
 
@@ -98,11 +108,12 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Contact Info Preview */}
-      <div className="mt-6 text-center text-sm text-gray-500">
-        <p>TEL: 099-999-9999</p>
-        <p>LINE: @luckybadminton</p>
-      </div>
+      {/* Contact Info */}
+      {venuePhone && (
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <p>TEL: {venuePhone}</p>
+        </div>
+      )}
     </div>
   );
 }

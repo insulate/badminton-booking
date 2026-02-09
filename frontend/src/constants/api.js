@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
     UPDATE_PAYMENT: '/settings/payment',
     UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
+    VENUE_INFO: '/settings/venue-info', // Public
     FLOOR_PLAN: '/settings/floor-plan',
     QR_CODE: '/settings/qr-code',
     PAYMENT_INFO: '/settings/payment-info', // Public
