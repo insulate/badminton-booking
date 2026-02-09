@@ -293,7 +293,7 @@ const ProductsPage = () => {
                     <td className="px-6 py-4">
                       {product.image ? (
                         <img
-                          src={product.image.startsWith('data:') ? product.image : `${(import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '')}${product.image}`}
+                          src={product.image.startsWith('data:') ? product.image : `${(import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '')}${product.image}`}
                           alt={product.name}
                           className="w-12 h-12 object-cover rounded-lg border border-gray-200"
                         />

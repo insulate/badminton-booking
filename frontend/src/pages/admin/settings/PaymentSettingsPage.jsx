@@ -7,7 +7,7 @@ import { ROUTES } from '../../../constants';
 import { PageContainer, Card, PageHeader, Button } from '../../../components/common';
 
 // ใช้ base URL สำหรับ static files (ไม่มี /api)
-const STATIC_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '');
+const STATIC_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '');
 
 const PaymentSettingsPage = () => {
   const navigate = useNavigate();

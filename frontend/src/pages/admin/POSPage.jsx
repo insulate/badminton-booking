@@ -19,7 +19,7 @@ import { productsAPI, salesAPI, categoriesAPI, settingsAPI, shiftsAPI } from '..
 import { PageContainer, PageHeader } from '../../components/common';
 import { ROUTES } from '../../constants';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim();
 
 const POSPage = () => {
   const navigate = useNavigate();

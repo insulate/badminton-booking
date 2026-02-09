@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { settingsAPI, bookingsAPI } from '../../lib/api';
 
 // ใช้ base URL สำหรับ static files (ไม่มี /api)
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '');
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '');
 
 /**
  * BookingDetailModal Component

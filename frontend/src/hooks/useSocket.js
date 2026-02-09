@@ -8,7 +8,7 @@ import { io } from 'socket.io-client';
 import useAuthStore from '../store/authStore';
 
 // Socket URL (same as API but without /api)
-const SOCKET_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace('/api', '');
+const SOCKET_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '');
 
 /**
  * Custom hook for Socket.IO connection

@@ -3,7 +3,7 @@ import { X, Image, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { productsAPI } from '../../lib/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim();
 
 const ProductModal = ({ product, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({

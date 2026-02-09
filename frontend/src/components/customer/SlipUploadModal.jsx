@@ -3,7 +3,7 @@ import { X, Upload, Image, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').trim();
 
 export default function SlipUploadModal({ isOpen, onClose, booking, onSuccess }) {
   const [selectedFile, setSelectedFile] = useState(null);
