@@ -288,6 +288,16 @@ export default function PaymentPage() {
     return new Intl.NumberFormat('th-TH').format(price);
   };
 
+  const getBookingTimeRange = () => {
+    if (!booking?.timeSlot?.startTime) return '';
+    const [h, m] = booking.timeSlot.startTime.split(':').map(Number);
+    const startMin = (booking.startMinute || 0);
+    const totalStartMins = h * 60 + m + startMin;
+    const totalEndMins = totalStartMins + (booking.duration || 1) * 60;
+    const fmt = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+    return `${fmt(totalStartMins)} - ${fmt(totalEndMins)}`;
+  };
+
   const generatePromptPayQR = () => {
     if (!paymentInfo?.promptPayNumber || !booking?.pricing?.total) return null;
 
@@ -361,7 +371,8 @@ export default function PaymentPage() {
               <div className="flex justify-between">
                 <span className="text-gray-500">เวลา</span>
                 <span className="font-medium">
-                  {booking?.timeSlot?.startTime} - {booking?.timeSlot?.endTime}
+                  {getBookingTimeRange()}
+                  {booking?.duration !== 1 && ` (${booking.duration === 0.5 ? '30 นาที' : booking.duration % 1 === 0 ? `${booking.duration} ชม.` : `${Math.floor(booking.duration)} ชม. 30 น.`})`}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -457,8 +468,8 @@ export default function PaymentPage() {
           <div className="flex items-center gap-2 text-gray-600">
             <Clock className="w-4 h-4" />
             <span>
-              {booking?.timeSlot?.startTime} - {booking?.timeSlot?.endTime}
-              {booking?.duration > 1 && ` (${booking.duration} ชม.)`}
+              {getBookingTimeRange()}
+              {booking?.duration !== 1 && ` (${booking.duration === 0.5 ? '30 นาที' : booking.duration % 1 === 0 ? `${booking.duration} ชม.` : `${Math.floor(booking.duration)} ชม. 30 น.`})`}
             </span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">

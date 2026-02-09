@@ -33,15 +33,18 @@ export default function BookingSlotModal({
     return max;
   }, [availability, slotIndex, slot]);
 
-  // Calculate end time
+  // Calculate end time (supports 0.5 hour increments)
   const endTime = useMemo(() => {
-    if (!availability || !slot) return slot?.endTime || '';
-    const endIndex = slotIndex + selectedDuration - 1;
-    return availability[endIndex]?.endTime || slot.endTime;
-  }, [availability, slotIndex, selectedDuration, slot]);
+    if (!slot) return slot?.endTime || '';
+    const [h, m] = slot.startTime.split(':').map(Number);
+    const totalMins = h * 60 + m + selectedDuration * 60;
+    const endH = Math.floor(totalMins / 60);
+    const endM = totalMins % 60;
+    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+  }, [slot, selectedDuration]);
 
-  // Duration options
-  const durationOptions = Array.from({ length: maxDuration }, (_, i) => i + 1);
+  // Duration options (0.5 step)
+  const durationOptions = Array.from({ length: maxDuration * 2 }, (_, i) => (i + 1) * 0.5);
 
   // Early return AFTER all hooks
   if (!isOpen || !slot) return null;
@@ -145,19 +148,19 @@ export default function BookingSlotModal({
 
         {/* Duration Selector */}
         <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-3">จำนวนชั่วโมง</p>
+          <p className="text-sm text-gray-600 mb-3">ระยะเวลา</p>
           <div className="flex flex-wrap gap-2">
             {durationOptions.map((duration) => (
               <button
                 key={duration}
                 onClick={() => setSelectedDuration(duration)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
                   selectedDuration === duration
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {duration} ชม.
+                {duration === 0.5 ? '30 นาที' : duration % 1 === 0 ? `${duration} ชม.` : `${Math.floor(duration)} ชม. 30 น.`}
               </button>
             ))}
           </div>
@@ -170,7 +173,7 @@ export default function BookingSlotModal({
             <span className="font-medium">
               {slot.startTime} - {endTime}
             </span>
-            <span className="text-gray-500">({selectedDuration} ชั่วโมง)</span>
+            <span className="text-gray-500">({selectedDuration === 0.5 ? '30 นาที' : selectedDuration % 1 === 0 ? `${selectedDuration} ชม.` : `${Math.floor(selectedDuration)} ชม. 30 น.`})</span>
           </div>
         </div>
 

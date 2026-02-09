@@ -7,7 +7,7 @@ const TimeSlot = require('../models/timeslot.model');
  */
 const validateBookingRequest = async (req, res, next) => {
   try {
-    const { customer, court, date, timeSlot, duration } = req.body;
+    const { customer, court, date, timeSlot, duration, startMinute } = req.body;
 
     // Validate customer information
     if (!customer || !customer.name || !customer.phone) {
@@ -102,10 +102,25 @@ const validateBookingRequest = async (req, res, next) => {
     }
 
     // Validate duration
-    if (!duration || duration < 1 || duration > 8) {
+    if (!duration || duration < 0.5 || duration > 8) {
       return res.status(400).json({
         success: false,
-        message: 'Duration must be between 1 and 8 hours',
+        message: 'Duration must be between 0.5 and 8 hours',
+      });
+    }
+
+    if (duration % 0.5 !== 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Duration must be in increments of 0.5 hours',
+      });
+    }
+
+    // Validate startMinute
+    if (startMinute !== undefined && startMinute !== 0 && startMinute !== 30) {
+      return res.status(400).json({
+        success: false,
+        message: 'startMinute must be 0 or 30',
       });
     }
 
@@ -321,11 +336,11 @@ const validateAvailabilityCheck = (req, res, next) => {
 
     // Validate duration if provided
     if (duration !== undefined) {
-      const durationNum = parseInt(duration);
-      if (isNaN(durationNum) || durationNum < 1 || durationNum > 8) {
+      const durationNum = parseFloat(duration);
+      if (isNaN(durationNum) || durationNum < 0.5 || durationNum > 8 || durationNum % 0.5 !== 0) {
         return res.status(400).json({
           success: false,
-          message: 'Duration must be a number between 1 and 8 hours',
+          message: 'Duration must be a number between 0.5 and 8 hours in increments of 0.5',
         });
       }
     }
@@ -369,11 +384,11 @@ const validatePriceCalculation = (req, res, next) => {
 
     // Validate duration
     if (duration !== undefined) {
-      const durationNum = parseInt(duration);
-      if (isNaN(durationNum) || durationNum < 1 || durationNum > 8) {
+      const durationNum = parseFloat(duration);
+      if (isNaN(durationNum) || durationNum < 0.5 || durationNum > 8 || durationNum % 0.5 !== 0) {
         return res.status(400).json({
           success: false,
-          message: 'Duration must be a number between 1 and 8 hours',
+          message: 'Duration must be a number between 0.5 and 8 hours in increments of 0.5',
         });
       }
     }

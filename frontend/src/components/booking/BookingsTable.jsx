@@ -84,9 +84,15 @@ const BookingsTable = ({
     return `${day}/${month}/${year}`;
   };
 
-  // Format time
-  const formatTime = (startTime, endTime) => {
-    return `${startTime} - ${endTime}`;
+  // Format time - calculate actual booking time from startMinute + duration
+  const formatTime = (booking) => {
+    if (!booking?.timeSlot?.startTime) return '-';
+    const [h, m] = booking.timeSlot.startTime.split(':').map(Number);
+    const startMin = (booking.startMinute || 0);
+    const totalStartMins = h * 60 + m + startMin;
+    const totalEndMins = totalStartMins + (booking.duration || 1) * 60;
+    const fmt = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+    return `${fmt(totalStartMins)} - ${fmt(totalEndMins)}`;
   };
 
   // Format price
@@ -206,8 +212,8 @@ const BookingsTable = ({
                   {/* Time */}
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {booking.timeSlot?.startTime && booking.timeSlot?.endTime
-                        ? formatTime(booking.timeSlot.startTime, booking.timeSlot.endTime)
+                      {booking.timeSlot?.startTime
+                        ? formatTime(booking)
                         : '-'}
                     </div>
                   </td>

@@ -56,42 +56,53 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
     return badges[type] || badges.normal;
   };
 
-  // Get slot status color
-  const getSlotColor = (slot) => {
-    // Date is blocked - show all available slots as blocked
-    if (isBlocked && slot.available) {
-      return 'bg-gray-200 border-gray-400 cursor-not-allowed opacity-60';
+  // Get half-slot status color
+  const getHalfSlotColor = (halfSlot, slot) => {
+    // Date is blocked
+    if (isBlocked && halfSlot.available) {
+      return 'bg-gray-200 cursor-not-allowed opacity-60';
     }
 
     // Blocked by Group Play
     if (slot.blockedByGroupPlay) {
-      return 'bg-purple-100 border-purple-400 cursor-not-allowed';
+      return 'bg-purple-100 cursor-not-allowed';
     }
 
-    // Booked slots
-    if (!slot.available) {
-      // Booked and paid = green
-      if (slot.booking?.paymentStatus === 'paid') {
-        return 'bg-green-100 border-green-400 hover:bg-green-200 hover:shadow-md cursor-pointer';
+    // Booked
+    if (!halfSlot.available) {
+      if (halfSlot.booking?.paymentStatus === 'paid') {
+        return 'bg-green-100 hover:bg-green-200 cursor-pointer';
       }
-      // Booked but not paid = red
-      return 'bg-red-100 border-red-300 hover:bg-red-200 hover:shadow-md cursor-pointer';
+      return 'bg-red-100 hover:bg-red-200 cursor-pointer';
     }
 
-    // Available slots
-    // Available + Peak Hour = orange/yellow
+    // Available
     if (slot.peakHour) {
-      return 'bg-orange-50 border-orange-300 hover:bg-orange-100 cursor-pointer';
+      return 'bg-orange-50 hover:bg-orange-100 cursor-pointer';
     }
-    // Available + Normal = blue
-    return 'bg-blue-50 border-blue-300 hover:bg-blue-100 cursor-pointer';
+    return 'bg-blue-50 hover:bg-blue-100 cursor-pointer';
   };
 
-  // Handle slot click
-  const handleSlotClick = (court, slot) => {
-    // Date is blocked - do nothing for available slots
-    if (isBlocked && slot.available) {
-      onSlotClick({ court, timeSlot: slot }); // Let parent handle the error message
+  // Get full slot border color (for the outer container)
+  const getSlotBorderColor = (slot) => {
+    if (isBlocked && slot.available) return 'border-gray-400';
+    if (slot.blockedByGroupPlay) return 'border-purple-400';
+    if (!slot.firstHalf?.available && !slot.secondHalf?.available) {
+      const anyPaid = slot.firstHalf?.booking?.paymentStatus === 'paid' || slot.secondHalf?.booking?.paymentStatus === 'paid';
+      return anyPaid ? 'border-green-400' : 'border-red-300';
+    }
+    if (slot.peakHour) return 'border-orange-300';
+    return 'border-blue-300';
+  };
+
+  // Handle half-slot click
+  const handleHalfSlotClick = (court, slot, half) => {
+    const startMinute = half === 'first' ? 0 : 30;
+    const halfSlot = half === 'first' ? slot.firstHalf : slot.secondHalf;
+
+    // Date is blocked
+    if (isBlocked && halfSlot?.available) {
+      onSlotClick({ court, timeSlot: slot, startMinute });
       return;
     }
 
@@ -100,8 +111,8 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
       return;
     }
 
-    if (slot.available) {
-      // For available slots, open booking modal
+    if (halfSlot?.available) {
+      // For available half-slots, open booking modal
       onSlotClick({
         court,
         timeSlot: {
@@ -110,11 +121,12 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
           endTime: slot.endTime,
           peakHour: slot.peakHour,
         },
+        startMinute,
       });
-    } else {
-      // For booked slots, show booking details in modal
+    } else if (halfSlot?.booking) {
+      // For booked half-slots, show booking details
       setSelectedBooking({
-        ...slot.booking,
+        ...halfSlot.booking,
         courtNumber: court.courtNumber,
         courtName: court.courtName,
         timeSlot: `${slot.startTime} - ${slot.endTime}`,
@@ -230,51 +242,69 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
                       <div className="text-xs text-gray-500">{court.courtName}</div>
                     </div>
                   </td>
-                  {court.slots.map((slot, index) => (
-                    <td key={`${court.courtId}-${index}`} className="px-2 py-2">
-                      <div
-                        onClick={() => handleSlotClick(court, slot)}
-                        className={`tooltip p-3 rounded-lg border-2 text-center transition-all ${getSlotColor(
-                          slot
-                        )}`}
-                        data-tooltip={
-                          slot.blockedByGroupPlay
-                            ? 'ถูกบล็อกโดยก๊วนสนาม (Group Play)'
-                            : isBlocked && slot.available
-                            ? blockedReason || 'วันนี้ปิดการจอง'
-                            : slot.available
-                            ? 'คลิกเพื่อจอง'
-                            : `จองโดย: ${slot.booking?.customerName || 'N/A'}`
-                        }
-                      >
-                        {slot.blockedByGroupPlay ? (
-                          <div className="text-xs font-semibold text-purple-700">
-                            ก๊วนสนาม
+                  {court.slots.map((slot, index) => {
+                    const firstHalf = slot.firstHalf || { available: slot.available, booking: slot.booking };
+                    const secondHalf = slot.secondHalf || { available: slot.available, booking: slot.booking };
+
+                    const renderHalf = (halfSlot, half) => {
+                      const isFirst = half === 'first';
+                      const label = isFirst ? ':00' : ':30';
+
+                      if (slot.blockedByGroupPlay) {
+                        return (
+                          <div className="text-[10px] font-semibold text-purple-700 leading-tight">
+                            <div className="text-[9px] text-purple-400">{label}</div>
+                            ก๊วน
                           </div>
-                        ) : isBlocked && slot.available ? (
-                          <div className="text-xs font-semibold text-gray-500">
-                            ปิดการจอง
+                        );
+                      }
+                      if (isBlocked && halfSlot.available) {
+                        return (
+                          <div className="text-[10px] font-semibold text-gray-500 leading-tight">
+                            <div className="text-[9px] text-gray-400">{label}</div>
+                            ปิด
                           </div>
-                        ) : slot.available ? (
-                          <div className={`text-xs font-semibold ${
-                            slot.peakHour ? 'text-orange-700' : 'text-blue-700'
-                          }`}>
+                        );
+                      }
+                      if (halfSlot.available) {
+                        return (
+                          <div className={`text-[10px] font-semibold leading-tight ${slot.peakHour ? 'text-orange-700' : 'text-blue-700'}`}>
+                            <div className={`text-[9px] ${slot.peakHour ? 'text-orange-400' : 'text-blue-400'}`}>{label}</div>
                             ว่าง
                           </div>
-                        ) : (
-                          <div className="text-xs">
-                            <div className={`font-semibold ${
-                              slot.booking?.paymentStatus === 'paid'
-                                ? 'text-green-700'
-                                : 'text-red-700'
-                            }`}>
-                              {slot.booking?.customerName || 'N/A'}
-                            </div>
+                        );
+                      }
+                      return (
+                        <div className="text-[10px] leading-tight">
+                          <div className={`text-[9px] ${halfSlot.booking?.paymentStatus === 'paid' ? 'text-green-400' : 'text-red-400'}`}>{label}</div>
+                          <div className={`font-semibold truncate ${halfSlot.booking?.paymentStatus === 'paid' ? 'text-green-700' : 'text-red-700'}`}>
+                            {halfSlot.booking?.customerName || 'จอง'}
                           </div>
-                        )}
-                      </div>
-                    </td>
-                  ))}
+                        </div>
+                      );
+                    };
+
+                    return (
+                      <td key={`${court.courtId}-${index}`} className="px-1 py-2">
+                        <div className={`flex rounded-lg border-2 overflow-hidden transition-all ${getSlotBorderColor(slot)}`}>
+                          <div
+                            onClick={() => handleHalfSlotClick(court, slot, 'first')}
+                            className={`flex-1 py-2 px-1 text-center transition-all border-r border-gray-200 ${getHalfSlotColor(firstHalf, slot)}`}
+                            title={firstHalf.available ? `คลิกเพื่อจอง ${slot.startTime}` : `จองโดย: ${firstHalf.booking?.customerName || 'N/A'}`}
+                          >
+                            {renderHalf(firstHalf, 'first')}
+                          </div>
+                          <div
+                            onClick={() => handleHalfSlotClick(court, slot, 'second')}
+                            className={`flex-1 py-2 px-1 text-center transition-all ${getHalfSlotColor(secondHalf, slot)}`}
+                            title={secondHalf.available ? `คลิกเพื่อจอง ${slot.startTime.split(':')[0]}:30` : `จองโดย: ${secondHalf.booking?.customerName || 'N/A'}`}
+                          >
+                            {renderHalf(secondHalf, 'second')}
+                          </div>
+                        </div>
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

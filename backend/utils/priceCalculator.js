@@ -24,8 +24,12 @@ const calculatePrice = async ({
       throw new Error('TimeSlot ID is required');
     }
 
-    if (duration < 1 || duration > 8) {
-      throw new Error('Duration must be between 1 and 8 hours');
+    if (duration < 0.5 || duration > 8) {
+      throw new Error('Duration must be between 0.5 and 8 hours');
+    }
+
+    if (duration % 0.5 !== 0) {
+      throw new Error('Duration must be in increments of 0.5 hours');
     }
 
     if (!['normal', 'member'].includes(customerType)) {
@@ -108,7 +112,7 @@ const calculatePriceTable = async (timeSlotId, customerType = 'normal') => {
   try {
     const priceTable = [];
 
-    for (let duration = 1; duration <= 8; duration++) {
+    for (let duration = 0.5; duration <= 8; duration += 0.5) {
       const pricing = await calculatePrice({
         timeSlotId,
         duration,

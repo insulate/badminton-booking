@@ -90,7 +90,7 @@ router.get('/pending-slips-count', protect, admin, async (req, res) => {
  */
 router.post('/customer', protectPlayer, async (req, res) => {
   try {
-    const { date, timeSlot, duration } = req.body;
+    const { date, timeSlot, duration, startMinute } = req.body;
     const player = req.player;
 
     // Validate input
@@ -217,6 +217,7 @@ router.post('/customer', protectPlayer, async (req, res) => {
       date: bookingDate,
       timeSlot,
       duration: bookingDuration,
+      startMinute: startMinute || 0,
       pricing: {
         subtotal,
         discount: 0,
@@ -567,7 +568,7 @@ router.get('/:id', protect, validateObjectId(), async (req, res) => {
  */
 router.post('/check-availability', protect, validateAvailabilityCheck, async (req, res) => {
   try {
-    const { courtId, date, timeSlotId, duration } = req.body;
+    const { courtId, date, timeSlotId, duration, startMinute } = req.body;
 
     if (!courtId && !date && !timeSlotId) {
       return res.status(400).json({
@@ -583,6 +584,7 @@ router.post('/check-availability', protect, validateAvailabilityCheck, async (re
         date,
         timeSlotId,
         duration: duration || 1,
+        startMinute: startMinute || 0,
       });
       return res.status(200).json({
         success: true,
@@ -661,7 +663,7 @@ router.post('/calculate-price', protect, validatePriceCalculation, async (req, r
  */
 router.post('/', protect, validateBookingRequest, async (req, res) => {
   try {
-    const { customer, court, date, timeSlot, duration, paymentMethod, paymentStatus, notes } = req.body;
+    const { customer, court, date, timeSlot, duration, startMinute, paymentMethod, paymentStatus, notes } = req.body;
     const { court: courtDoc, timeSlot: timeSlotDoc, bookingDate } = req.validatedData;
 
     // Check if date is blocked
@@ -680,6 +682,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
       date: bookingDate,
       timeSlotId: timeSlot,
       duration: duration || 1,
+      startMinute: startMinute || 0,
     });
 
     if (!availability.available) {
@@ -712,6 +715,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
       date: bookingDate,
       timeSlot,
       duration,
+      startMinute: startMinute || 0,
       pricing: {
         subtotal: pricing.subtotal,
         discount: pricing.discount,

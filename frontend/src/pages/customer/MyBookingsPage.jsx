@@ -59,6 +59,16 @@ export default function MyBookingsPage() {
     return new Intl.NumberFormat('th-TH').format(price);
   };
 
+  const getBookingTimeRange = (booking) => {
+    if (!booking?.timeSlot?.startTime) return '';
+    const [h, m] = booking.timeSlot.startTime.split(':').map(Number);
+    const startMin = (booking.startMinute || 0);
+    const totalStartMins = h * 60 + m + startMin;
+    const totalEndMins = totalStartMins + (booking.duration || 1) * 60;
+    const fmt = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+    return `${fmt(totalStartMins)} - ${fmt(totalEndMins)}`;
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       payment_pending: { bg: 'bg-orange-500', label: 'รอชำระเงิน' },
@@ -274,8 +284,8 @@ export default function MyBookingsPage() {
                   <div className="flex items-center gap-2 text-gray-600">
                     <Clock className="w-4 h-4" />
                     <span>
-                      {booking.timeSlot?.startTime} - {booking.timeSlot?.endTime}
-                      {booking.duration > 1 && ` (${booking.duration} ชม.)`}
+                      {getBookingTimeRange(booking)}
+                      {booking.duration !== 1 && ` (${booking.duration === 0.5 ? '30 นาที' : booking.duration % 1 === 0 ? `${booking.duration} ชม.` : `${Math.floor(booking.duration)} ชม. 30 น.`})`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">

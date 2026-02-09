@@ -16,7 +16,7 @@ const defaultSettings = {
   },
   booking: {
     advanceBookingDays: 7,
-    minBookingHours: 1,
+    minBookingHours: 0.5,
     maxBookingHours: 3,
     cancellationHours: 24,
     requireDeposit: false,

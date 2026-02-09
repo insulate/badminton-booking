@@ -324,7 +324,7 @@ const RecurringBookingsPage = () => {
                         สนาม {group.pattern?.court?.courtNumber} - {group.pattern?.court?.name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {group.pattern?.timeSlot?.startTime} | {group.pattern?.duration} ชม. |{' '}
+                        {group.pattern?.timeSlot?.startTime} | {group.pattern?.duration === 0.5 ? '30 นาที' : group.pattern?.duration % 1 === 0 ? `${group.pattern?.duration} ชม.` : `${Math.floor(group.pattern?.duration)} ชม. 30 น.`} |{' '}
                         {group.pattern?.daysOfWeek?.map((d) => DAY_NAMES[d]).join(', ')}
                       </div>
                     </td>

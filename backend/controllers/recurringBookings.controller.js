@@ -286,6 +286,7 @@ const createRecurringBooking = async (req, res) => {
         date,
         timeSlot,
         duration,
+        startMinute: 0,
         pricing: {
           subtotal: priceInfo.subtotal,
           discount: 0,

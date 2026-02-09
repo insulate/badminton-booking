@@ -55,9 +55,20 @@ const bookingSchema = new mongoose.Schema(
     duration: {
       type: Number,
       required: [true, 'Please provide duration'],
-      min: [1, 'Duration must be at least 1 hour'],
+      min: [0.5, 'Duration must be at least 0.5 hours'],
       max: [8, 'Duration cannot exceed 8 hours'],
       default: 1,
+      validate: {
+        validator: function (v) {
+          return v % 0.5 === 0;
+        },
+        message: 'Duration must be in increments of 0.5 hours',
+      },
+    },
+    startMinute: {
+      type: Number,
+      enum: [0, 30],
+      default: 0,
     },
     pricing: {
       subtotal: {

@@ -51,6 +51,16 @@ export default function BookingSuccessModal({ isOpen, booking, onClose }) {
     return new Intl.NumberFormat('th-TH').format(price);
   };
 
+  const getBookingTimeRange = () => {
+    if (!booking?.timeSlot?.startTime) return '';
+    const [h, m] = booking.timeSlot.startTime.split(':').map(Number);
+    const startMin = (booking.startMinute || 0);
+    const totalStartMins = h * 60 + m + startMin;
+    const totalEndMins = totalStartMins + (booking.duration || 1) * 60;
+    const fmt = (mins) => `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+    return `${fmt(totalStartMins)} - ${fmt(totalEndMins)}`;
+  };
+
   const handleViewBookings = () => {
     navigate(ROUTES.CUSTOMER.MY_BOOKINGS);
   };
@@ -113,8 +123,8 @@ export default function BookingSuccessModal({ isOpen, booking, onClose }) {
               <div className="flex items-center gap-3 text-gray-600">
                 <Clock className="w-5 h-5 text-blue-600" />
                 <span>
-                  {booking.timeSlot?.startTime} - {booking.timeSlot?.endTime}
-                  {booking.duration > 1 && ` (${booking.duration} ชม.)`}
+                  {getBookingTimeRange()}
+                  {booking.duration !== 1 && ` (${booking.duration === 0.5 ? '30 นาที' : booking.duration % 1 === 0 ? `${booking.duration} ชม.` : `${Math.floor(booking.duration)} ชม. 30 น.`})`}
                 </span>
               </div>
               <div className="flex items-center gap-3 text-gray-600">

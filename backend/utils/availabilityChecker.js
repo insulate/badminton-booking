@@ -15,7 +15,7 @@ const { isDateBlocked } = require('./blockedDateChecker');
  * @param {ObjectId} params.excludeBookingId - Exclude this booking ID (for updates)
  * @returns {Promise<Object>} { available: Boolean, conflictingBooking: Object }
  */
-const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excludeBookingId = null }) => {
+const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, startMinute = 0, excludeBookingId = null }) => {
   try {
     // Validate inputs
     if (!courtId || !date || !timeSlotId) {
@@ -48,8 +48,14 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
       throw new Error('TimeSlot not found in active slots');
     }
 
+    // Calculate half-slot requirements
+    const halfSlotsNeeded = duration * 2;
+    const startHalf = startMinute === 30 ? 1 : 0;
+    const totalHalfsFromStart = startHalf + halfSlotsNeeded;
+    const slotsToSpan = Math.ceil(totalHalfsFromStart / 2);
+
     // Check if we have enough consecutive slots
-    if (startIndex + duration > allTimeSlots.length) {
+    if (startIndex + slotsToSpan > allTimeSlots.length) {
       return {
         available: false,
         conflictingBooking: null,
@@ -58,7 +64,7 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
     }
 
     // Validate that timeslots are actually consecutive (no gaps)
-    const slotsNeeded = allTimeSlots.slice(startIndex, startIndex + duration);
+    const slotsNeeded = allTimeSlots.slice(startIndex, startIndex + slotsToSpan);
     for (let i = 0; i < slotsNeeded.length - 1; i++) {
       const currentSlot = slotsNeeded[i];
       const nextSlot = slotsNeeded[i + 1];
@@ -85,9 +91,6 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
       }
     }
 
-    // Get the timeslot IDs we need to check
-    const timeSlotsToCheck = slotsNeeded.map((ts) => ts._id);
-
     // Get all bookings for this court and date
     const endOfDay = new Date(bookingDate);
     endOfDay.setHours(23, 59, 59, 999);
@@ -102,39 +105,63 @@ const checkAvailability = async ({ courtId, date, timeSlotId, duration = 1, excl
       .populate('court', 'courtNumber name')
       .populate('timeSlot', 'startTime endTime');
 
-    // Create a set of all occupied timeslot IDs (considering duration)
-    const occupiedSlots = new Set();
+    // Create a set of all occupied half-slots (considering duration and startMinute)
+    const occupiedHalfSlots = new Set();
     bookings.forEach((booking) => {
       const bookingStartIndex = allTimeSlots.findIndex((ts) => ts._id.equals(booking.timeSlot._id));
       if (bookingStartIndex !== -1) {
-        // Mark all slots covered by this booking's duration
-        for (let i = 0; i < booking.duration && bookingStartIndex + i < allTimeSlots.length; i++) {
-          occupiedSlots.add(allTimeSlots[bookingStartIndex + i]._id.toString());
+        const bStartHalf = (booking.startMinute || 0) === 30 ? 1 : 0;
+        const bHalfSlots = (booking.duration || 1) * 2;
+
+        for (let h = 0; h < bHalfSlots; h++) {
+          const absoluteHalf = bStartHalf + h;
+          const slotOffset = Math.floor(absoluteHalf / 2);
+          const halfInSlot = absoluteHalf % 2;
+          const slotIdx = bookingStartIndex + slotOffset;
+          if (slotIdx < allTimeSlots.length) {
+            const suffix = halfInSlot === 0 ? 'first' : 'second';
+            occupiedHalfSlots.add(`${allTimeSlots[slotIdx]._id.toString()}_${suffix}`);
+          }
         }
       }
     });
 
-    // Check if any of our required slots are occupied
-    const conflictingSlotId = timeSlotsToCheck.find((slotId) => occupiedSlots.has(slotId.toString()));
+    // Check if any of our required half-slots are occupied
+    for (let h = 0; h < halfSlotsNeeded; h++) {
+      const absoluteHalf = startHalf + h;
+      const slotOffset = Math.floor(absoluteHalf / 2);
+      const halfInSlot = absoluteHalf % 2;
+      const slotIdx = startIndex + slotOffset;
+      const suffix = halfInSlot === 0 ? 'first' : 'second';
+      const key = `${allTimeSlots[slotIdx]._id.toString()}_${suffix}`;
 
-    if (conflictingSlotId) {
-      // Find the booking that conflicts
-      const conflictingBooking = bookings.find((booking) => {
-        const bookingStartIndex = allTimeSlots.findIndex((ts) => ts._id.equals(booking.timeSlot._id));
-        if (bookingStartIndex !== -1) {
-          for (let i = 0; i < booking.duration; i++) {
-            if (allTimeSlots[bookingStartIndex + i]._id.equals(conflictingSlotId)) {
-              return true;
+      if (occupiedHalfSlots.has(key)) {
+        // Find the conflicting booking
+        const conflictingBooking = bookings.find((booking) => {
+          const bookingStartIndex = allTimeSlots.findIndex((ts) => ts._id.equals(booking.timeSlot._id));
+          if (bookingStartIndex === -1) return false;
+
+          const bStartHalf = (booking.startMinute || 0) === 30 ? 1 : 0;
+          const bHalfSlots = (booking.duration || 1) * 2;
+
+          for (let bh = 0; bh < bHalfSlots; bh++) {
+            const bAbsoluteHalf = bStartHalf + bh;
+            const bSlotOffset = Math.floor(bAbsoluteHalf / 2);
+            const bHalfInSlot = bAbsoluteHalf % 2;
+            const bSlotIdx = bookingStartIndex + bSlotOffset;
+            if (bSlotIdx < allTimeSlots.length) {
+              const bSuffix = bHalfInSlot === 0 ? 'first' : 'second';
+              if (`${allTimeSlots[bSlotIdx]._id.toString()}_${bSuffix}` === key) return true;
             }
           }
-        }
-        return false;
-      });
+          return false;
+        });
 
-      return {
-        available: false,
-        conflictingBooking: conflictingBooking || null,
-      };
+        return {
+          available: false,
+          conflictingBooking: conflictingBooking || null,
+        };
+      }
     }
 
     return {
@@ -268,26 +295,47 @@ const getCourtSchedule = async (date, dayType) => {
       .populate('court', 'courtNumber name')
       .populate('timeSlot', 'startTime endTime');
 
+    // Helper to format booking info
+    const formatBookingInfo = (booking) => booking
+      ? {
+          bookingId: booking._id,
+          bookingCode: booking.bookingCode,
+          customerName: booking.customer.name,
+          customerPhone: booking.customer.phone,
+          bookingStatus: booking.bookingStatus,
+          paymentStatus: booking.paymentStatus,
+          duration: booking.duration,
+          startMinute: booking.startMinute || 0,
+        }
+      : null;
+
     // Build schedule grid
     const schedule = await Promise.all(
       courts.map(async (court) => {
-        // Create a map to track which timeslots are booked for this court
-        const bookedSlots = new Map(); // key: timeSlotId, value: booking
+        // Create a map to track which half-slots are booked for this court
+        const bookedHalfSlots = new Map(); // key: "slotId_first"/"slotId_second", value: booking
 
         // Process all bookings for this court
         bookings
           .filter((b) => b.court && b.court._id.equals(court._id))
           .forEach((booking) => {
-            // Find the starting timeslot index
             const startIndex = timeSlots.findIndex((ts) =>
               booking.timeSlot && ts._id.equals(booking.timeSlot._id)
             );
 
             if (startIndex !== -1) {
-              // Mark the starting slot and all consecutive slots based on duration
-              for (let i = 0; i < booking.duration && startIndex + i < timeSlots.length; i++) {
-                const slot = timeSlots[startIndex + i];
-                bookedSlots.set(slot._id.toString(), booking);
+              const bStartHalf = (booking.startMinute || 0) === 30 ? 1 : 0;
+              const bHalfSlots = (booking.duration || 1) * 2;
+
+              for (let h = 0; h < bHalfSlots; h++) {
+                const absoluteHalf = bStartHalf + h;
+                const slotOffset = Math.floor(absoluteHalf / 2);
+                const halfInSlot = absoluteHalf % 2;
+                const slotIdx = startIndex + slotOffset;
+                if (slotIdx < timeSlots.length) {
+                  const suffix = halfInSlot === 0 ? 'first' : 'second';
+                  bookedHalfSlots.set(`${timeSlots[slotIdx]._id.toString()}_${suffix}`, booking);
+                }
               }
             }
           });
@@ -295,7 +343,8 @@ const getCourtSchedule = async (date, dayType) => {
         // Map each timeslot with availability info (check Group Play blocking)
         const courtSlots = await Promise.all(
           timeSlots.map(async (timeSlot) => {
-            const booking = bookedSlots.get(timeSlot._id.toString());
+            const firstHalfBooking = bookedHalfSlots.get(`${timeSlot._id.toString()}_first`);
+            const secondHalfBooking = bookedHalfSlots.get(`${timeSlot._id.toString()}_second`);
 
             // Check if time slot is blocked by Group Play
             const isBlockedByGroupPlay = await GroupPlay.isTimeSlotBlocked(
@@ -309,18 +358,17 @@ const getCourtSchedule = async (date, dayType) => {
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               peakHour: timeSlot.peakHour,
-              available: !booking && !isBlockedByGroupPlay,
+              available: !firstHalfBooking && !secondHalfBooking && !isBlockedByGroupPlay,
               blockedByGroupPlay: isBlockedByGroupPlay,
-              booking: booking
-                ? {
-                    bookingId: booking._id,
-                    bookingCode: booking.bookingCode,
-                    customerName: booking.customer.name,
-                    customerPhone: booking.customer.phone,
-                    bookingStatus: booking.bookingStatus,
-                    paymentStatus: booking.paymentStatus,
-                  }
-                : null,
+              firstHalf: {
+                available: !firstHalfBooking && !isBlockedByGroupPlay,
+                booking: formatBookingInfo(firstHalfBooking),
+              },
+              secondHalf: {
+                available: !secondHalfBooking && !isBlockedByGroupPlay,
+                booking: formatBookingInfo(secondHalfBooking),
+              },
+              booking: formatBookingInfo(firstHalfBooking || secondHalfBooking),
             };
           })
         );
@@ -425,22 +473,37 @@ const getAvailabilityByTimeSlot = async (date) => {
         const timeSlotIndex = allTimeSlots.findIndex(ts => ts._id.equals(timeSlot._id));
 
         for (const court of courts) {
-          // Check if booked
-          const isBooked = bookings.some(booking => {
-            if (!booking.court || !booking.court.equals(court._id)) return false;
-            
-            const bookingSlotIndex = allTimeSlots.findIndex(ts => 
+          // Check if both halves of this slot are booked for this court
+          let firstHalfBooked = false;
+          let secondHalfBooked = false;
+
+          bookings.forEach(booking => {
+            if (!booking.court || !booking.court.equals(court._id)) return;
+
+            const bookingSlotIndex = allTimeSlots.findIndex(ts =>
               booking.timeSlot && ts._id.equals(booking.timeSlot)
             );
-            
-            if (bookingSlotIndex === -1) return false;
-            
-            // Check if current timeSlot falls within booking duration
-            return timeSlotIndex >= bookingSlotIndex && 
-                   timeSlotIndex < bookingSlotIndex + (booking.duration || 1);
+
+            if (bookingSlotIndex === -1) return;
+
+            const bStartHalf = (booking.startMinute || 0) === 30 ? 1 : 0;
+            const bHalfSlots = (booking.duration || 1) * 2;
+
+            for (let h = 0; h < bHalfSlots; h++) {
+              const absoluteHalf = bStartHalf + h;
+              const slotOffset = Math.floor(absoluteHalf / 2);
+              const halfInSlot = absoluteHalf % 2;
+              const slotIdx = bookingSlotIndex + slotOffset;
+
+              if (slotIdx === timeSlotIndex) {
+                if (halfInSlot === 0) firstHalfBooked = true;
+                if (halfInSlot === 1) secondHalfBooked = true;
+              }
+            }
           });
 
-          if (isBooked) {
+          // Court is fully booked only if both halves are occupied
+          if (firstHalfBooked && secondHalfBooked) {
             bookedCount++;
             continue;
           }

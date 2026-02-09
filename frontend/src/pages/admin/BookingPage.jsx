@@ -94,6 +94,7 @@ const BookingPage = () => {
       court: slotData.court,
       timeSlot: slotData.timeSlot,
       date: dateStr,
+      startMinute: slotData.startMinute || 0,
     });
     setIsModalOpen(true);
   };

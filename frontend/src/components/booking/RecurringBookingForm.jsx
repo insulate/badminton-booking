@@ -255,7 +255,7 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
       courtInfo: selectedCourt,
       timeSlot: formData.timeSlot,
       timeSlotInfo: selectedTimeSlot,
-      duration: parseInt(formData.duration),
+      duration: parseFloat(formData.duration),
       daysOfWeek: formData.daysOfWeek,
       startDate: formData.startDate,
       endDate: formData.endDate,
@@ -475,9 +475,9 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          {[1, 2, 3, 4].map((hour) => (
-            <option key={hour} value={hour}>
-              {hour} ชั่วโมง
+          {Array.from({ length: 8 }, (_, i) => (i + 1) * 0.5).map((hours) => (
+            <option key={hours} value={hours}>
+              {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชั่วโมง` : `${Math.floor(hours)} ชม. 30 นาที`}
             </option>
           ))}
         </select>

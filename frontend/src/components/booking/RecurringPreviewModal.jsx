@@ -76,7 +76,7 @@ const RecurringPreviewModal = ({
                 <div>
                   <span className="text-gray-600">เวลา:</span>
                   <span className="ml-2 font-medium">
-                    {summary.timeSlot?.startTime} ({summary.duration} ชม.)
+                    {summary.timeSlot?.startTime} ({summary.duration === 0.5 ? '30 นาที' : summary.duration % 1 === 0 ? `${summary.duration} ชม.` : `${Math.floor(summary.duration)} ชม. 30 น.`})
                   </span>
                 </div>
                 <div>

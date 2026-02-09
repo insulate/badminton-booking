@@ -59,14 +59,23 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
     return methods;
   };
 
-  // Calculate end time based on duration
+  // Calculate start time considering startMinute
+  const getActualStartTime = () => {
+    if (!bookingData?.timeSlot?.startTime) return '';
+    const [hours, minutes] = bookingData.timeSlot.startTime.split(':').map(Number);
+    const actualMinutes = minutes + (bookingData.startMinute || 0);
+    const totalMins = hours * 60 + actualMinutes;
+    return `${String(Math.floor(totalMins / 60)).padStart(2, '0')}:${String(totalMins % 60).padStart(2, '0')}`;
+  };
+
+  // Calculate end time based on duration and startMinute
   const calculateEndTime = () => {
     if (!bookingData?.timeSlot?.startTime) return '';
 
     const [hours, minutes] = bookingData.timeSlot.startTime.split(':').map(Number);
-    const endHours = hours + parseInt(formData.duration);
-    const endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    return endTime;
+    const startMins = hours * 60 + minutes + (bookingData.startMinute || 0);
+    const totalMins = startMins + parseFloat(formData.duration) * 60;
+    return `${String(Math.floor(totalMins / 60)).padStart(2, '0')}:${String(totalMins % 60).padStart(2, '0')}`;
   };
 
   // Calculate price when duration changes
@@ -145,8 +154,8 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
       newErrors.customerEmail = 'รูปแบบอีเมลไม่ถูกต้อง';
     }
 
-    if (formData.duration < 1 || formData.duration > 8) {
-      newErrors.duration = 'ระยะเวลาต้องอยู่ระหว่าง 1-8 ชั่วโมง';
+    if (formData.duration < 0.5 || formData.duration > 8) {
+      newErrors.duration = 'ระยะเวลาต้องอยู่ระหว่าง 30 นาที ถึง 8 ชั่วโมง';
     }
 
     setErrors(newErrors);
@@ -174,7 +183,8 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
         court: bookingData.court.courtId,
         date: bookingData.date,
         timeSlot: bookingData.timeSlot.timeSlotId,
-        duration: parseInt(formData.duration),
+        duration: parseFloat(formData.duration),
+        startMinute: bookingData.startMinute || 0,
         paymentMethod: formData.paymentMethod,
         paymentStatus: formData.paymentStatus,
         notes: formData.notes,
@@ -263,7 +273,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
               <div>
                 <span className="text-gray-600">เวลา:</span>
                 <span className="ml-2 font-semibold text-gray-900">
-                  {bookingData?.timeSlot?.startTime} - {calculateEndTime()}
+                  {getActualStartTime()} - {calculateEndTime()}
                   {bookingData?.timeSlot?.peakHour && (
                     <span className="ml-2 inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-800">
                       Peak Hour
@@ -353,9 +363,9 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
-                    <option key={hour} value={hour}>
-                      {hour} ชั่วโมง
+                  {Array.from({ length: 16 }, (_, i) => (i + 1) * 0.5).map((hours) => (
+                    <option key={hours} value={hours}>
+                      {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชั่วโมง` : `${Math.floor(hours)} ชม. 30 นาที`}
                     </option>
                   ))}
                 </select>
@@ -463,7 +473,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                 <div className="space-y-0.5 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">
-                      ราคาต่อชั่วโมง × {formData.duration} ชม.
+                      ราคาต่อชั่วโมง × {formData.duration == 0.5 ? '30 นาที' : formData.duration % 1 === 0 ? `${formData.duration} ชม.` : `${Math.floor(formData.duration)} ชม. 30 นาที`}
                     </span>
                     <span className="text-gray-900">{pricing.subtotal} บาท</span>
                   </div>
