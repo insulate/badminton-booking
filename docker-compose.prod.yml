@@ -13,7 +13,7 @@ services:
       - MONGODB_URI=mongodb://waste-mongodb:27017/badminton_db
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRE=30d
-      - CLIENT_URL=https://badminton-booking.vercel.app
+      - CLIENT_URL=https://badminton-booking-ivory.vercel.app
     volumes:
       - badminton_uploads:/app/uploads
     networks:
