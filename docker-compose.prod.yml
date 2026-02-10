@@ -14,6 +14,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRE=30d
       - CLIENT_URL=https://badminton-booking-ivory.vercel.app
+      - ALLOWED_ORIGINS=https://badminton-booking.vercel.app
     volumes:
       - badminton_uploads:/app/uploads
     networks:
