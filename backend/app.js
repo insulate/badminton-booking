@@ -38,16 +38,11 @@ if (process.env.NODE_ENV !== 'test') {
 
 // CORS Configuration
 const corsOptions = {
-  // Allow specific origins or use environment variable
   origin: function (origin, callback) {
+    // Build allowed origins from env vars
     const allowedOrigins = [
       process.env.CLIENT_URL,
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://localhost:3000',
-      'https://badminton-booking.vercel.app',
-      'https://badminton-booking-ivory.vercel.app'
+      ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : []),
     ].filter(Boolean);
 
     // Allow requests with no origin (like mobile apps, curl, Postman)
