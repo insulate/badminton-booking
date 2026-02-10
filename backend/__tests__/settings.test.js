@@ -358,6 +358,94 @@ describe('Settings API Tests', () => {
     });
   });
 
+  // --- PUBLIC ENDPOINTS (Bug #3 regression) ---
+  describe('GET /api/settings/venue-info', () => {
+    it('should return venue info without authentication (Bug #3 regression)', async () => {
+      // First set some venue data
+      await request(app)
+        .patch('/api/settings/venue')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Test Badminton Club', phone: '02-123-4567', address: '123 Test Rd' });
+
+      const response = await request(app).get('/api/settings/venue-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('venue');
+      expect(response.body.data).toHaveProperty('operating');
+      expect(response.body.data).toHaveProperty('booking');
+      expect(response.body.data.venue.name).toBe('Test Badminton Club');
+      expect(response.body.data.venue.phone).toBe('02-123-4567');
+    });
+
+    it('should include operating hours and booking settings', async () => {
+      // Set operating and booking data
+      await request(app)
+        .patch('/api/settings/operating')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ openTime: '06:00', closeTime: '22:00' });
+
+      await request(app)
+        .patch('/api/settings/booking')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ advanceBookingDays: 14 });
+
+      const response = await request(app).get('/api/settings/venue-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.operating.openTime).toBe('06:00');
+      expect(response.body.data.operating.closeTime).toBe('22:00');
+      expect(response.body.data.booking.advanceBookingDays).toBe(14);
+    });
+
+    it('should return defaults when no settings exist', async () => {
+      const response = await request(app).get('/api/settings/venue-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.venue).toBeDefined();
+      expect(response.body.data.operating).toBeDefined();
+      expect(response.body.data.booking).toBeDefined();
+    });
+  });
+
+  describe('GET /api/settings/payment-info', () => {
+    it('should return payment info without authentication', async () => {
+      // Set payment data
+      await request(app)
+        .patch('/api/settings/payment')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          acceptPromptPay: true,
+          promptPayNumber: '0812345678',
+          acceptTransfer: true,
+          bankAccount: {
+            bankName: 'ธนาคารกสิกรไทย',
+            accountNumber: '123-4-56789-0',
+            accountName: 'Test Account',
+          },
+        });
+
+      const response = await request(app).get('/api/settings/payment-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.promptPayNumber).toBe('0812345678');
+      expect(response.body.data.acceptPromptPay).toBe(true);
+      expect(response.body.data.acceptTransfer).toBe(true);
+      expect(response.body.data.bankAccount.bankName).toBe('ธนาคารกสิกรไทย');
+    });
+
+    it('should return defaults when no payment settings exist', async () => {
+      const response = await request(app).get('/api/settings/payment-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('promptPayNumber');
+      expect(response.body.data).toHaveProperty('bankAccount');
+    });
+  });
+
   describe('Integration Tests', () => {
     it('should maintain data consistency across multiple updates', async () => {
       // Update venue

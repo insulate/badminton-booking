@@ -10,6 +10,7 @@ const User = require('../models/user.model');
 const Court = require('../models/court.model');
 const TimeSlot = require('../models/timeslot.model');
 const Booking = require('../models/booking.model');
+const Setting = require('../models/setting.model');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token for testing
@@ -48,6 +49,7 @@ describe('Bookings API Tests', () => {
     await Court.deleteMany({});
     await TimeSlot.deleteMany({});
     await Booking.deleteMany({});
+    await Setting.deleteMany({});
 
     // Create admin user
     adminUser = await User.create({
@@ -95,6 +97,7 @@ describe('Bookings API Tests', () => {
     await Court.deleteMany({});
     await TimeSlot.deleteMany({});
     await Booking.deleteMany({});
+    await Setting.deleteMany({});
     await mongoose.connection.close();
   });
 
@@ -494,14 +497,15 @@ describe('Bookings API Tests', () => {
     let booking;
 
     beforeEach(async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Use +5 days to avoid cancellationHours restriction (default 24h)
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 5);
 
       booking = await Booking.create({
         bookingCode: 'BK2025111900001',
         customer: { name: 'Test Customer', phone: '0812345678' },
         court: testCourt._id,
-        date: tomorrow,
+        date: futureDate,
         timeSlot: testTimeSlot._id,
         duration: 1,
         pricing: { subtotal: 150, discount: 0, deposit: 0, total: 150 },
@@ -663,6 +667,158 @@ describe('Bookings API Tests', () => {
 
       expect(checkoutResponse.status).toBe(200);
       expect(checkoutResponse.body.data.bookingStatus).toBe('completed');
+    });
+  });
+
+  describe('PATCH /api/bookings/:id/assign-court', () => {
+    let booking;
+    let secondCourt;
+
+    beforeEach(async () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      booking = await Booking.create({
+        bookingCode: 'BK2025111900001',
+        customer: { name: 'Test Customer', phone: '0812345678' },
+        court: testCourt._id,
+        date: tomorrow,
+        timeSlot: testTimeSlot._id,
+        duration: 1,
+        pricing: { subtotal: 150, discount: 0, deposit: 0, total: 150 },
+        bookingStatus: 'confirmed',
+        paymentStatus: 'pending',
+      });
+
+      secondCourt = await Court.create({
+        courtNumber: 'C02',
+        name: 'Court 2',
+        type: 'normal',
+        status: 'available',
+      });
+    });
+
+    afterEach(async () => {
+      if (secondCourt) await Court.findByIdAndDelete(secondCourt._id);
+    });
+
+    it('should assign court to booking', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/assign-court`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ courtId: secondCourt._id.toString() });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('สำเร็จ');
+    });
+
+    it('should reject assign-court without courtId', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/assign-court`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({});
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should reject assign-court with non-existent court', async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/assign-court`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ courtId: fakeId.toString() });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('PATCH /api/bookings/:id/verify-slip', () => {
+    let booking;
+
+    beforeEach(async () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      booking = await Booking.create({
+        bookingCode: 'BK2025111900001',
+        customer: { name: 'Test Customer', phone: '0812345678' },
+        court: testCourt._id,
+        date: tomorrow,
+        timeSlot: testTimeSlot._id,
+        duration: 1,
+        pricing: { subtotal: 150, discount: 0, deposit: 0, total: 150 },
+        bookingStatus: 'confirmed',
+        paymentStatus: 'pending',
+        paymentSlip: {
+          image: '/uploads/slips/test-slip.jpg',
+          status: 'pending_verification',
+          uploadedAt: new Date(),
+        },
+      });
+    });
+
+    it('should verify slip successfully', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/verify-slip`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'verify' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.paymentSlip.status).toBe('verified');
+      expect(response.body.data.paymentStatus).toBe('paid');
+    });
+
+    it('should reject slip with reason', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/verify-slip`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'reject', rejectReason: 'สลิปไม่ชัด' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.paymentSlip.status).toBe('rejected');
+    });
+
+    it('should reject verify without action', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/verify-slip`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({});
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should reject verify on booking without slip', async () => {
+      // Create booking without slip
+      const noSlipBooking = await Booking.create({
+        bookingCode: 'BK2025111900099',
+        customer: { name: 'No Slip', phone: '0899999999' },
+        court: testCourt._id,
+        date: new Date(Date.now() + 86400000),
+        timeSlot: testTimeSlot._id,
+        duration: 1,
+        pricing: { subtotal: 150, discount: 0, deposit: 0, total: 150 },
+        bookingStatus: 'confirmed',
+        paymentStatus: 'pending',
+      });
+
+      const response = await request(app)
+        .patch(`/api/bookings/${noSlipBooking._id}/verify-slip`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'verify' });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should deny access to regular user', async () => {
+      const response = await request(app)
+        .patch(`/api/bookings/${booking._id}/verify-slip`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ action: 'verify' });
+
+      expect(response.status).toBe(403);
     });
   });
 

@@ -9,6 +9,7 @@ const app = require('../app');
 const User = require('../models/user.model');
 const Product = require('../models/product.model');
 const Sale = require('../models/sale.model');
+const Shift = require('../models/shift.model');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token for testing
@@ -31,6 +32,7 @@ describe('Sales/POS API Tests', () => {
   let userToken;
   let testProduct1;
   let testProduct2;
+  let openShift;
 
   // Setup: Create test data
   beforeAll(async () => {
@@ -45,6 +47,7 @@ describe('Sales/POS API Tests', () => {
     await User.deleteMany({});
     await Product.deleteMany({});
     await Sale.deleteMany({});
+    await Shift.deleteMany({});
 
     // Create admin user
     adminUser = await User.create({
@@ -65,6 +68,25 @@ describe('Sales/POS API Tests', () => {
     // Generate tokens
     adminToken = generateToken(adminUser._id);
     userToken = generateToken(regularUser._id);
+
+    // Create open shifts for both users (required for creating sales)
+    const now = new Date();
+    await Shift.create({
+      shiftCode: 'SFT-SALES-ADMIN-001',
+      user: adminUser._id,
+      date: now,
+      startTime: now,
+      openingCash: 1000,
+      status: 'open',
+    });
+    await Shift.create({
+      shiftCode: 'SFT-SALES-USER-001',
+      user: regularUser._id,
+      date: now,
+      startTime: now,
+      openingCash: 500,
+      status: 'open',
+    });
   });
 
   // Cleanup: Close DB connection after all tests
@@ -72,6 +94,7 @@ describe('Sales/POS API Tests', () => {
     await User.deleteMany({});
     await Product.deleteMany({});
     await Sale.deleteMany({});
+    await Shift.deleteMany({});
     await mongoose.connection.close();
   });
 
@@ -92,9 +115,9 @@ describe('Sales/POS API Tests', () => {
     });
 
     testProduct2 = await Product.create({
-      sku: 'BEV-001',
+      sku: 'DRK-001',
       name: 'Water Bottle',
-      category: 'beverage',
+      category: 'drink',
       price: 10,
       stock: 100,
       lowStockAlert: 20,

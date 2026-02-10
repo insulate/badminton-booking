@@ -373,6 +373,184 @@ describe('Auth API Tests', () => {
     });
   });
 
+  // --- Player Auth ---
+  describe('POST /api/auth/player/register', () => {
+    let Player;
+
+    beforeAll(async () => {
+      Player = require('../models/player.model');
+    });
+
+    afterEach(async () => {
+      await Player.deleteMany({});
+    });
+
+    it('should register a new player', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/register')
+        .send({
+          name: 'New Player',
+          phone: '0812345678',
+          password: 'password123',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('token');
+      expect(response.body.data.name).toBe('New Player');
+    });
+
+    it('should reject duplicate phone number', async () => {
+      await Player.create({
+        name: 'Existing Player',
+        phone: '0812345678',
+        password: 'password123',
+        status: 'active',
+      });
+
+      const response = await request(app)
+        .post('/api/auth/player/register')
+        .send({
+          name: 'Another Player',
+          phone: '0812345678',
+          password: 'password123',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('ถูกใช้งานแล้ว');
+    });
+
+    it('should reject missing required fields', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/register')
+        .send({ name: 'Incomplete' });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should reject short password', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/register')
+        .send({
+          name: 'Player',
+          phone: '0899999999',
+          password: '123',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('6');
+    });
+  });
+
+  describe('POST /api/auth/player/login', () => {
+    let Player;
+
+    beforeAll(async () => {
+      Player = require('../models/player.model');
+    });
+
+    beforeEach(async () => {
+      await Player.deleteMany({});
+      await Player.create({
+        name: 'Login Test Player',
+        phone: '0888888888',
+        password: 'password123',
+        status: 'active',
+      });
+    });
+
+    afterEach(async () => {
+      await Player.deleteMany({});
+    });
+
+    it('should login player with valid credentials', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/login')
+        .send({
+          phone: '0888888888',
+          password: 'password123',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('token');
+      expect(response.body.data.name).toBe('Login Test Player');
+    });
+
+    it('should reject invalid phone', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/login')
+        .send({
+          phone: '0899999999',
+          password: 'password123',
+        });
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should reject invalid password', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/login')
+        .send({
+          phone: '0888888888',
+          password: 'wrongpassword',
+        });
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should reject missing fields', async () => {
+      const response = await request(app)
+        .post('/api/auth/player/login')
+        .send({ phone: '0888888888' });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('GET /api/auth/player/me', () => {
+    let Player;
+    let playerToken;
+
+    beforeAll(async () => {
+      Player = require('../models/player.model');
+    });
+
+    beforeEach(async () => {
+      await Player.deleteMany({});
+      const player = await Player.create({
+        name: 'Me Test Player',
+        phone: '0877777777',
+        password: 'password123',
+        status: 'active',
+      });
+      playerToken = jwt.sign({ id: player._id }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+    });
+
+    afterEach(async () => {
+      await Player.deleteMany({});
+    });
+
+    it('should get player profile with valid token', async () => {
+      const response = await request(app)
+        .get('/api/auth/player/me')
+        .set('Authorization', `Bearer ${playerToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.name).toBe('Me Test Player');
+      expect(response.body.data.phone).toBe('0877777777');
+    });
+
+    it('should deny access without token', async () => {
+      const response = await request(app).get('/api/auth/player/me');
+
+      expect(response.status).toBe(401);
+    });
+  });
+
   describe('Integration Tests', () => {
     it('should handle full auth flow', async () => {
       // 1. Login

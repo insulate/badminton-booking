@@ -391,7 +391,7 @@ describe('Products and Categories API Tests', () => {
           {
             sku: 'BEV-001',
             name: 'Water',
-            category: 'beverage',
+            category: 'drink',
             price: 10,
             stock: 100,
             status: 'active',
@@ -647,6 +647,52 @@ describe('Products and Categories API Tests', () => {
 
         expect(response.status).toBe(400);
       });
+    });
+  });
+
+  // --- Bug #4 Regression: drink category ---
+  describe('Drink Category (Bug #4 regression)', () => {
+    it('should create product with category "drink" successfully', async () => {
+      const response = await request(app)
+        .post('/api/products')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          sku: 'DRK-001',
+          name: 'น้ำดื่ม',
+          category: 'drink',
+          price: 10,
+          stock: 100,
+          status: 'active',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.category).toBe('drink');
+    });
+
+    it('should generate SKU with DRK prefix for drink category', async () => {
+      const response = await request(app)
+        .get('/api/products/generate-sku?category=drink')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.sku).toMatch(/^DRK-\d{3}$/);
+    });
+
+    it('should reject product with invalid category "beverage"', async () => {
+      const response = await request(app)
+        .post('/api/products')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          sku: 'BEV-001',
+          name: 'เครื่องดื่ม',
+          category: 'beverage',
+          price: 15,
+          stock: 50,
+        });
+
+      expect(response.status).toBe(400);
     });
   });
 
