@@ -282,6 +282,7 @@ router.get('/venue-info', async (req, res) => {
           phone: settings.venue?.phone || '',
           email: settings.venue?.email || '',
           address: settings.venue?.address || '',
+          lineId: settings.venue?.lineId || '',
         },
         operating: {
           openTime: settings.operating?.openTime || '09:00',

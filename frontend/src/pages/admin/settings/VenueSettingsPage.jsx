@@ -15,6 +15,7 @@ const VenueSettingsPage = () => {
     address: '',
     phone: '',
     email: '',
+    lineId: '',
   });
 
   useEffect(() => {
@@ -116,8 +117,8 @@ const VenueSettingsPage = () => {
               />
             </div>
 
-            {/* Phone and Email Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Phone, Email, Line ID Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Phone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,6 +146,21 @@ const VenueSettingsPage = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="เช่น info@abcbadminton.com"
+                />
+              </div>
+
+              {/* Line ID */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Line ID
+                </label>
+                <input
+                  type="text"
+                  name="lineId"
+                  value={formData.lineId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="เช่น @abcbadminton"
                 />
               </div>
             </div>

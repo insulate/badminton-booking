@@ -169,6 +169,23 @@ describe('Settings API Tests', () => {
       expect(response.body.data.address).toBe('456 New St');
     });
 
+    it('should update venue settings with lineId', async () => {
+      const venueData = {
+        name: 'Line Test Venue',
+        lineId: '@testbadminton',
+      };
+
+      const response = await request(app)
+        .patch('/api/settings/venue')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(venueData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.name).toBe('Line Test Venue');
+      expect(response.body.data.lineId).toBe('@testbadminton');
+    });
+
     it('should deny access to regular user', async () => {
       const response = await request(app)
         .patch('/api/settings/venue')
@@ -376,6 +393,18 @@ describe('Settings API Tests', () => {
       expect(response.body.data).toHaveProperty('booking');
       expect(response.body.data.venue.name).toBe('Test Badminton Club');
       expect(response.body.data.venue.phone).toBe('02-123-4567');
+    });
+
+    it('should include lineId in venue-info response', async () => {
+      await request(app)
+        .patch('/api/settings/venue')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Line Venue', lineId: '@mybadminton' });
+
+      const response = await request(app).get('/api/settings/venue-info');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.venue.lineId).toBe('@mybadminton');
     });
 
     it('should include operating hours and booking settings', async () => {

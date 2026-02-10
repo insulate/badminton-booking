@@ -59,6 +59,7 @@ export default function HomePage() {
 
   const venueName = venueInfo?.venue?.name || 'สนามแบดมินตัน';
   const venuePhone = venueInfo?.venue?.phone || '';
+  const venueLineId = venueInfo?.venue?.lineId || '';
 
   // Loading state
   if (loading) {
@@ -109,9 +110,10 @@ export default function HomePage() {
       </div>
 
       {/* Contact Info */}
-      {venuePhone && (
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>TEL: {venuePhone}</p>
+      {(venuePhone || venueLineId) && (
+        <div className="mt-6 text-center text-sm text-gray-500 space-y-1">
+          {venuePhone && <p>TEL: {venuePhone}</p>}
+          {venueLineId && <p>LINE: {venueLineId}</p>}
         </div>
       )}
     </div>
