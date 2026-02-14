@@ -213,6 +213,10 @@ const groupPlaySchema = new mongoose.Schema(
       min: [0, 'ค่าเข้าร่วมต้องไม่ติดลบ'],
     },
     players: [sessionPlayerSchema],
+    gameCounter: {
+      type: Number,
+      default: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -303,32 +307,61 @@ groupPlaySchema.methods.markEntryFeePaid = function (playerId) {
   return this.save();
 };
 
-// Method to start a new game
-groupPlaySchema.methods.startGame = function (playerIds, courtId, teammates = [], opponents = []) {
+// Static method to start a new game with atomic gameNumber generation
+groupPlaySchema.statics.startGameAtomic = async function (sessionId, playerIds, courtId, teammates = [], opponents = []) {
   if (!courtId) {
     throw new Error('กรุณาเลือกสนาม');
   }
 
-  const gameNumber = this.players.reduce((max, p) => Math.max(max, p.games.length), 0) + 1;
+  // Step 1: Atomically increment gameCounter to get unique gameNumber
+  const updated = await this.findOneAndUpdate(
+    { _id: sessionId },
+    { $inc: { gameCounter: 1 } },
+    { new: true }
+  );
 
-  playerIds.forEach((playerId) => {
-    const player = this.players.id(playerId);
-    if (player) {
-      player.games.push({
-        gameNumber,
-        court: courtId,
-        teammates: teammates.filter((id) => id !== playerId.toString()),
-        opponents,
-        status: 'playing',
-        startTime: new Date(),
-        items: [],
-        totalItemsCost: 0,
-        costPerPlayer: 0,
-      });
-    }
-  });
+  if (!updated) {
+    throw new Error('ไม่พบ session');
+  }
 
-  return this.save();
+  const gameNumber = updated.gameCounter;
+  const now = new Date();
+
+  // Step 2: Add game to each player using atomic $push
+  for (const playerId of playerIds) {
+    await this.updateOne(
+      { _id: sessionId, 'players._id': playerId },
+      {
+        $push: {
+          'players.$.games': {
+            gameNumber,
+            court: courtId,
+            teammates: (teammates || []).filter((id) => id !== playerId.toString()),
+            opponents: opponents || [],
+            status: 'playing',
+            startTime: now,
+            items: [],
+            totalItemsCost: 0,
+            costPerPlayer: 0,
+          },
+        },
+      }
+    );
+  }
+
+  return gameNumber;
+};
+
+// Instance method (backward compatible wrapper - reloads document after atomic update)
+groupPlaySchema.methods.startGame = async function (playerIds, courtId, teammates = [], opponents = []) {
+  const gameNumber = await mongoose.model('GroupPlay').startGameAtomic(this._id, playerIds, courtId, teammates, opponents);
+
+  // Reload document data so callers can access updated players/games
+  const refreshed = await mongoose.model('GroupPlay').findById(this._id);
+  this.players = refreshed.players;
+  this.gameCounter = refreshed.gameCounter;
+
+  return gameNumber;
 };
 
 // Method to update game players
@@ -411,10 +444,20 @@ groupPlaySchema.methods.finishGame = function (playerId, gameNumber, items) {
   // Calculate total items cost
   const totalItemsCost = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Find all players who have this game (by gameNumber and status = playing)
+  // Get court from the game being finished (defense-in-depth against gameNumber collision)
+  const courtId = game.court ? game.court.toString() : null;
+
+  // Find all players who have this game (by gameNumber, status, and court)
   const playersInGame = [];
   this.players.forEach(p => {
-    const playerGame = p.games.find(g => g.gameNumber === gameNumber && g.status === 'playing');
+    const playerGame = p.games.find(g => {
+      if (g.gameNumber !== gameNumber || g.status !== 'playing') return false;
+      // Also match court to prevent cross-court miscalculation
+      if (courtId && g.court) {
+        return g.court.toString() === courtId;
+      }
+      return true;
+    });
     if (playerGame) {
       playersInGame.push(p);
     }
@@ -434,7 +477,11 @@ groupPlaySchema.methods.finishGame = function (playerId, gameNumber, items) {
 
   // Update all players in this game
   playersInGame.forEach(p => {
-    const playerGame = p.games.find(g => g.gameNumber === gameNumber && g.status === 'playing');
+    const playerGame = p.games.find(g => {
+      if (g.gameNumber !== gameNumber || g.status !== 'playing') return false;
+      if (courtId && g.court) return g.court.toString() === courtId;
+      return true;
+    });
     if (playerGame) {
       // Update game details
       playerGame.items = items;

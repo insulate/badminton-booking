@@ -213,16 +213,19 @@ export default function GroupPlayPage() {
     }))
   ) || [];
 
-  // Deduplicate games by gameNumber and collect all players in each game
+  // Deduplicate games by gameNumber + court combination
   const gamesMap = new Map();
   allGames.forEach(game => {
-    if (!gamesMap.has(game.gameNumber)) {
-      gamesMap.set(game.gameNumber, {
+    const courtId = typeof game.court === 'object' ? game.court?._id : game.court;
+    const gameKey = `${game.gameNumber}_${courtId || 'unknown'}`;
+
+    if (!gamesMap.has(gameKey)) {
+      gamesMap.set(gameKey, {
         ...game,
         players: []
       });
     }
-    const gameData = gamesMap.get(game.gameNumber);
+    const gameData = gamesMap.get(gameKey);
 
     // Update court info if current game has populated court data
     if (game.court && typeof game.court === 'object' && game.court.name) {

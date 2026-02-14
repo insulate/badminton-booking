@@ -341,8 +341,8 @@ router.post('/:id/game/start', async (req, res) => {
       });
     }
 
-    // Start game
-    await session.startGame(playerIds, courtId, teammates, opponents);
+    // Start game (atomic operation to prevent gameNumber collision)
+    await GroupPlay.startGameAtomic(session._id, playerIds, courtId, teammates, opponents);
 
     const updatedSession = await GroupPlay.findById(session._id)
       .populate('players.player', 'name level levelName')

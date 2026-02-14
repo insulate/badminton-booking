@@ -170,6 +170,7 @@ export default function StartGameModal({ session, onClose, onSuccess }) {
                       <div>
                         <p className="font-medium text-text-primary">{player.name}</p>
                         <p className="text-sm text-text-secondary">{player.phone}</p>
+                        <p className="text-xs text-slate-400">เล่นไปแล้ว {player.games?.length || 0} เกม</p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         {player.level && (
