@@ -268,6 +268,11 @@ export default function AdminLayout() {
           path: ROUTES.ADMIN.SETTINGS_FLOOR_PLAN,
           icon: Map,
         },
+        {
+          name: 'ระดับมือผู้เล่น',
+          path: ROUTES.ADMIN.SETTINGS_PLAYER_LEVELS,
+          icon: UserCircle2,
+        },
       ],
     },
   ];

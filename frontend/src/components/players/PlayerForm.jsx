@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
-import { getAllLevels } from '../../constants/playerLevels';
+import { getAllLevels, fetchPlayerLevels } from '../../constants/playerLevels';
 
 /**
  * PlayerForm - ฟอร์มสร้าง/แก้ไขผู้เล่น
@@ -12,7 +12,11 @@ import { getAllLevels } from '../../constants/playerLevels';
  */
 export default function PlayerForm({ player, onSubmit, onCancel, isLoading = false }) {
   const isEditMode = !!player;
-  const levels = getAllLevels();
+  const [levels, setLevels] = useState(getAllLevels());
+
+  useEffect(() => {
+    fetchPlayerLevels().then((apiLevels) => setLevels(apiLevels));
+  }, []);
 
   const [formData, setFormData] = useState({
     name: player?.name || '',

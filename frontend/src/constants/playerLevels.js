@@ -1,121 +1,156 @@
 /**
  * Player Level System for Badminton
- * Based on MK Badminton 2025 Standard
- * 11 levels (0-10) from beginner to professional
+ * Fetches levels from API with hardcoded fallback
  */
 
-export const PLAYER_LEVELS = {
+import { settingsAPI } from '../lib/api';
+
+// Hardcoded default levels (fallback when API is unavailable)
+const DEFAULT_LEVELS = {
   0: {
     value: '0',
-    name: 'เปาะแปะ',
+    name: 'เริ่มต้น',
     nameEn: 'Beginner',
     description: 'เริ่มต้นเล่น ยังไม่คุ้นเคยกับกีฬา',
-    color: '#94a3b8', // slate-400
+    color: '#94a3b8',
   },
   1: {
     value: '1',
-    name: 'หน้าบ้าน',
-    nameEn: 'Casual',
+    name: 'มือBG',
+    nameEn: 'BG',
     description: 'เล่นได้เบื้องต้น เล่นเพื่อสุขภาพ',
-    color: '#60a5fa', // blue-400
+    color: '#60a5fa',
   },
   2: {
     value: '2',
-    name: 'S-',
+    name: 'มือS-',
     nameEn: 'S Minus',
     description: 'เริ่มมีพื้นฐาน รู้จักเทคนิคพื้นฐาน',
-    color: '#34d399', // emerald-400
+    color: '#34d399',
   },
   3: {
     value: '3',
-    name: 'S',
+    name: 'มือS',
     nameEn: 'S',
     description: 'พื้นฐานดี เล่นได้คล่อง',
-    color: '#22c55e', // green-500
+    color: '#22c55e',
   },
   4: {
     value: '4',
-    name: 'S+',
-    nameEn: 'S Plus',
+    name: 'มือN',
+    nameEn: 'N',
     description: 'เล่นได้ดี มีเทคนิคหลากหลาย',
-    color: '#84cc16', // lime-500
+    color: '#f59e0b',
   },
   5: {
     value: '5',
-    name: 'A-',
-    nameEn: 'A Minus',
-    description: 'เล่นได้ดีมาก เริ่มมีกลยุทธ์',
-    color: '#eab308', // yellow-500
+    name: 'มือP-',
+    nameEn: 'P Minus',
+    description: 'นักกีฬาระดับดี มีกลยุทธ์ชัดเจน',
+    color: '#f97316',
   },
   6: {
     value: '6',
-    name: 'A',
-    nameEn: 'A',
-    description: 'นักกีฬาระดับดี มีกลยุทธ์ชัดเจน',
-    color: '#f59e0b', // amber-500
-  },
-  7: {
-    value: '7',
-    name: 'A+',
-    nameEn: 'A Plus',
+    name: 'มือP',
+    nameEn: 'P',
     description: 'นักกีฬาระดับสูง ทักษะครบถ้วน',
-    color: '#f97316', // orange-500
-  },
-  8: {
-    value: '8',
-    name: 'B',
-    nameEn: 'B',
-    description: 'นักกีฬาระดับแนวหน้า เคยแข่งขันระดับจังหวัด',
-    color: '#ef4444', // red-500
-  },
-  9: {
-    value: '9',
-    name: 'B+',
-    nameEn: 'B Plus',
-    description: 'นักกีฬาระดับสูงมาก เคยแข่งขันระดับภาค/ประเทศ',
-    color: '#dc2626', // red-600
-  },
-  10: {
-    value: '10',
-    name: 'Pro',
-    nameEn: 'Professional',
-    description: 'นักกีฬาอาชีพ ระดับทีมชาติ',
-    color: '#991b1b', // red-800
+    color: '#ef4444',
   },
 };
 
+// Module-level cache for API-fetched levels
+let _cachedLevels = null;
+let _fetchPromise = null;
+
 /**
- * Get level info by level value
- * @param {string|number} level - Level value (0-10)
+ * Fetch player levels from API and cache them
+ * @returns {Promise<array>} Array of level objects
+ */
+export const fetchPlayerLevels = async () => {
+  // Return cached if available
+  if (_cachedLevels) return _cachedLevels;
+
+  // Deduplicate concurrent requests
+  if (_fetchPromise) return _fetchPromise;
+
+  _fetchPromise = (async () => {
+    try {
+      const response = await settingsAPI.getPlayerLevels();
+      if (response.success && response.data && response.data.length > 0) {
+        _cachedLevels = response.data;
+        return _cachedLevels;
+      }
+    } catch (error) {
+      console.error('Error fetching player levels, using defaults:', error);
+    }
+    // Fallback to defaults
+    _cachedLevels = getAllLevelsDefault();
+    return _cachedLevels;
+  })();
+
+  const result = await _fetchPromise;
+  _fetchPromise = null;
+  return result;
+};
+
+/**
+ * Clear the cached levels (call after updating levels in settings)
+ */
+export const clearLevelsCache = () => {
+  _cachedLevels = null;
+  _fetchPromise = null;
+};
+
+/**
+ * Get all levels from cache or hardcoded default (sync)
+ */
+const getAllLevelsDefault = () => {
+  return Object.keys(DEFAULT_LEVELS).map((key) => ({
+    value: DEFAULT_LEVELS[key].value,
+    name: DEFAULT_LEVELS[key].name,
+    nameEn: DEFAULT_LEVELS[key].nameEn,
+    description: DEFAULT_LEVELS[key].description,
+    color: DEFAULT_LEVELS[key].color,
+  }));
+};
+
+/**
+ * Get level info by level value (uses cache if available, fallback to hardcoded)
+ * @param {string|number} level - Level value
+ * @param {array} [levelsFromApi] - Optional levels array from API
  * @returns {object|null} Level info or null if not found
  */
-export const getLevelInfo = (level) => {
-  const levelKey = String(level);
-  return PLAYER_LEVELS[levelKey] || null;
+export const getLevelInfo = (level, levelsFromApi) => {
+  const levelStr = String(level);
+  const source = levelsFromApi || _cachedLevels;
+
+  if (source) {
+    const found = source.find((l) => String(l.value) === levelStr);
+    return found || null;
+  }
+
+  // Fallback to hardcoded
+  return DEFAULT_LEVELS[levelStr] || null;
 };
 
 /**
  * Get level name by level value
- * @param {string|number} level - Level value (0-10)
+ * @param {string|number} level - Level value
+ * @param {array} [levelsFromApi] - Optional levels array from API
  * @returns {string} Level name
  */
-export const getLevelName = (level) => {
-  const info = getLevelInfo(level);
+export const getLevelName = (level, levelsFromApi) => {
+  const info = getLevelInfo(level, levelsFromApi);
   return info ? info.name : 'ไม่ระบุ';
 };
 
 /**
- * Get all levels as array
+ * Get all levels as array (sync - from cache or hardcoded)
  * @returns {array} Array of level objects
  */
 export const getAllLevels = () => {
-  return Object.keys(PLAYER_LEVELS).map((key) => ({
-    value: PLAYER_LEVELS[key].value,
-    name: PLAYER_LEVELS[key].name,
-    nameEn: PLAYER_LEVELS[key].nameEn,
-    description: PLAYER_LEVELS[key].description,
-    color: PLAYER_LEVELS[key].color,
-  }));
+  if (_cachedLevels) return _cachedLevels;
+  return getAllLevelsDefault();
 };
 
 /**
@@ -124,16 +159,23 @@ export const getAllLevels = () => {
  * @returns {boolean} True if valid
  */
 export const isValidLevel = (level) => {
-  const levelKey = String(level);
-  return PLAYER_LEVELS.hasOwnProperty(levelKey);
+  const levelStr = String(level);
+  if (_cachedLevels) {
+    return _cachedLevels.some((l) => String(l.value) === levelStr);
+  }
+  return DEFAULT_LEVELS.hasOwnProperty(levelStr);
 };
 
 /**
  * Get level color for UI display
  * @param {string|number} level - Level value
+ * @param {array} [levelsFromApi] - Optional levels array from API
  * @returns {string} Color hex code
  */
-export const getLevelColor = (level) => {
-  const info = getLevelInfo(level);
-  return info ? info.color : '#6b7280'; // gray-500 as default
+export const getLevelColor = (level, levelsFromApi) => {
+  const info = getLevelInfo(level, levelsFromApi);
+  return info ? info.color : '#6b7280';
 };
+
+// Keep PLAYER_LEVELS export for backwards compat (but prefer getAllLevels/getLevelInfo)
+export const PLAYER_LEVELS = DEFAULT_LEVELS;

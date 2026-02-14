@@ -1,92 +1,80 @@
 /**
  * Player Level System for Badminton
- * Based on MK Badminton 2025 Standard
- * 11 levels (0-10) from beginner to professional
+ * 7 levels (0-6) from beginner to professional
  */
 
 const PLAYER_LEVELS = {
   0: {
     value: '0',
-    name: 'เปาะแปะ',
+    name: 'เริ่มต้น',
     nameEn: 'Beginner',
     description: 'เริ่มต้นเล่น ยังไม่คุ้นเคยกับกีฬา',
     color: '#94a3b8', // slate-400
   },
   1: {
     value: '1',
-    name: 'หน้าบ้าน',
-    nameEn: 'Casual',
+    name: 'มือBG',
+    nameEn: 'BG',
     description: 'เล่นได้เบื้องต้น เล่นเพื่อสุขภาพ',
     color: '#60a5fa', // blue-400
   },
   2: {
     value: '2',
-    name: 'S-',
+    name: 'มือS-',
     nameEn: 'S Minus',
     description: 'เริ่มมีพื้นฐาน รู้จักเทคนิคพื้นฐาน',
     color: '#34d399', // emerald-400
   },
   3: {
     value: '3',
-    name: 'S',
+    name: 'มือS',
     nameEn: 'S',
     description: 'พื้นฐานดี เล่นได้คล่อง',
     color: '#22c55e', // green-500
   },
   4: {
     value: '4',
-    name: 'S+',
-    nameEn: 'S Plus',
+    name: 'มือN',
+    nameEn: 'N',
     description: 'เล่นได้ดี มีเทคนิคหลากหลาย',
-    color: '#84cc16', // lime-500
+    color: '#f59e0b', // amber-500
   },
   5: {
     value: '5',
-    name: 'A-',
-    nameEn: 'A Minus',
-    description: 'เล่นได้ดีมาก เริ่มมีกลยุทธ์',
-    color: '#eab308', // yellow-500
+    name: 'มือP-',
+    nameEn: 'P Minus',
+    description: 'นักกีฬาระดับดี มีกลยุทธ์ชัดเจน',
+    color: '#f97316', // orange-500
   },
   6: {
     value: '6',
-    name: 'A',
-    nameEn: 'A',
-    description: 'นักกีฬาระดับดี มีกลยุทธ์ชัดเจน',
-    color: '#f59e0b', // amber-500
-  },
-  7: {
-    value: '7',
-    name: 'A+',
-    nameEn: 'A Plus',
+    name: 'มือP',
+    nameEn: 'P',
     description: 'นักกีฬาระดับสูง ทักษะครบถ้วน',
-    color: '#f97316', // orange-500
-  },
-  8: {
-    value: '8',
-    name: 'B',
-    nameEn: 'B',
-    description: 'นักกีฬาระดับแนวหน้า เคยแข่งขันระดับจังหวัด',
     color: '#ef4444', // red-500
-  },
-  9: {
-    value: '9',
-    name: 'B+',
-    nameEn: 'B Plus',
-    description: 'นักกีฬาระดับสูงมาก เคยแข่งขันระดับภาค/ประเทศ',
-    color: '#dc2626', // red-600
-  },
-  10: {
-    value: '10',
-    name: 'Pro',
-    nameEn: 'Professional',
-    description: 'นักกีฬาอาชีพ ระดับทีมชาติ',
-    color: '#991b1b', // red-800
   },
 };
 
 /**
- * Get level info by level value
- * @param {string|number} level - Level value (0-10)
+ * Get levels from DB (async) with hardcoded fallback
+ * @returns {Promise<array>} Array of level objects from DB
+ */
+const getLevelsFromDB = async () => {
+  try {
+    const Setting = require('../models/setting.model');
+    const settings = await Setting.getSettings();
+    if (settings.playerLevels && settings.playerLevels.length > 0) {
+      return settings.playerLevels;
+    }
+  } catch (error) {
+    // Fallback to hardcoded levels
+  }
+  return getAllLevels();
+};
+
+/**
+ * Get level info by level value (uses hardcoded fallback)
+ * @param {string|number} level - Level value
  * @returns {object|null} Level info or null if not found
  */
 const getLevelInfo = (level) => {
@@ -95,8 +83,8 @@ const getLevelInfo = (level) => {
 };
 
 /**
- * Get level name by level value
- * @param {string|number} level - Level value (0-10)
+ * Get level name by level value (uses hardcoded fallback)
+ * @param {string|number} level - Level value
  * @returns {string} Level name
  */
 const getLevelName = (level) => {
@@ -105,7 +93,18 @@ const getLevelName = (level) => {
 };
 
 /**
- * Get all levels as array
+ * Get level name from DB levels array
+ * @param {string|number} level - Level value
+ * @param {array} dbLevels - Levels array from DB
+ * @returns {string} Level name
+ */
+const getLevelNameFromList = (level, dbLevels) => {
+  const found = dbLevels.find((l) => String(l.value) === String(level));
+  return found ? found.name : 'ไม่ระบุ';
+};
+
+/**
+ * Get all levels as array (hardcoded fallback)
  * @returns {array} Array of level objects
  */
 const getAllLevels = () => {
@@ -119,7 +118,7 @@ const getAllLevels = () => {
 };
 
 /**
- * Validate level value
+ * Validate level value (uses hardcoded fallback)
  * @param {string|number} level - Level value to validate
  * @returns {boolean} True if valid
  */
@@ -232,7 +231,9 @@ module.exports = {
   PLAYER_LEVELS,
   getLevelInfo,
   getLevelName,
+  getLevelNameFromList,
   getAllLevels,
+  getLevelsFromDB,
   isValidLevel,
   getLevelDifference,
   checkMatchBalance,

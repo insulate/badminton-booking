@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Users, Plus, Search, RefreshCw, Trash2, Edit2, Phone, Calendar, ArrowUpDown, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { playersAPI } from '../../lib/api';
-import { getAllLevels } from '../../constants/playerLevels';
+import { getAllLevels, fetchPlayerLevels } from '../../constants/playerLevels';
 import PlayerLevelBadge from '../../components/players/PlayerLevelBadge';
 import PlayerStatsCard from '../../components/players/PlayerStatsCard';
 import PlayerForm from '../../components/players/PlayerForm';
@@ -37,7 +37,12 @@ export default function PlayersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  const levels = getAllLevels();
+  const [levels, setLevels] = useState(getAllLevels());
+
+  // Fetch player levels from API
+  useEffect(() => {
+    fetchPlayerLevels().then((apiLevels) => setLevels(apiLevels));
+  }, []);
 
   // Fetch players
   const fetchPlayers = async () => {

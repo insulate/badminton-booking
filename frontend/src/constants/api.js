@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
     PAYMENT_INFO: '/settings/payment-info', // Public
     BLOCKED_DATES: '/settings/blocked-dates', // Public GET, Admin POST/DELETE
     BLOCKED_DATE: (date) => `/settings/blocked-dates/${date}`, // Admin DELETE
+    PLAYER_LEVELS: '/settings/player-levels', // Public GET, Admin PATCH
   },
 
   // Courts Management (Admin)

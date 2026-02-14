@@ -271,6 +271,17 @@ export const settingsAPI = {
     return response.data;
   },
 
+  // Player Levels
+  getPlayerLevels: async () => {
+    const response = await api.get(API_ENDPOINTS.SETTINGS.PLAYER_LEVELS);
+    return response.data;
+  },
+
+  updatePlayerLevels: async (levels) => {
+    const response = await api.patch(API_ENDPOINTS.SETTINGS.PLAYER_LEVELS, { levels });
+    return response.data;
+  },
+
   // Blocked Dates (วันปิดการจอง)
   getBlockedDates: async () => {
     const response = await api.get(API_ENDPOINTS.SETTINGS.BLOCKED_DATES);

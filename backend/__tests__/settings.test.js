@@ -520,4 +520,125 @@ describe('Settings API Tests', () => {
       expect(response.body.data.booking.advanceBookingDays).toBe(15);
     });
   });
+
+  // --- PLAYER LEVELS ENDPOINTS ---
+  describe('GET /api/settings/player-levels', () => {
+    it('should return player levels without authentication (public)', async () => {
+      const response = await request(app).get('/api/settings/player-levels');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
+      // Check default levels structure
+      expect(response.body.data[0]).toHaveProperty('value');
+      expect(response.body.data[0]).toHaveProperty('name');
+      expect(response.body.data[0]).toHaveProperty('color');
+    });
+
+    it('should return default 7 levels when no custom levels set', async () => {
+      const response = await request(app).get('/api/settings/player-levels');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(7);
+      expect(response.body.data[0].name).toBe('เริ่มต้น');
+      expect(response.body.data[6].name).toBe('มือP');
+    });
+  });
+
+  describe('PATCH /api/settings/player-levels', () => {
+    it('should update player levels for admin', async () => {
+      const newLevels = [
+        { value: '0', name: 'Beginner', nameEn: 'Beginner', description: 'New player', color: '#94a3b8' },
+        { value: '1', name: 'Intermediate', nameEn: 'Intermediate', description: 'Some experience', color: '#60a5fa' },
+        { value: '2', name: 'Advanced', nameEn: 'Advanced', description: 'Expert player', color: '#ef4444' },
+      ];
+
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ levels: newLevels });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data[0].name).toBe('Beginner');
+      expect(response.body.data[2].name).toBe('Advanced');
+    });
+
+    it('should persist updated levels via GET', async () => {
+      const newLevels = [
+        { value: '0', name: 'Level A', nameEn: 'A', description: '', color: '#111111' },
+        { value: '1', name: 'Level B', nameEn: 'B', description: '', color: '#222222' },
+      ];
+
+      await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ levels: newLevels });
+
+      const response = await request(app).get('/api/settings/player-levels');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0].name).toBe('Level A');
+      expect(response.body.data[1].color).toBe('#222222');
+    });
+
+    it('should reject empty levels array', async () => {
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ levels: [] });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should reject levels with duplicate values', async () => {
+      const duplicateLevels = [
+        { value: '0', name: 'Level A', nameEn: 'A', description: '', color: '#111' },
+        { value: '0', name: 'Level B', nameEn: 'B', description: '', color: '#222' },
+      ];
+
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ levels: duplicateLevels });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should reject levels without name', async () => {
+      const invalidLevels = [
+        { value: '0', name: '', nameEn: 'A', description: '', color: '#111' },
+      ];
+
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ levels: invalidLevels });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should deny access to regular user', async () => {
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ levels: [{ value: '0', name: 'Test' }] });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should deny access without token', async () => {
+      const response = await request(app)
+        .patch('/api/settings/player-levels')
+        .send({ levels: [{ value: '0', name: 'Test' }] });
+
+      expect(response.status).toBe(401);
+    });
+  });
 });

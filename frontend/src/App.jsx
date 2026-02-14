@@ -33,6 +33,7 @@ import BookingSettingsPage from './pages/admin/settings/BookingSettingsPage';
 import PaymentSettingsPage from './pages/admin/settings/PaymentSettingsPage';
 import GeneralSettingsPage from './pages/admin/settings/GeneralSettingsPage';
 import FloorPlanSettingsPage from './pages/admin/settings/FloorPlanSettingsPage';
+import PlayerLevelsSettingsPage from './pages/admin/settings/PlayerLevelsSettingsPage';
 
 // Courts Pages
 import CourtsPage from './pages/admin/settings/courts/CourtsPage';
@@ -164,6 +165,7 @@ function App() {
           <Route path="settings/payment" element={<PaymentSettingsPage />} />
           <Route path="settings/general" element={<GeneralSettingsPage />} />
           <Route path="settings/floor-plan" element={<FloorPlanSettingsPage />} />
+          <Route path="settings/player-levels" element={<PlayerLevelsSettingsPage />} />
 
           {/* Courts Routes */}
           <Route path="settings/courts" element={<CourtsPage />} />

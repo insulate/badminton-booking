@@ -169,6 +169,28 @@ const settingSchema = new mongoose.Schema(
       },
     },
 
+    // ระดับมือผู้เล่น
+    playerLevels: {
+      type: [
+        {
+          value: { type: String, required: true },
+          name: { type: String, required: true },
+          nameEn: { type: String, default: '' },
+          description: { type: String, default: '' },
+          color: { type: String, default: '#94a3b8' },
+        },
+      ],
+      default: [
+        { value: '0', name: 'เริ่มต้น', nameEn: 'Beginner', description: 'เริ่มต้นเล่น ยังไม่คุ้นเคยกับกีฬา', color: '#94a3b8' },
+        { value: '1', name: 'มือBG', nameEn: 'BG', description: 'เล่นได้เบื้องต้น เล่นเพื่อสุขภาพ', color: '#60a5fa' },
+        { value: '2', name: 'มือS-', nameEn: 'S Minus', description: 'เริ่มมีพื้นฐาน รู้จักเทคนิคพื้นฐาน', color: '#34d399' },
+        { value: '3', name: 'มือS', nameEn: 'S', description: 'พื้นฐานดี เล่นได้คล่อง', color: '#22c55e' },
+        { value: '4', name: 'มือN', nameEn: 'N', description: 'เล่นได้ดี มีเทคนิคหลากหลาย', color: '#f59e0b' },
+        { value: '5', name: 'มือP-', nameEn: 'P Minus', description: 'นักกีฬาระดับดี มีกลยุทธ์ชัดเจน', color: '#f97316' },
+        { value: '6', name: 'มือP', nameEn: 'P', description: 'นักกีฬาระดับสูง ทักษะครบถ้วน', color: '#ef4444' },
+      ],
+    },
+
     // การตั้งค่าอื่นๆ
     general: {
       currency: {

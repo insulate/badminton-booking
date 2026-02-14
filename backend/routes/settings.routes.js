@@ -37,7 +37,7 @@ router.put('/', protect, admin, async (req, res) => {
     let settings = await Setting.findOne();
 
     // Whitelist allowed fields to prevent mass assignment vulnerabilities
-    const allowedFields = ['venue', 'operating', 'booking', 'payment', 'general'];
+    const allowedFields = ['venue', 'operating', 'booking', 'payment', 'general', 'playerLevels'];
     const updateData = {};
 
     allowedFields.forEach((field) => {
@@ -299,6 +299,83 @@ router.get('/venue-info', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสนาม',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/settings/player-levels
+ * @desc    Get player levels (Public - for player registration and display)
+ * @access  Public
+ */
+router.get('/player-levels', async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+
+    res.json({
+      success: true,
+      data: settings.playerLevels || [],
+    });
+  } catch (error) {
+    console.error('Get player levels error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลระดับมือ',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PATCH /api/settings/player-levels
+ * @desc    Update player levels
+ * @access  Private (Admin)
+ */
+router.patch('/player-levels', protect, admin, async (req, res) => {
+  try {
+    const settings = await Setting.getSettings();
+    const { levels } = req.body;
+
+    if (!Array.isArray(levels) || levels.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุระดับมืออย่างน้อย 1 ระดับ',
+      });
+    }
+
+    // Validate each level
+    for (const level of levels) {
+      if (!level.value || !level.name) {
+        return res.status(400).json({
+          success: false,
+          message: 'แต่ละระดับต้องมี value และ name',
+        });
+      }
+    }
+
+    // Check for duplicate values
+    const values = levels.map((l) => l.value);
+    if (new Set(values).size !== values.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'ค่า value ของแต่ละระดับต้องไม่ซ้ำกัน',
+      });
+    }
+
+    settings.playerLevels = levels;
+    await settings.save();
+
+    res.json({
+      success: true,
+      message: 'อัพเดทระดับมือสำเร็จ',
+      data: settings.playerLevels,
+    });
+  } catch (error) {
+    console.error('Update player levels error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการอัพเดทระดับมือ',
       error: error.message,
     });
   }

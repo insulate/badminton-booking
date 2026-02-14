@@ -43,6 +43,7 @@ export const ROUTES = {
     SETTINGS_PAYMENT: '/admin/settings/payment',
     SETTINGS_GENERAL: '/admin/settings/general',
     SETTINGS_FLOOR_PLAN: '/admin/settings/floor-plan',
+    SETTINGS_PLAYER_LEVELS: '/admin/settings/player-levels',
     // Shift Management
     ATTENDANCE: '/admin/attendance',
     SHIFTS: '/admin/shifts',

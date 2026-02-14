@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { playersAPI } from '../../lib/api';
-import { getAllLevels } from '../../constants/playerLevels';
+import { getAllLevels, fetchPlayerLevels } from '../../constants/playerLevels';
 
 export default function PlayerCheckInModal({ sessionId, onClose, onSuccess }) {
   const [searchMode, setSearchMode] = useState('database'); // 'database' or 'walkin'
@@ -18,7 +18,11 @@ export default function PlayerCheckInModal({ sessionId, onClose, onSuccess }) {
     level: '',
   });
 
-  const levels = getAllLevels();
+  const [levels, setLevels] = useState(getAllLevels());
+
+  useEffect(() => {
+    fetchPlayerLevels().then((apiLevels) => setLevels(apiLevels));
+  }, []);
 
   useEffect(() => {
     if (searchMode === 'database' && searchTerm.length >= 2) {
@@ -151,7 +155,7 @@ export default function PlayerCheckInModal({ sessionId, onClose, onSuccess }) {
                           </div>
                           {player.level && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                              {levels.find(l => l.value === player.level)?.label || player.level}
+                              {levels.find(l => l.value === player.level)?.name || player.level}
                             </span>
                           )}
                         </div>
@@ -213,7 +217,7 @@ export default function PlayerCheckInModal({ sessionId, onClose, onSuccess }) {
                   <option value="">ไม่ระบุ</option>
                   {levels.map(level => (
                     <option key={level.value} value={level.value}>
-                      {level.label}
+                      {level.name}
                     </option>
                   ))}
                 </select>
