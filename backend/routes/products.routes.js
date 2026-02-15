@@ -23,7 +23,7 @@ router.get('/generate-sku', protect, async (req, res) => {
     // Category prefix mapping
     const prefixes = {
       shuttlecock: 'SHT',
-      drink: 'DRK',
+      beverage: 'DRK',
       snack: 'SNK',
       equipment: 'EQP',
       other: 'OTH',

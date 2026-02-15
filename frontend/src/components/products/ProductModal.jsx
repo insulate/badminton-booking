@@ -283,7 +283,7 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
               >
                 <option value="">เลือกหมวดหมู่</option>
                 <option value="shuttlecock">ลูกแบด</option>
-                <option value="drink">เครื่องดื่ม</option>
+                <option value="beverage">เครื่องดื่ม</option>
                 <option value="snack">ขนม</option>
                 <option value="equipment">อุปกรณ์</option>
                 <option value="other">อื่นๆ</option>

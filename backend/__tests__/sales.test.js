@@ -117,7 +117,7 @@ describe('Sales/POS API Tests', () => {
     testProduct2 = await Product.create({
       sku: 'DRK-001',
       name: 'Water Bottle',
-      category: 'drink',
+      category: 'beverage',
       price: 10,
       stock: 100,
       lowStockAlert: 20,

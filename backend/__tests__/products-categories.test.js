@@ -391,7 +391,7 @@ describe('Products and Categories API Tests', () => {
           {
             sku: 'BEV-001',
             name: 'Water',
-            category: 'drink',
+            category: 'beverage',
             price: 10,
             stock: 100,
             status: 'active',
@@ -650,16 +650,16 @@ describe('Products and Categories API Tests', () => {
     });
   });
 
-  // --- Bug #4 Regression: drink category ---
-  describe('Drink Category (Bug #4 regression)', () => {
-    it('should create product with category "drink" successfully', async () => {
+  // --- Beverage category (renamed from 'drink' to match Category collection) ---
+  describe('Beverage Category', () => {
+    it('should create product with category "beverage" successfully', async () => {
       const response = await request(app)
         .post('/api/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           sku: 'DRK-001',
           name: 'น้ำดื่ม',
-          category: 'drink',
+          category: 'beverage',
           price: 10,
           stock: 100,
           status: 'active',
@@ -667,12 +667,12 @@ describe('Products and Categories API Tests', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.category).toBe('drink');
+      expect(response.body.data.category).toBe('beverage');
     });
 
-    it('should generate SKU with DRK prefix for drink category', async () => {
+    it('should generate SKU with DRK prefix for beverage category', async () => {
       const response = await request(app)
-        .get('/api/products/generate-sku?category=drink')
+        .get('/api/products/generate-sku?category=beverage')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
@@ -680,14 +680,14 @@ describe('Products and Categories API Tests', () => {
       expect(response.body.data.sku).toMatch(/^DRK-\d{3}$/);
     });
 
-    it('should reject product with invalid category "beverage"', async () => {
+    it('should reject product with invalid category "drink"', async () => {
       const response = await request(app)
         .post('/api/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          sku: 'BEV-001',
+          sku: 'DRK-002',
           name: 'เครื่องดื่ม',
-          category: 'beverage',
+          category: 'drink',
           price: 15,
           stock: 50,
         });
