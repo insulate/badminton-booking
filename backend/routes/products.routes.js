@@ -69,6 +69,33 @@ router.get('/generate-sku', protect, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/products/low-stock-count
+ * @desc    Get count of low stock products
+ * @access  Private (Admin/Staff)
+ */
+router.get('/low-stock-count', protect, async (req, res) => {
+  try {
+    const count = await Product.countDocuments({
+      trackStock: true,
+      status: 'active',
+      $expr: { $lte: ['$stock', '$lowStockAlert'] },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: { count },
+    });
+  } catch (error) {
+    console.error('Error fetching low stock count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch low stock count',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   GET /api/products
  * @desc    Get all products with filters
  * @access  Private (Admin/Staff)

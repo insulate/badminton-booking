@@ -452,6 +452,11 @@ export const productsAPI = {
     return response.data;
   },
 
+  getLowStockCount: async () => {
+    const response = await api.get(API_ENDPOINTS.PRODUCTS.LOW_STOCK_COUNT);
+    return response.data;
+  },
+
   generateSKU: async (category) => {
     const response = await api.get(API_ENDPOINTS.PRODUCTS.GENERATE_SKU, {
       params: { category },

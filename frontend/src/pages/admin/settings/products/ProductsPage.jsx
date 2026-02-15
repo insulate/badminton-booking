@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, ArrowLeft, Search, AlertTriangle, Package, Sparkles, TrendingUp } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Search, AlertTriangle, Package, Sparkles, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsAPI, categoriesAPI } from '../../../../lib/api';
 import { ROUTES } from '../../../../constants';
 import toast from 'react-hot-toast';
 import ProductModal from '../../../../components/products/ProductModal';
 import { PageContainer, Card, PageHeader, Button } from '../../../../components/common';
+
+const ITEMS_PER_PAGE = 20;
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -13,22 +15,51 @@ const ProductsPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
 
+  // Debounce search term (400ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filterCategory, filterStatus]);
+
+  // Fetch products when filters or page change
   useEffect(() => {
     fetchProducts();
+  }, [debouncedSearch, filterCategory, filterStatus, page]);
+
+  // Fetch categories and low stock count on mount
+  useEffect(() => {
     fetchCategories();
+    fetchLowStockCount();
   }, []);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productsAPI.getAll();
+      const params = { page, limit: ITEMS_PER_PAGE };
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+      if (filterCategory) params.category = filterCategory;
+      if (filterStatus) params.status = filterStatus;
+
+      const response = await productsAPI.getAll(params);
       if (response.success) {
         setProducts(response.data);
+        setTotal(response.total || 0);
+        setTotalPages(response.totalPages || 0);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -49,6 +80,17 @@ const ProductsPage = () => {
     }
   };
 
+  const fetchLowStockCount = async () => {
+    try {
+      const response = await productsAPI.getLowStockCount();
+      if (response.success) {
+        setLowStockCount(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching low stock count:', error);
+    }
+  };
+
   const handleDelete = async (product) => {
     if (
       !window.confirm(
@@ -63,6 +105,7 @@ const ProductsPage = () => {
       if (response.success) {
         toast.success('ลบสินค้าสำเร็จ');
         fetchProducts();
+        fetchLowStockCount();
       }
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -87,18 +130,9 @@ const ProductsPage = () => {
 
   const handleModalSuccess = () => {
     fetchProducts();
+    fetchLowStockCount();
     handleModalClose();
   };
-
-  // Filter products
-  const filteredProducts = products.filter((product) => {
-    const matchSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategory = !filterCategory || product.category === filterCategory;
-    const matchStatus = !filterStatus || product.status === filterStatus;
-    return matchSearch && matchCategory && matchStatus;
-  });
 
   // Category labels
   const getCategoryLabel = (categoryName) => {
@@ -151,7 +185,7 @@ const ProductsPage = () => {
     return product.stock <= product.lowStockAlert;
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="text-center">
@@ -168,7 +202,7 @@ const ProductsPage = () => {
       {/* Header */}
       <PageHeader
         title="จัดการสินค้า"
-        subtitle={`จัดการสินค้าและสต็อกทั้งหมด • ${filteredProducts.length} รายการ`}
+        subtitle={`จัดการสินค้าและสต็อกทั้งหมด • ${total} รายการ`}
         icon={Package}
         iconColor="purple"
         actions={
@@ -225,7 +259,7 @@ const ProductsPage = () => {
       </Card>
 
       {/* Low Stock Alert */}
-        {products.filter(isLowStock).length > 0 && (
+        {lowStockCount > 0 && (
           <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-5 flex items-start gap-3 shadow-lg">
             <div className="bg-yellow-500 p-2 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-white" />
@@ -233,7 +267,7 @@ const ProductsPage = () => {
             <div>
               <h3 className="text-sm font-bold text-yellow-800">แจ้งเตือนสต็อกต่ำ</h3>
               <p className="text-sm text-yellow-700 mt-1">
-                มีสินค้า <span className="font-bold">{products.filter(isLowStock).length}</span> รายการที่สต็อกต่ำกว่าจำนวนที่กำหนด
+                มีสินค้า <span className="font-bold">{lowStockCount}</span> รายการที่สต็อกต่ำกว่าจำนวนที่กำหนด
               </p>
             </div>
           </div>
@@ -241,7 +275,7 @@ const ProductsPage = () => {
 
       {/* Products Table */}
       <Card padding="p-0" className="overflow-hidden bg-white/80 backdrop-blur-sm border-gray-100">
-          <div className="overflow-x-auto">
+          <div className={`overflow-x-auto ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -272,7 +306,7 @@ const ProductsPage = () => {
                 </tr>
               </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-2">
@@ -286,7 +320,7 @@ const ProductsPage = () => {
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => (
+                products.map((product) => (
                   <tr
                     key={product._id}
                     className={`hover:bg-gray-50 ${isLowStock(product) ? 'bg-yellow-50' : ''}`}
@@ -297,6 +331,7 @@ const ProductsPage = () => {
                           src={product.image.startsWith('data:') ? product.image : `${(import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '')}${product.image}`}
                           alt={product.name}
                           className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
@@ -368,6 +403,35 @@ const ProductsPage = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-white/50">
+              <div className="text-sm text-gray-700">
+                แสดง {(page - 1) * ITEMS_PER_PAGE + 1} ถึง{' '}
+                {Math.min(page * ITEMS_PER_PAGE, total)} จาก {total} รายการ
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => p - 1)}
+                  disabled={page === 1}
+                  className="p-2 border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm font-medium text-gray-700 px-3">
+                  หน้า {page} จาก {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page === totalPages}
+                  className="p-2 border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
       </Card>
 
       {/* Product Modal */}
@@ -384,4 +448,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-

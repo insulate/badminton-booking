@@ -102,6 +102,7 @@ export const API_ENDPOINTS = {
   PRODUCTS: {
     LIST: '/products',
     GENERATE_SKU: '/products/generate-sku',
+    LOW_STOCK_COUNT: '/products/low-stock-count',
     GET: (id) => `/products/${id}`,
     CREATE: '/products',
     UPDATE: (id) => `/products/${id}`,
