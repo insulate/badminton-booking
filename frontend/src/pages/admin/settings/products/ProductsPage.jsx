@@ -147,6 +147,7 @@ const ProductsPage = () => {
 
   // Check if stock is low
   const isLowStock = (product) => {
+    if (product.trackStock === false) return false;
     return product.stock <= product.lowStockAlert;
   };
 
@@ -323,16 +324,22 @@ const ProductsPage = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div
-                        className={`text-sm font-medium ${
-                          isLowStock(product) ? 'text-yellow-600' : 'text-gray-900'
-                        }`}
-                      >
-                        {product.stock.toLocaleString('th-TH')}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        เตือนที่ {product.lowStockAlert.toLocaleString('th-TH')}
-                      </div>
+                      {product.trackStock === false ? (
+                        <span className="text-sm text-gray-400 italic">ไม่ติดตาม</span>
+                      ) : (
+                        <>
+                          <div
+                            className={`text-sm font-medium ${
+                              isLowStock(product) ? 'text-yellow-600' : 'text-gray-900'
+                            }`}
+                          >
+                            {product.stock.toLocaleString('th-TH')}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            เตือนที่ {product.lowStockAlert.toLocaleString('th-TH')}
+                          </div>
+                        </>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(product.status)}

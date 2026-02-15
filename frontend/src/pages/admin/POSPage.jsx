@@ -97,7 +97,8 @@ const POSPage = () => {
       product.name.toLowerCase().includes(search.toLowerCase()) ||
       product.sku.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = !categoryFilter || product.category === categoryFilter;
-    return matchesSearch && matchesCategory && product.stock > 0;
+    const hasStock = product.trackStock === false || product.stock > 0;
+    return matchesSearch && matchesCategory && hasStock;
   });
 
   // Add to cart
@@ -105,8 +106,8 @@ const POSPage = () => {
     const existingItem = cart.find((item) => item.product._id === product._id);
 
     if (existingItem) {
-      // Check stock limit
-      if (existingItem.quantity >= product.stock) {
+      // Check stock limit (only for tracked products)
+      if (product.trackStock !== false && existingItem.quantity >= product.stock) {
         toast.error(`สต็อกสินค้าไม่เพียงพอ (เหลือ ${product.stock} ชิ้น)`);
         return;
       }
@@ -133,7 +134,7 @@ const POSPage = () => {
     }
 
     const product = products.find((p) => p._id === productId);
-    if (newQuantity > product.stock) {
+    if (product.trackStock !== false && newQuantity > product.stock) {
       toast.error(`สต็อกสินค้าไม่เพียงพอ (เหลือ ${product.stock} ชิ้น)`);
       return;
     }
@@ -278,7 +279,7 @@ const POSPage = () => {
                       className="group relative bg-white border-2 border-gray-100 rounded-2xl p-3 hover:border-blue-400 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
                     >
                       {/* Stock Badge */}
-                      {product.stock <= 10 && (
+                      {product.trackStock !== false && product.stock <= 10 && (
                         <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
                           <TrendingUp className="w-3 h-3" />
                           เหลือน้อย
@@ -316,7 +317,7 @@ const POSPage = () => {
                       <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                         <span className="text-blue-600 font-bold text-lg">฿{product.price.toFixed(2)}</span>
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                          คงเหลือ {product.stock}
+                          {product.trackStock === false ? 'ไม่จำกัด' : `คงเหลือ ${product.stock}`}
                         </span>
                       </div>
 

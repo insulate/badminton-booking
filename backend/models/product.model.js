@@ -25,9 +25,12 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Price is required'],
       min: [0, 'Price cannot be negative'],
     },
+    trackStock: {
+      type: Boolean,
+      default: true,
+    },
     stock: {
       type: Number,
-      required: [true, 'Stock is required'],
       min: [0, 'Stock cannot be negative'],
       default: 0,
     },
@@ -57,6 +60,7 @@ productSchema.index({ category: 1, status: 1 });
 
 // Virtual for checking if stock is low
 productSchema.virtual('isLowStock').get(function () {
+  if (!this.trackStock) return false;
   return this.stock <= this.lowStockAlert;
 });
 

@@ -11,6 +11,7 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
     name: '',
     category: '',
     price: '',
+    trackStock: true,
     stock: '',
     lowStockAlert: 5,
     status: 'active'
@@ -30,6 +31,7 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
         name: product.name || '',
         category: product.category || '',
         price: product.price || '',
+        trackStock: product.trackStock !== false,
         stock: product.stock || '',
         lowStockAlert: product.lowStockAlert || 5,
         status: product.status || 'active'
@@ -135,13 +137,15 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
       toast.error('กรุณากรอกราคาที่ถูกต้อง');
       return false;
     }
-    if (!formData.stock || formData.stock < 0) {
-      toast.error('กรุณากรอกจำนวนสต็อกที่ถูกต้อง');
-      return false;
-    }
-    if (!formData.lowStockAlert || formData.lowStockAlert < 0) {
-      toast.error('กรุณากรอกจำนวนแจ้งเตือนสต็อกต่ำที่ถูกต้อง');
-      return false;
+    if (formData.trackStock) {
+      if (formData.stock === '' || formData.stock < 0) {
+        toast.error('กรุณากรอกจำนวนสต็อกที่ถูกต้อง');
+        return false;
+      }
+      if (formData.lowStockAlert === '' || formData.lowStockAlert < 0) {
+        toast.error('กรุณากรอกจำนวนแจ้งเตือนสต็อกต่ำที่ถูกต้อง');
+        return false;
+      }
     }
     return true;
   };
@@ -161,8 +165,9 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
       submitData.append('name', formData.name);
       submitData.append('category', formData.category);
       submitData.append('price', formData.price);
-      submitData.append('stock', formData.stock);
-      submitData.append('lowStockAlert', formData.lowStockAlert);
+      submitData.append('trackStock', formData.trackStock);
+      submitData.append('stock', formData.trackStock ? formData.stock : 0);
+      submitData.append('lowStockAlert', formData.trackStock ? formData.lowStockAlert : 0);
       submitData.append('status', formData.status);
 
       // Add image if selected
@@ -335,6 +340,33 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
               />
             </div>
 
+            {/* Track Stock Toggle */}
+            <div className="md:col-span-2">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    ติดตามสต๊อก
+                  </label>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    เปิดใช้เพื่อติดตามจำนวนสินค้าคงเหลือและหักสต๊อกเมื่อขาย
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, trackStock: !prev.trackStock }))}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    formData.trackStock ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      formData.trackStock ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
             {/* Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -354,41 +386,45 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
             </div>
 
             {/* Stock */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                จำนวนสต็อก <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0"
-                min="0"
-                required
-              />
-            </div>
+            {formData.trackStock && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  จำนวนสต็อก <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
+                  min="0"
+                  required
+                />
+              </div>
+            )}
 
             {/* Low Stock Alert */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                แจ้งเตือนสต็อกต่ำ <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="lowStockAlert"
-                value={formData.lowStockAlert}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="5"
-                min="0"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                แจ้งเตือนเมื่อสต็อกต่ำกว่าหรือเท่ากับจำนวนนี้
-              </p>
-            </div>
+            {formData.trackStock && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  แจ้งเตือนสต็อกต่ำ <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="lowStockAlert"
+                  value={formData.lowStockAlert}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="5"
+                  min="0"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  แจ้งเตือนเมื่อสต็อกต่ำกว่าหรือเท่ากับจำนวนนี้
+                </p>
+              </div>
+            )}
 
             {/* Status */}
             <div>

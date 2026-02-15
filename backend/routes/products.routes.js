@@ -153,7 +153,9 @@ router.get('/:id', protect, async (req, res) => {
  */
 router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const { sku, name, category, price, stock, lowStockAlert, status } = req.body;
+    const { sku, name, category, price, stock, lowStockAlert, status, trackStock } = req.body;
+
+    const isTrackStock = trackStock !== 'false' && trackStock !== false;
 
     // Check if SKU already exists
     const existingProduct = await Product.findOne({ sku: sku.toUpperCase() });
@@ -172,8 +174,9 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       name,
       category,
       price,
-      stock,
-      lowStockAlert,
+      trackStock: isTrackStock,
+      stock: isTrackStock ? stock : 0,
+      lowStockAlert: isTrackStock ? lowStockAlert : 0,
       image: imagePath,
       status,
     });
@@ -211,7 +214,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
  */
 router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const { sku, name, category, price, stock, lowStockAlert, status } = req.body;
+    const { sku, name, category, price, stock, lowStockAlert, status, trackStock } = req.body;
 
     let product = await Product.findById(req.params.id);
 
@@ -233,8 +236,15 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
       }
     }
 
+    const isTrackStock = trackStock !== undefined ? (trackStock !== 'false' && trackStock !== false) : product.trackStock;
+
     // Prepare update data
-    const updateData = { sku, name, category, price, stock, lowStockAlert, status };
+    const updateData = {
+      sku, name, category, price, status,
+      trackStock: isTrackStock,
+      stock: isTrackStock ? stock : 0,
+      lowStockAlert: isTrackStock ? lowStockAlert : 0,
+    };
 
     // Handle image update
     if (req.file) {
@@ -305,6 +315,13 @@ router.patch('/:id/stock', protect, admin, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
+      });
+    }
+
+    if (!product.trackStock) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update stock for products that do not track stock',
       });
     }
 

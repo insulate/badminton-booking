@@ -215,7 +215,7 @@ router.post('/', protect, async (req, res) => {
         });
       }
 
-      if (product.stock < item.quantity) {
+      if (product.trackStock !== false && product.stock < item.quantity) {
         return res.status(400).json({
           success: false,
           message: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
@@ -270,6 +270,13 @@ router.post('/', protect, async (req, res) => {
     // Update product stock atomically with stock check
     // This prevents race condition by using atomic operation
     for (const item of processedItems) {
+      const productDoc = await Product.findById(item.product);
+
+      // Skip stock deduction for products that don't track stock
+      if (productDoc && productDoc.trackStock === false) {
+        continue;
+      }
+
       const updated = await Product.findOneAndUpdate(
         {
           _id: item.product,
