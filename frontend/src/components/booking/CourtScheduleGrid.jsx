@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, CalendarX } from 'lucide-react';
+import { X, CalendarX, AlertTriangle } from 'lucide-react';
 
 /**
  * CourtScheduleGrid Component
@@ -44,7 +44,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
     );
   }
 
-  const { courts, timeSlots } = schedule;
+  const { courts, timeSlots, unassignedBookings = [] } = schedule;
 
   // Get court type badge color
   const getCourtTypeBadge = (type) => {
@@ -207,6 +207,48 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
         </div>
       </div>
 
+      {/* Unassigned Bookings Banner */}
+      {unassignedBookings.length > 0 && (
+        <div className="mx-6 mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <p className="font-semibold text-amber-800">
+              มี {unassignedBookings.length} การจองที่ยังไม่ได้กำหนดสนาม
+            </p>
+          </div>
+          <div className="space-y-2">
+            {unassignedBookings.map((booking) => (
+              <div
+                key={booking.bookingId}
+                className="flex items-center justify-between bg-white border border-amber-100 rounded-lg px-3 py-2 text-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-mono font-semibold text-amber-700">{booking.bookingCode}</span>
+                  <span className="text-gray-700">{booking.customerNickname || booking.customerName || '-'}</span>
+                  {booking.customerPhone && (
+                    <span className="text-gray-500">{booking.customerPhone}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-600">{booking.startTime} - {booking.endTime}</span>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                    booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                    booking.paymentStatus === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-orange-100 text-orange-800'
+                  }`}>
+                    {booking.paymentStatus === 'paid' ? 'ชำระแล้ว' :
+                     booking.paymentStatus === 'partial' ? 'ชำระบางส่วน' : 'รอชำระ'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-amber-600">
+            กรุณาไปที่ &quot;รายการจอง&quot; เพื่อกำหนดสนามให้กับการจองเหล่านี้
+          </p>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -278,7 +320,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
                         <div className="text-[10px] leading-tight">
                           <div className={`text-[9px] ${halfSlot.booking?.paymentStatus === 'paid' ? 'text-green-400' : 'text-red-400'}`}>{label}</div>
                           <div className={`font-semibold truncate ${halfSlot.booking?.paymentStatus === 'paid' ? 'text-green-700' : 'text-red-700'}`}>
-                            {halfSlot.booking?.customerName || 'จอง'}
+                            {halfSlot.booking?.customerNickname || halfSlot.booking?.customerName || 'จอง'}
                           </div>
                         </div>
                       );
@@ -290,14 +332,14 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
                           <div
                             onClick={() => handleHalfSlotClick(court, slot, 'first')}
                             className={`flex-1 py-2 px-1 text-center transition-all border-r border-gray-200 ${getHalfSlotColor(firstHalf, slot)}`}
-                            title={firstHalf.available ? `คลิกเพื่อจอง ${slot.startTime}` : `จองโดย: ${firstHalf.booking?.customerName || 'N/A'}`}
+                            title={firstHalf.available ? `คลิกเพื่อจอง ${slot.startTime}` : `จองโดย: ${firstHalf.booking?.customerNickname || firstHalf.booking?.customerName || 'N/A'}`}
                           >
                             {renderHalf(firstHalf, 'first')}
                           </div>
                           <div
                             onClick={() => handleHalfSlotClick(court, slot, 'second')}
                             className={`flex-1 py-2 px-1 text-center transition-all ${getHalfSlotColor(secondHalf, slot)}`}
-                            title={secondHalf.available ? `คลิกเพื่อจอง ${slot.startTime.split(':')[0]}:30` : `จองโดย: ${secondHalf.booking?.customerName || 'N/A'}`}
+                            title={secondHalf.available ? `คลิกเพื่อจอง ${slot.startTime.split(':')[0]}:30` : `จองโดย: ${secondHalf.booking?.customerNickname || secondHalf.booking?.customerName || 'N/A'}`}
                           >
                             {renderHalf(secondHalf, 'second')}
                           </div>
@@ -400,7 +442,7 @@ const CourtScheduleGrid = ({ schedule, onSlotClick, loading, isBlocked = false, 
                       />
                     </svg>
                     <p className="font-medium text-gray-900">
-                      {selectedBooking.customerName}
+                      {selectedBooking.customerNickname || selectedBooking.customerName}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

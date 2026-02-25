@@ -15,6 +15,7 @@ const DAY_OPTIONS = [
 const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
   const [formData, setFormData] = useState({
     customerName: '',
+    customerNickname: '',
     customerPhone: '',
     customerEmail: '',
     customerId: '', // เพิ่มสำหรับเก็บ ID ของลูกค้าที่เลือก
@@ -105,6 +106,7 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
       ...prev,
       customerId: player._id,
       customerName: player.name,
+      customerNickname: player.nickname || '',
       customerPhone: player.phone || '',
       customerEmail: player.email || '',
     }));
@@ -248,6 +250,7 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
     onPreview({
       customer: {
         name: formData.customerName,
+        nickname: formData.customerNickname,
         phone: formData.customerPhone,
         email: formData.customerEmail,
       },
@@ -284,7 +287,10 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
         {selectedCustomer ? (
           <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div>
-              <div className="font-medium text-blue-900">{selectedCustomer.name}</div>
+              <div className="font-medium text-blue-900">
+                {selectedCustomer.name}
+                {selectedCustomer.nickname && <span className="text-blue-700 font-normal"> ({selectedCustomer.nickname})</span>}
+              </div>
               <div className="text-sm text-blue-700">
                 {selectedCustomer.phone}
                 {selectedCustomer.email && ` • ${selectedCustomer.email}`}
@@ -320,10 +326,22 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.customerName ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="ชื่อลูกค้า *"
+                  placeholder="ชื่อจริง *"
                 />
                 {errors.customerName && <p className="mt-1 text-xs text-red-600">{errors.customerName}</p>}
               </div>
+              <div>
+                <input
+                  type="text"
+                  name="customerNickname"
+                  value={formData.customerNickname}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="ชื่อเล่น (ไม่บังคับ)"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <input
                   type="tel"
@@ -337,15 +355,17 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
                 />
                 {errors.customerPhone && <p className="mt-1 text-xs text-red-600">{errors.customerPhone}</p>}
               </div>
+              <div>
+                <input
+                  type="email"
+                  name="customerEmail"
+                  value={formData.customerEmail}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="อีเมล (ไม่บังคับ)"
+                />
+              </div>
             </div>
-            <input
-              type="email"
-              name="customerEmail"
-              value={formData.customerEmail}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="อีเมล (ไม่บังคับ)"
-            />
           </div>
         ) : (
           <div ref={customerSearchRef} className="relative">

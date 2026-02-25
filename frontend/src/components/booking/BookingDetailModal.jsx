@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, DollarSign, Image, CheckCircle, XCircle, Clock3 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { settingsAPI, bookingsAPI } from '../../lib/api';
+import { settingsAPI, bookingsAPI, courtsAPI } from '../../lib/api';
 
 // ใช้ base URL สำหรับ static files (ไม่มี /api)
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace('/api', '');
@@ -21,6 +21,53 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
   const [rejectReason, setRejectReason] = useState('');
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [showSlipPreview, setShowSlipPreview] = useState(false);
+  const [isAssigningCourt, setIsAssigningCourt] = useState(false);
+  const [selectedCourtId, setSelectedCourtId] = useState('');
+  const [allCourts, setAllCourts] = useState([]);
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  // Fetch courts for assignment
+  useEffect(() => {
+    const fetchCourts = async () => {
+      try {
+        const response = await courtsAPI.getAll();
+        if (response.success) {
+          setAllCourts(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching courts:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchCourts();
+    }
+  }, [isOpen]);
+
+  // Handle assign court
+  const handleAssignCourt = async () => {
+    if (!selectedCourtId) {
+      toast.error('กรุณาเลือกสนาม');
+      return;
+    }
+    try {
+      setAssignLoading(true);
+      const response = await bookingsAPI.assignCourt(booking._id, selectedCourtId);
+      if (response.success) {
+        toast.success('กำหนดสนามสำเร็จ');
+        setIsAssigningCourt(false);
+        setSelectedCourtId('');
+        onUpdate?.(response.data);
+      } else {
+        toast.error(response.message || 'ไม่สามารถกำหนดสนามได้');
+      }
+    } catch (error) {
+      console.error('Assign court error:', error);
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการกำหนดสนาม');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
 
   // Fetch payment settings
   useEffect(() => {
@@ -251,11 +298,58 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
 
                   <div className="flex items-start gap-3">
                     <MapPin size={20} className="text-gray-400 mt-0.5" />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-gray-600">สนาม</p>
-                      <p className="font-medium text-gray-900">
-                        {booking.court?.courtNumber} - {booking.court?.name}
-                      </p>
+                      {isAssigningCourt ? (
+                        <div className="mt-1 space-y-2">
+                          <select
+                            value={selectedCourtId}
+                            onChange={(e) => setSelectedCourtId(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          >
+                            <option value="">-- เลือกสนาม --</option>
+                            {allCourts.map((c) => (
+                              <option key={c._id} value={c._id}>
+                                {c.courtNumber} - {c.name}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleAssignCourt}
+                              disabled={assignLoading || !selectedCourtId}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            >
+                              {assignLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+                            </button>
+                            <button
+                              onClick={() => { setIsAssigningCourt(false); setSelectedCourtId(''); }}
+                              className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              ยกเลิก
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {booking.court ? (
+                            <p className="font-medium text-gray-900">
+                              {booking.court.courtNumber} - {booking.court.name}
+                            </p>
+                          ) : (
+                            <p className="font-medium text-amber-600">ยังไม่ได้กำหนดสนาม</p>
+                          )}
+                          <button
+                            onClick={() => {
+                              setSelectedCourtId(booking.court?._id || '');
+                              setIsAssigningCourt(true);
+                            }}
+                            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            {booking.court ? 'เปลี่ยน' : 'กำหนดสนาม'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -278,7 +372,10 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     <User size={20} className="text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm text-gray-600">ชื่อ</p>
-                      <p className="font-medium text-gray-900">{booking.customer?.name || '-'}</p>
+                      <p className="font-medium text-gray-900">
+                        {booking.customer?.name || '-'}
+                        {booking.customer?.nickname && <span className="text-gray-500 font-normal"> ({booking.customer.nickname})</span>}
+                      </p>
                     </div>
                   </div>
 

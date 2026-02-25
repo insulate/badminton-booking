@@ -325,7 +325,10 @@ const SalesHistoryPage = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">
                           {sale.customer ? (
                             <div>
-                              <p className="font-medium">{sale.customer.name || '-'}</p>
+                              <p className="font-medium">
+                                {sale.customer.name || '-'}
+                                {sale.customer.nickname && <span className="text-gray-500 font-normal"> ({sale.customer.nickname})</span>}
+                              </p>
                               <p className="text-gray-500 text-xs">{sale.customer.phone || '-'}</p>
                             </div>
                           ) : (
@@ -447,7 +450,10 @@ const SalesHistoryPage = () => {
                   <div className="space-y-2 text-sm">
                     <p>
                       <span className="text-gray-600">ชื่อ:</span>{' '}
-                      <span className="font-medium text-gray-900">{selectedSale.customer.name || '-'}</span>
+                      <span className="font-medium text-gray-900">
+                        {selectedSale.customer.name || '-'}
+                        {selectedSale.customer.nickname && ` (${selectedSale.customer.nickname})`}
+                      </span>
                     </p>
                     <p>
                       <span className="text-gray-600">เบอร์:</span>{' '}

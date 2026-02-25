@@ -55,6 +55,7 @@ const BookingsTable = ({
   // Get booking status badge
   const getStatusBadge = (status) => {
     const badges = {
+      payment_pending: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'รอชำระเงิน' },
       pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'รอยืนยัน' },
       confirmed: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'ยืนยันแล้ว' },
       'checked-in': { bg: 'bg-purple-100', text: 'text-purple-800', label: 'เช็คอินแล้ว' },
@@ -111,7 +112,7 @@ const BookingsTable = ({
 
   // Can cancel
   const canCancel = (booking) => {
-    return ['pending', 'confirmed'].includes(booking.bookingStatus);
+    return ['payment_pending', 'pending', 'confirmed'].includes(booking.bookingStatus);
   };
 
   // Can mark as paid

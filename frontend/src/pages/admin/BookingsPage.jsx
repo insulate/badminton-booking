@@ -306,6 +306,7 @@ const BookingsPage = () => {
           onMarkAsPaid={handleMarkAsPaid}
           onCheckin={handleCheckin}
           onCancel={handleCancel}
+          onReload={loadBookings}
         />
       </div>
 

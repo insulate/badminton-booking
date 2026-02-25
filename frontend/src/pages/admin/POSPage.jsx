@@ -514,7 +514,7 @@ const POSPage = () => {
 // Payment Modal Component
 const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
   const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [customer, setCustomer] = useState({ name: '', phone: '' });
+  const [customer, setCustomer] = useState({ name: '', nickname: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState(null);
   const [receivedAmount, setReceivedAmount] = useState('');
@@ -588,7 +588,7 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
           price: item.price,
           subtotal: item.subtotal,
         })),
-        customer: customer.name || customer.phone ? { ...customer, type: 'walk-in' } : null,
+        customer: customer.name || customer.nickname || customer.phone ? { ...customer, type: 'walk-in' } : null,
         paymentMethod,
         total,
         // Send receivedAmount only for cash payment
@@ -659,13 +659,22 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
           <div className="mb-6">
             <h3 className="font-semibold text-gray-800 mb-3">ข้อมูลลูกค้า (ไม่บังคับ)</h3>
             <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="ชื่อลูกค้า"
-                value={customer.name}
-                onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="ชื่อจริง"
+                  value={customer.name}
+                  onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  placeholder="ชื่อเล่น"
+                  value={customer.nickname}
+                  onChange={(e) => setCustomer({ ...customer, nickname: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
               <input
                 type="tel"
                 placeholder="เบอร์โทร"

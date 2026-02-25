@@ -186,7 +186,7 @@ export default function BookingSlotModal({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-gray-800">
               <User className="w-4 h-4 text-gray-400" />
-              <span>{player?.name}</span>
+              <span>{player?.name}{player?.nickname && ` (${player.nickname})`}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-800">
               <Phone className="w-4 h-4 text-gray-400" />

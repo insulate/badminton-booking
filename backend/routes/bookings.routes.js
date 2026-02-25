@@ -210,6 +210,7 @@ router.post('/customer', protectPlayer, async (req, res) => {
       bookingCode,
       customer: {
         name: player.name,
+        nickname: player.nickname || '',
         phone: player.phone,
       },
       player: player._id,
@@ -708,6 +709,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
       bookingCode,
       customer: {
         name: customer.name,
+        nickname: customer.nickname || '',
         phone: customer.phone,
         email: customer.email || '',
       },
@@ -768,6 +770,7 @@ router.patch('/:id', protect, validateObjectId(), validateBookingUpdate, async (
     // Validate booking status transitions
     if (bookingStatus && bookingStatus !== booking.bookingStatus) {
       const validTransitions = {
+        payment_pending: ['confirmed', 'cancelled'],
         confirmed: ['checked-in', 'cancelled'],
         'checked-in': ['completed'],
         completed: [], // Cannot transition from completed
@@ -787,6 +790,7 @@ router.patch('/:id', protect, validateObjectId(), validateBookingUpdate, async (
     // Update fields
     if (customer) {
       if (customer.name) booking.customer.name = customer.name;
+      if (customer.nickname !== undefined) booking.customer.nickname = customer.nickname;
       if (customer.phone) booking.customer.phone = customer.phone;
       if (customer.email !== undefined) booking.customer.email = customer.email;
     }

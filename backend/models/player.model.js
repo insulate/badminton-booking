@@ -11,6 +11,10 @@ const playerSchema = new mongoose.Schema(
       minlength: [2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'],
       maxlength: [100, 'ชื่อต้องไม่เกิน 100 ตัวอักษร'],
     },
+    nickname: {
+      type: String,
+      trim: true,
+    },
     phone: {
       type: String,
       required: [true, 'กรุณากรอกเบอร์โทรศัพท์'],

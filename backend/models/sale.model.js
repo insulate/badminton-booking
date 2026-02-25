@@ -42,6 +42,10 @@ const saleSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
+      nickname: {
+        type: String,
+        trim: true,
+      },
       phone: {
         type: String,
         trim: true,

@@ -117,6 +117,7 @@ const BookingFilters = ({ filters, onFilterChange }) => {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">ทั้งหมด</option>
+            <option value="payment_pending">รอชำระเงิน</option>
             <option value="pending">รอยืนยัน</option>
             <option value="confirmed">ยืนยันแล้ว</option>
             <option value="checked-in">เช็คอินแล้ว</option>

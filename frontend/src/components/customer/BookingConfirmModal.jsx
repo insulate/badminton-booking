@@ -67,7 +67,7 @@ export default function BookingConfirmModal({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white">
               <User className="w-4 h-4 text-blue-300" />
-              <span>{player.name}</span>
+              <span>{player.name}{player.nickname && ` (${player.nickname})`}</span>
             </div>
             <div className="flex items-center gap-2 text-white">
               <Phone className="w-4 h-4 text-blue-300" />

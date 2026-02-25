@@ -316,7 +316,10 @@ const RecurringBookingsPage = () => {
                       <span className="text-sm font-medium text-blue-600">{group.groupCode}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{group.customer.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {group.customer.name}
+                        {group.customer.nickname && <span className="text-gray-500 font-normal"> ({group.customer.nickname})</span>}
+                      </div>
                       <div className="text-sm text-gray-500">{group.customer.phone}</div>
                     </td>
                     <td className="px-6 py-4">
@@ -402,7 +405,7 @@ const RecurringBookingsPage = () => {
                       {selectedGroup.groupCode}
                     </h2>
                     <p className="text-gray-600">
-                      {selectedGroup.customer.name} - {selectedGroup.customer.phone}
+                      {selectedGroup.customer.name}{selectedGroup.customer.nickname && ` (${selectedGroup.customer.nickname})`} - {selectedGroup.customer.phone}
                     </p>
                   </div>
                   <button onClick={() => setShowDetail(false)} className="text-gray-400 hover:text-gray-600">

@@ -99,14 +99,9 @@ export default function CustomerLayout() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 pt-14 pb-16 overflow-auto">
-        <Outlet />
-      </main>
-
-      {/* Bottom Navigation (fixed) */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-40">
-        <div className="h-full flex items-center justify-around max-w-lg mx-auto">
+      {/* Top Navigation (below header) */}
+      <nav className="fixed top-14 left-0 right-0 h-12 bg-white border-b border-gray-200 shadow-sm z-40">
+        <div className="h-full flex items-center justify-center gap-1 max-w-7xl mx-auto px-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActivePath(item.path);
@@ -116,23 +111,26 @@ export default function CustomerLayout() {
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg
-                  transition-all duration-200 min-w-[80px]
+                  flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium
+                  transition-all duration-200
                   ${isActive
-                    ? 'text-blue-600'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }
                 `}
               >
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                <span className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}>
-                  {item.name}
-                </span>
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </div>
       </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 pt-[6.5rem] overflow-auto">
+        <Outlet />
+      </main>
     </div>
   );
 }

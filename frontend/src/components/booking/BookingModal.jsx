@@ -11,6 +11,7 @@ import { bookingsAPI, settingsAPI } from '../../lib/api';
 const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
   const [formData, setFormData] = useState({
     customerName: '',
+    customerNickname: '',
     customerPhone: '',
     customerEmail: '',
     duration: 1,
@@ -177,6 +178,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
       const bookingPayload = {
         customer: {
           name: formData.customerName,
+          nickname: formData.customerNickname,
           phone: formData.customerPhone,
           email: formData.customerEmail,
         },
@@ -287,11 +289,11 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
           {/* Form - Scrollable */}
           <form id="booking-form" onSubmit={handleSubmit} className="mt-4 flex-1 overflow-y-auto">
             <div className="space-y-3 pr-2">
-            {/* Row 1: Name & Phone */}
+            {/* Row 1: Name & Nickname */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
-                  ชื่อลูกค้า <span className="text-red-500">*</span>
+                  ชื่อจริง <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -302,13 +304,31 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                   className={`mt-1 block w-full rounded-lg border ${
                     errors.customerName ? 'border-red-300' : 'border-gray-300'
                   } px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                  placeholder="กรอกชื่อลูกค้า"
+                  placeholder="กรอกชื่อจริง"
                 />
                 {errors.customerName && (
                   <p className="mt-1 text-xs text-red-600">{errors.customerName}</p>
                 )}
               </div>
 
+              <div>
+                <label htmlFor="customerNickname" className="block text-sm font-medium text-gray-700">
+                  ชื่อเล่น (ไม่บังคับ)
+                </label>
+                <input
+                  type="text"
+                  id="customerNickname"
+                  name="customerNickname"
+                  value={formData.customerNickname}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="กรอกชื่อเล่น"
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Phone & Email */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
                   เบอร์โทรศัพท์ <span className="text-red-500">*</span>
@@ -328,10 +348,7 @@ const BookingModal = ({ isOpen, onClose, bookingData, onSuccess }) => {
                   <p className="mt-1 text-xs text-red-600">{errors.customerPhone}</p>
                 )}
               </div>
-            </div>
 
-            {/* Row 2: Email & Duration */}
-            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
                   อีเมล (ไม่บังคับ)

@@ -14,6 +14,10 @@ const bookingSchema = new mongoose.Schema(
         required: [true, 'Please provide customer name'],
         trim: true,
       },
+      nickname: {
+        type: String,
+        trim: true,
+      },
       phone: {
         type: String,
         required: [true, 'Please provide customer phone'],

@@ -61,7 +61,10 @@ const RecurringPreviewModal = ({
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-600">ลูกค้า:</span>
-                  <span className="ml-2 font-medium">{formData.customer.name}</span>
+                  <span className="ml-2 font-medium">
+                    {formData.customer.name}
+                    {formData.customer.nickname && <span className="text-gray-500 font-normal"> ({formData.customer.nickname})</span>}
+                  </span>
                 </div>
                 <div>
                   <span className="text-gray-600">เบอร์โทร:</span>

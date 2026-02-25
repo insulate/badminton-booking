@@ -240,6 +240,7 @@ const createRecurringBooking = async (req, res) => {
       groupCode,
       customer: {
         name: customer.name,
+        nickname: customer.nickname || '',
         phone: customer.phone,
         email: customer.email || '',
       },
@@ -279,6 +280,7 @@ const createRecurringBooking = async (req, res) => {
         bookingCode,
         customer: {
           name: customer.name,
+          nickname: customer.nickname || '',
           phone: customer.phone,
           email: customer.email || '',
         },

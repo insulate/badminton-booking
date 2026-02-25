@@ -215,20 +215,33 @@ const getAvailableCourts = async ({ date, timeSlotId, courtType = null }) => {
 
     const allCourts = await Court.find(courtQuery).sort({ courtNumber: 1 });
 
-    // Get all booked court IDs for this date and timeslot
-    const bookedCourts = await Booking.find({
+    // Get all bookings for this date and timeslot
+    const slotBookings = await Booking.find({
       date: bookingDate,
       timeSlot: timeSlotId,
       deletedAt: null,
       bookingStatus: { $ne: 'cancelled' },
-    }).distinct('court');
+    });
+
+    // Separate: bookings with court assigned vs without court (pending assignment)
+    const bookedCourtIds = slotBookings
+      .filter((b) => b.court)
+      .map((b) => b.court);
+    const unassignedCount = slotBookings.filter((b) => !b.court).length;
 
     // Filter out booked courts and courts blocked by Group Play
+    let unassignedRemaining = unassignedCount;
     const availableCourts = await Promise.all(
       allCourts.map(async (court) => {
-        // Check if booked
-        const isBooked = bookedCourts.some((bookedCourtId) => bookedCourtId.equals(court._id));
+        // Check if this court is directly booked
+        const isBooked = bookedCourtIds.some((id) => id.equals(court._id));
         if (isBooked) {
+          return null;
+        }
+
+        // Reserve courts for unassigned bookings (first-come)
+        if (unassignedRemaining > 0) {
+          unassignedRemaining--;
           return null;
         }
 
@@ -301,6 +314,7 @@ const getCourtSchedule = async (date, dayType) => {
           bookingId: booking._id,
           bookingCode: booking.bookingCode,
           customerName: booking.customer.name,
+          customerNickname: booking.customer.nickname || '',
           customerPhone: booking.customer.phone,
           bookingStatus: booking.bookingStatus,
           paymentStatus: booking.paymentStatus,
@@ -383,10 +397,29 @@ const getCourtSchedule = async (date, dayType) => {
       })
     );
 
+    // Collect unassigned bookings (court: null) for frontend awareness
+    const unassignedBookings = bookings
+      .filter((b) => !b.court)
+      .map((b) => ({
+        bookingId: b._id,
+        bookingCode: b.bookingCode,
+        customerName: b.customer?.name,
+        customerNickname: b.customer?.nickname || '',
+        customerPhone: b.customer?.phone,
+        bookingStatus: b.bookingStatus,
+        paymentStatus: b.paymentStatus,
+        duration: b.duration,
+        startMinute: b.startMinute || 0,
+        timeSlotId: b.timeSlot?._id,
+        startTime: b.timeSlot?.startTime,
+        endTime: b.timeSlot?.endTime,
+      }));
+
     return {
       date: bookingDate,
       dayType,
       courts: schedule,
+      unassignedBookings,
       timeSlots: timeSlots.map((ts) => ({
         timeSlotId: ts._id,
         startTime: ts.startTime,
@@ -472,6 +505,39 @@ const getAvailabilityByTimeSlot = async (date) => {
         const allTimeSlots = timeSlots;
         const timeSlotIndex = allTimeSlots.findIndex(ts => ts._id.equals(timeSlot._id));
 
+        // Count unassigned bookings (court: null) that overlap this time slot
+        let unassignedCount = 0;
+        bookings.forEach(booking => {
+          if (booking.court) return; // skip bookings with court assigned
+
+          const bookingSlotIndex = allTimeSlots.findIndex(ts =>
+            booking.timeSlot && ts._id.equals(booking.timeSlot)
+          );
+          if (bookingSlotIndex === -1) return;
+
+          const bStartHalf = (booking.startMinute || 0) === 30 ? 1 : 0;
+          const bHalfSlots = (booking.duration || 1) * 2;
+
+          let overlapsFirst = false;
+          let overlapsSecond = false;
+          for (let h = 0; h < bHalfSlots; h++) {
+            const absoluteHalf = bStartHalf + h;
+            const slotOffset = Math.floor(absoluteHalf / 2);
+            const halfInSlot = absoluteHalf % 2;
+            const slotIdx = bookingSlotIndex + slotOffset;
+
+            if (slotIdx === timeSlotIndex) {
+              if (halfInSlot === 0) overlapsFirst = true;
+              if (halfInSlot === 1) overlapsSecond = true;
+            }
+          }
+
+          // Count as occupying a court if it covers both halves of this slot
+          if (overlapsFirst && overlapsSecond) {
+            unassignedCount++;
+          }
+        });
+
         for (const court of courts) {
           // Check if both halves of this slot are booked for this court
           let firstHalfBooked = false;
@@ -520,7 +586,7 @@ const getAvailabilityByTimeSlot = async (date) => {
           }
         }
 
-        const availableCount = totalCourts - bookedCount - blockedByGroupPlayCount;
+        const availableCount = totalCourts - bookedCount - blockedByGroupPlayCount - unassignedCount;
 
         // Determine pricing based on peak hour
         const pricing = timeSlot.peakHour
