@@ -90,8 +90,9 @@ export default function PlayersPage() {
 
       filtered = players.filter((player) => {
         const nameMatch = player.name.toLowerCase().includes(searchLower);
+        const nicknameMatch = player.nickname?.toLowerCase().includes(searchLower);
         const phoneMatch = searchNumbers && player.phone.includes(searchNumbers);
-        return nameMatch || phoneMatch;
+        return nameMatch || nicknameMatch || phoneMatch;
       });
     }
 
@@ -414,7 +415,12 @@ export default function PlayersPage() {
                     >
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-semibold text-gray-900">{player.name}</div>
+                          <div className="font-semibold text-gray-900">
+                            {player.name}
+                            {player.nickname && (
+                              <span className="ml-2 text-sm font-normal text-gray-500">({player.nickname})</span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                             <Phone className="w-3.5 h-3.5" />
                             {formatPhone(player.phone)}

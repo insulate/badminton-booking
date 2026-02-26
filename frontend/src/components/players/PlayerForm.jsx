@@ -20,6 +20,7 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
 
   const [formData, setFormData] = useState({
     name: player?.name || '',
+    nickname: player?.nickname || '',
     phone: player?.phone || '',
     level: player?.level || '',
     password: '',
@@ -81,6 +82,7 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
     // Prepare data
     const submitData = {
       name: formData.name.trim(),
+      nickname: formData.nickname.trim(),
       phone: formData.phone,
       level: formData.level || null,
       notes: formData.notes.trim(),
@@ -131,6 +133,23 @@ export default function PlayerForm({ player, onSubmit, onCancel, isLoading = fal
               disabled={isLoading}
             />
             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+          </div>
+
+          {/* Nickname */}
+          <div>
+            <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-1">
+              ชื่อเล่น
+            </label>
+            <input
+              type="text"
+              id="nickname"
+              name="nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="กรอกชื่อเล่น (ไม่บังคับ)"
+              disabled={isLoading}
+            />
           </div>
 
           {/* Phone */}
