@@ -630,9 +630,18 @@ function calculateShiftSummary(sales, expenses) {
     transferSales: 0,
     totalExpenses: 0,
     totalChangeGiven: 0,
+    pendingTabAmount: 0,
+    pendingTabCount: 0,
   };
 
   sales.forEach((sale) => {
+    // Pending tab sales: track separately, don't include in revenue
+    if (sale.paymentStatus === 'pending') {
+      summary.pendingTabAmount += sale.total;
+      summary.pendingTabCount++;
+      return;
+    }
+
     summary.totalSales += sale.total;
 
     switch (sale.paymentMethod) {

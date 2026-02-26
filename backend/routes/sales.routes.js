@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Sale = require('../models/sale.model');
 const Product = require('../models/product.model');
+const Booking = require('../models/booking.model');
 const Shift = require('../models/shift.model');
 const { generateSaleCode } = require('../utils/saleCodeGenerator');
 const { protect, admin } = require('../middleware/auth');
@@ -13,7 +14,7 @@ const { protect, admin } = require('../middleware/auth');
  */
 router.get('/', protect, async (req, res) => {
   try {
-    const { startDate, endDate, paymentMethod, page = 1, limit = 50 } = req.query;
+    const { startDate, endDate, paymentMethod, paymentStatus, page = 1, limit = 50 } = req.query;
 
     // Build filter
     const filter = {};
@@ -27,6 +28,7 @@ router.get('/', protect, async (req, res) => {
       }
     }
     if (paymentMethod) filter.paymentMethod = paymentMethod;
+    if (paymentStatus) filter.paymentStatus = paymentStatus;
 
     // Pagination
     const skip = (page - 1) * limit;
@@ -88,16 +90,22 @@ router.get('/daily', protect, async (req, res) => {
       .populate('items.product', 'name sku category image')
       .sort({ createdAt: -1 });
 
-    // Calculate summary
+    // Separate paid and pending sales
+    const paidSales = sales.filter((s) => s.paymentStatus !== 'pending');
+    const pendingSales = sales.filter((s) => s.paymentStatus === 'pending');
+
+    // Calculate summary (only from paid sales)
     const summary = {
-      totalSales: sales.length,
-      totalRevenue: sales.reduce((sum, sale) => sum + sale.total, 0),
+      totalSales: paidSales.length,
+      totalRevenue: paidSales.reduce((sum, sale) => sum + sale.total, 0),
+      pendingCount: pendingSales.length,
+      pendingTotal: pendingSales.reduce((sum, sale) => sum + sale.total, 0),
       byPaymentMethod: {},
       byCategory: {},
     };
 
-    // Group by payment method
-    sales.forEach((sale) => {
+    // Group by payment method (paid only)
+    paidSales.forEach((sale) => {
       const method = sale.paymentMethod;
       if (!summary.byPaymentMethod[method]) {
         summary.byPaymentMethod[method] = { count: 0, total: 0 };
@@ -106,7 +114,7 @@ router.get('/daily', protect, async (req, res) => {
       summary.byPaymentMethod[method].total += sale.total;
     });
 
-    // Group by product category
+    // Group by product category (all sales)
     sales.forEach((sale) => {
       sale.items.forEach((item) => {
         const category = item.product?.category || 'other';
@@ -129,6 +137,49 @@ router.get('/daily', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch daily report',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/sales/booking/:bookingId
+ * @desc    Get all sales linked to a booking
+ * @access  Private (Admin/Staff)
+ */
+router.get('/booking/:bookingId', protect, async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { paymentStatus } = req.query;
+
+    const filter = { relatedBooking: bookingId };
+    if (paymentStatus) filter.paymentStatus = paymentStatus;
+
+    const sales = await Sale.find(filter)
+      .populate('items.product', 'name sku category image price')
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 });
+
+    const pendingSales = sales.filter((s) => s.paymentStatus === 'pending');
+    const paidSales = sales.filter((s) => s.paymentStatus === 'paid');
+
+    res.status(200).json({
+      success: true,
+      data: sales,
+      summary: {
+        totalSales: sales.length,
+        pendingCount: pendingSales.length,
+        paidCount: paidSales.length,
+        totalPending: pendingSales.reduce((sum, s) => sum + s.total, 0),
+        totalPaid: paidSales.reduce((sum, s) => sum + s.total, 0),
+        grandTotal: sales.reduce((sum, s) => sum + s.total, 0),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching booking sales:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch booking sales',
       error: error.message,
     });
   }
@@ -176,7 +227,8 @@ router.post('/', protect, async (req, res) => {
   let saleId = null;
 
   try {
-    const { items, customer, paymentMethod, relatedBooking, receivedAmount } = req.body;
+    const { items, customer, paymentMethod, relatedBooking, receivedAmount, paymentStatus: reqPaymentStatus } = req.body;
+    const paymentStatus = reqPaymentStatus || 'paid';
 
     // Check if user has an open shift (required for creating sales)
     const openShift = await Shift.findOpenShift(req.user._id);
@@ -185,6 +237,31 @@ router.post('/', protect, async (req, res) => {
         success: false,
         message: 'กรุณาเปิดกะก่อนขายสินค้า',
         requireShift: true,
+      });
+    }
+
+    // Validate pending sale must link to a booking
+    if (paymentStatus === 'pending') {
+      if (!relatedBooking) {
+        return res.status(400).json({
+          success: false,
+          message: 'Tab sale ต้องเชื่อมโยงกับการจองสนาม',
+        });
+      }
+      const booking = await Booking.findById(relatedBooking);
+      if (!booking || booking.deletedAt || booking.bookingStatus === 'cancelled') {
+        return res.status(400).json({
+          success: false,
+          message: 'ไม่พบการจอง หรือการจองถูกยกเลิกแล้ว',
+        });
+      }
+    }
+
+    // Validate payment method for paid sales
+    if (paymentStatus === 'paid' && !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกวิธีชำระเงิน',
       });
     }
 
@@ -236,11 +313,11 @@ router.post('/', protect, async (req, res) => {
     // Calculate total
     const total = processedItems.reduce((sum, item) => sum + item.subtotal, 0);
 
-    // Calculate change for cash payment
+    // Calculate change for cash payment (only for paid sales)
     let finalReceivedAmount = null;
     let finalChangeAmount = null;
 
-    if (paymentMethod === 'cash' && receivedAmount !== undefined && receivedAmount !== null) {
+    if (paymentStatus === 'paid' && paymentMethod === 'cash' && receivedAmount !== undefined && receivedAmount !== null) {
       if (receivedAmount < total) {
         return res.status(400).json({
           success: false,
@@ -256,7 +333,8 @@ router.post('/', protect, async (req, res) => {
       saleCode,
       items: processedItems,
       customer,
-      paymentMethod,
+      paymentStatus,
+      paymentMethod: paymentStatus === 'paid' ? paymentMethod : null,
       relatedBooking,
       createdBy: req.user._id,
       shift: openShift._id,
@@ -335,6 +413,189 @@ router.post('/', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create sale',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/sales/settle
+ * @desc    Settle pending sales (individual or combined with booking)
+ * @access  Private (Admin/Staff)
+ */
+router.post('/settle', protect, async (req, res) => {
+  try {
+    const { mode, saleIds, bookingId, paymentMethod, receivedAmount } = req.body;
+
+    // Check open shift
+    const openShift = await Shift.findOpenShift(req.user._id);
+    if (!openShift) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเปิดกะก่อน',
+        requireShift: true,
+      });
+    }
+
+    if (!paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกวิธีชำระเงิน',
+      });
+    }
+
+    let salesToSettle = [];
+    let bookingToSettle = null;
+
+    if (mode === 'individual') {
+      if (!saleIds || saleIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'กรุณาเลือกรายการที่ต้องการชำระ',
+        });
+      }
+      salesToSettle = await Sale.find({
+        _id: { $in: saleIds },
+        paymentStatus: 'pending',
+      });
+    } else if (mode === 'combined') {
+      if (!bookingId) {
+        return res.status(400).json({
+          success: false,
+          message: 'กรุณาระบุการจอง',
+        });
+      }
+      salesToSettle = await Sale.find({
+        relatedBooking: bookingId,
+        paymentStatus: 'pending',
+      });
+      bookingToSettle = await Booking.findById(bookingId);
+      if (!bookingToSettle) {
+        return res.status(404).json({
+          success: false,
+          message: 'ไม่พบการจอง',
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุ mode (individual หรือ combined)',
+      });
+    }
+
+    // Calculate totals
+    const salesTotalAmount = salesToSettle.reduce((sum, s) => sum + s.total, 0);
+    const bookingRemainingAmount =
+      mode === 'combined' && bookingToSettle
+        ? bookingToSettle.pricing.total - (bookingToSettle.pricing.deposit || 0)
+        : 0;
+    const grandTotal = salesTotalAmount + bookingRemainingAmount;
+
+    // Cash validation
+    let finalReceivedAmount = null;
+    let finalChangeAmount = null;
+    if (paymentMethod === 'cash') {
+      if (!receivedAmount || receivedAmount < grandTotal) {
+        return res.status(400).json({
+          success: false,
+          message: `จำนวนเงินที่รับไม่เพียงพอ (ต้องการ ฿${grandTotal.toFixed(2)})`,
+        });
+      }
+      finalReceivedAmount = receivedAmount;
+      finalChangeAmount = receivedAmount - grandTotal;
+    }
+
+    // Update all pending sales to paid
+    const settledSaleIds = salesToSettle.map((s) => s._id);
+    if (settledSaleIds.length > 0) {
+      await Sale.updateMany(
+        { _id: { $in: settledSaleIds } },
+        {
+          $set: {
+            paymentStatus: 'paid',
+            paymentMethod,
+            receivedAmount: finalReceivedAmount,
+            changeAmount: finalChangeAmount,
+            shift: openShift._id,
+          },
+        }
+      );
+    }
+
+    // Update booking payment if combined mode
+    let bookingSettled = false;
+    if (mode === 'combined' && bookingToSettle && bookingRemainingAmount > 0) {
+      bookingToSettle.pricing.deposit = bookingToSettle.pricing.total;
+      bookingToSettle.paymentStatus = 'paid';
+      bookingToSettle.paymentMethod = paymentMethod;
+      await bookingToSettle.save();
+      bookingSettled = true;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'ชำระเงินสำเร็จ',
+      data: {
+        settledSales: settledSaleIds.length,
+        salesTotalAmount,
+        bookingRemainingAmount,
+        grandTotal,
+        paymentMethod,
+        receivedAmount: finalReceivedAmount,
+        changeAmount: finalChangeAmount,
+        bookingSettled,
+      },
+    });
+  } catch (error) {
+    console.error('Error settling sales:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to settle sales',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PATCH /api/sales/:id/void
+ * @desc    Void a pending sale (restore stock)
+ * @access  Private (Admin/Staff)
+ */
+router.patch('/:id/void', protect, async (req, res) => {
+  try {
+    const sale = await Sale.findById(req.params.id);
+    if (!sale) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการขาย' });
+    }
+    if (sale.paymentStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'สามารถยกเลิกได้เฉพาะรายการที่ยังไม่ชำระเงิน',
+      });
+    }
+
+    // Restore stock
+    for (const item of sale.items) {
+      const product = await Product.findById(item.product);
+      if (product && product.trackStock !== false) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
+    }
+
+    // Delete the voided sale
+    await Sale.findByIdAndDelete(sale._id);
+
+    res.status(200).json({
+      success: true,
+      message: 'ยกเลิกรายการสำเร็จ คืนสต็อกเรียบร้อย',
+    });
+  } catch (error) {
+    console.error('Error voiding sale:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to void sale',
       error: error.message,
     });
   }

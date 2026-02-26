@@ -513,6 +513,21 @@ export const salesAPI = {
     const response = await api.post(API_ENDPOINTS.SALES.CREATE, data);
     return response.data;
   },
+
+  getByBooking: async (bookingId, params) => {
+    const response = await api.get(API_ENDPOINTS.SALES.BY_BOOKING(bookingId), { params });
+    return response.data;
+  },
+
+  settle: async (data) => {
+    const response = await api.post(API_ENDPOINTS.SALES.SETTLE, data);
+    return response.data;
+  },
+
+  void: async (id) => {
+    const response = await api.patch(API_ENDPOINTS.SALES.VOID(id));
+    return response.data;
+  },
 };
 
 // Categories API (Admin only)

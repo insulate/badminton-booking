@@ -56,11 +56,15 @@ const saleSchema = new mongoose.Schema(
       required: [true, 'Total is required'],
       min: [0, 'Total cannot be negative'],
     },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'paid',
+    },
     paymentMethod: {
       type: String,
-      enum: ['cash', 'promptpay', 'transfer', 'credit_card'],
-      required: [true, 'Payment method is required'],
-      default: 'cash',
+      enum: [null, 'cash', 'promptpay', 'transfer', 'credit_card'],
+      default: null,
     },
     receivedAmount: {
       type: Number,
@@ -95,7 +99,17 @@ const saleSchema = new mongoose.Schema(
 // saleCode already has unique index from schema definition
 saleSchema.index({ createdAt: -1 });
 saleSchema.index({ relatedBooking: 1 });
+saleSchema.index({ relatedBooking: 1, paymentStatus: 1 });
+saleSchema.index({ paymentStatus: 1 });
 saleSchema.index({ shift: 1 });
+
+// Pre-validate: paid sales must have paymentMethod
+saleSchema.pre('validate', function (next) {
+  if (this.paymentStatus === 'paid' && !this.paymentMethod) {
+    this.invalidate('paymentMethod', 'Payment method is required for paid sales');
+  }
+  next();
+});
 
 // Pre-save hook to calculate total
 saleSchema.pre('save', function (next) {

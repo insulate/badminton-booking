@@ -34,6 +34,7 @@ const SalesHistoryPage = () => {
   const [startDate, setStartDate] = useState(getToday());
   const [endDate, setEndDate] = useState(getToday());
   const [paymentMethod, setPaymentMethod] = useState('all');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination
@@ -47,7 +48,7 @@ const SalesHistoryPage = () => {
   // Load sales on mount and filter change
   useEffect(() => {
     loadSales();
-  }, [startDate, endDate, paymentMethod, pagination.page]);
+  }, [startDate, endDate, paymentMethod, paymentStatusFilter, pagination.page]);
 
   // Load sales from API
   const loadSales = async () => {
@@ -61,6 +62,7 @@ const SalesHistoryPage = () => {
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
       if (paymentMethod !== 'all') params.paymentMethod = paymentMethod;
+      if (paymentStatusFilter !== 'all') params.paymentStatus = paymentStatusFilter;
       if (searchQuery) params.search = searchQuery;
 
       const response = await salesAPI.getAll(params);
@@ -163,7 +165,7 @@ const SalesHistoryPage = () => {
 
         {/* Filters */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Start Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -217,6 +219,26 @@ const SalesHistoryPage = () => {
                 <option value="promptpay">พร้อมเพย์</option>
                 <option value="transfer">โอนเงิน</option>
                 <option value="credit_card">บัตรเครดิต</option>
+              </select>
+            </div>
+
+            {/* Payment Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Filter className="w-4 h-4 inline mr-1" />
+                สถานะการชำระ
+              </label>
+              <select
+                value={paymentStatusFilter}
+                onChange={(e) => {
+                  setPaymentStatusFilter(e.target.value);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
+              >
+                <option value="all">ทั้งหมด</option>
+                <option value="paid">ชำระแล้ว</option>
+                <option value="pending">ค้างชำระ (Tab)</option>
               </select>
             </div>
 
@@ -306,6 +328,9 @@ const SalesHistoryPage = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         วิธีชำระเงิน
                       </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        สถานะ
+                      </th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         การดำเนินการ
                       </th>
@@ -352,7 +377,23 @@ const SalesHistoryPage = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {getPaymentMethodBadge(sale.paymentMethod)}
+                          {sale.paymentMethod ? getPaymentMethodBadge(sale.paymentMethod) : <span className="text-gray-400 text-xs">-</span>}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {sale.paymentStatus === 'pending' ? (
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">
+                              ค้างชำระ
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                              ชำระแล้ว
+                            </span>
+                          )}
+                          {sale.relatedBooking && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                              {sale.relatedBooking.bookingCode || 'Tab'}
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                           <button
@@ -433,8 +474,22 @@ const SalesHistoryPage = () => {
                   <p className="font-medium text-gray-900">{formatDateTime(selectedSale.createdAt)}</p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-4">
-                  <p className="text-sm text-gray-600 mb-1">วิธีชำระเงิน</p>
-                  <div className="mt-1">{getPaymentMethodBadge(selectedSale.paymentMethod)}</div>
+                  <p className="text-sm text-gray-600 mb-1">สถานะ / วิธีชำระเงิน</p>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {selectedSale.paymentStatus === 'pending' ? (
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">ค้างชำระ</span>
+                    ) : (
+                      <>
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">ชำระแล้ว</span>
+                        {selectedSale.paymentMethod && getPaymentMethodBadge(selectedSale.paymentMethod)}
+                      </>
+                    )}
+                  </div>
+                  {selectedSale.relatedBooking && (
+                    <p className="text-xs text-blue-600 mt-2">
+                      ผูกกับการจอง: {selectedSale.relatedBooking.bookingCode || selectedSale.relatedBooking}
+                    </p>
+                  )}
                 </div>
               </div>
 

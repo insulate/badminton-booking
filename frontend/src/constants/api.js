@@ -116,6 +116,9 @@ export const API_ENDPOINTS = {
     DAILY: '/sales/daily',
     GET: (id) => `/sales/${id}`,
     CREATE: '/sales',
+    BY_BOOKING: (bookingId) => `/sales/booking/${bookingId}`,
+    SETTLE: '/sales/settle',
+    VOID: (id) => `/sales/${id}/void`,
   },
 
   // Categories Management (Admin)

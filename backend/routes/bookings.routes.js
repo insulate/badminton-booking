@@ -840,6 +840,20 @@ router.patch('/:id/cancel', protect, validateObjectId(), async (req, res) => {
       });
     }
 
+    // Check for pending tab sales before cancellation
+    const Sale = require('../models/sale.model');
+    const pendingSales = await Sale.countDocuments({
+      relatedBooking: booking._id,
+      paymentStatus: 'pending',
+    });
+    if (pendingSales > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `ไม่สามารถยกเลิกได้ มีรายการสินค้าค้างชำระ ${pendingSales} รายการ กรุณายกเลิกหรือชำระรายการก่อน`,
+        pendingSalesCount: pendingSales,
+      });
+    }
+
     // Attach booking to request for validation
     req.booking = booking;
 

@@ -15,9 +15,10 @@ import {
   Clock
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { productsAPI, salesAPI, categoriesAPI, settingsAPI, shiftsAPI } from '../../lib/api';
+import { productsAPI, salesAPI, categoriesAPI, settingsAPI, shiftsAPI, bookingsAPI } from '../../lib/api';
 import { PageContainer, PageHeader } from '../../components/common';
 import { ROUTES } from '../../constants';
+import { Receipt } from 'lucide-react';
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim();
 
@@ -35,6 +36,12 @@ const POSPage = () => {
   const [currentShift, setCurrentShift] = useState(null);
   const [shiftLoading, setShiftLoading] = useState(true);
   const [showNoShiftModal, setShowNoShiftModal] = useState(false);
+
+  // Tab mode state
+  const [tabMode, setTabMode] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showBookingSelector, setShowBookingSelector] = useState(false);
+  const [tabLoading, setTabLoading] = useState(false);
 
   // Fetch current shift status
   const fetchCurrentShift = async () => {
@@ -160,6 +167,49 @@ const POSPage = () => {
   // Clear cart
   const clearCart = () => {
     setCart([]);
+  };
+
+  // Handle tab checkout (pending sale linked to booking)
+  const handleTabCheckout = async () => {
+    if (!selectedBooking) {
+      toast.error('กรุณาเลือกการจองก่อน');
+      return;
+    }
+    try {
+      setTabLoading(true);
+      const saleData = {
+        items: cart.map((item) => ({
+          product: item.product._id,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.subtotal,
+        })),
+        customer: selectedBooking.customer
+          ? {
+              name: selectedBooking.customer.name || '',
+              nickname: selectedBooking.customer.nickname || '',
+              phone: selectedBooking.customer.phone || '',
+              type: 'walk-in',
+            }
+          : null,
+        relatedBooking: selectedBooking._id,
+        paymentStatus: 'pending',
+        total,
+      };
+
+      const response = await salesAPI.create(saleData);
+      if (response.success) {
+        toast.success('เปิดบิลสำเร็จ รายการจะแสดงในรายละเอียดการจอง');
+        clearCart();
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error('Error creating tab sale:', error);
+      const errorMessage = error.response?.data?.message || 'เกิดข้อผิดพลาดในการเปิดบิล';
+      toast.error(errorMessage);
+    } finally {
+      setTabLoading(false);
+    }
   };
 
   // Calculate total
@@ -355,6 +405,55 @@ const POSPage = () => {
                 )}
               </div>
 
+              {/* Tab Mode Toggle */}
+              <div className="mb-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={tabMode}
+                    onChange={(e) => {
+                      setTabMode(e.target.checked);
+                      if (!e.target.checked) setSelectedBooking(null);
+                    }}
+                    className="w-5 h-5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <Receipt className="w-4 h-4 text-amber-600" />
+                  <span className="font-medium text-amber-700 text-sm">เปิดบิล (Tab) - จ่ายทีหลัง</span>
+                </label>
+                {tabMode && (
+                  <div className="mt-2">
+                    {selectedBooking ? (
+                      <div className="flex items-center justify-between bg-white rounded-lg p-2.5 border border-amber-200">
+                        <div>
+                          <span className="font-bold text-sm text-amber-800">{selectedBooking.bookingCode}</span>
+                          <span className="text-gray-500 text-xs ml-2">
+                            {selectedBooking.customer?.nickname || selectedBooking.customer?.name || 'ไม่ระบุ'}
+                          </span>
+                          {selectedBooking.court && (
+                            <span className="text-gray-400 text-xs ml-1">
+                              • {selectedBooking.court.name || `สนาม ${selectedBooking.court.courtNumber}`}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setSelectedBooking(null)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowBookingSelector(true)}
+                        className="w-full py-2.5 border-2 border-dashed border-amber-300 rounded-lg text-amber-600 hover:bg-amber-100 transition-colors text-sm font-medium"
+                      >
+                        + เลือกการจอง...
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Cart Items */}
               {cart.length === 0 ? (
                 <div className="text-center py-16">
@@ -426,13 +525,41 @@ const POSPage = () => {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => setShowPaymentModal(true)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg"
-                    >
-                      <DollarSign className="w-6 h-6" />
-                      ชำระเงิน
-                    </button>
+                    {tabMode && selectedBooking ? (
+                      <button
+                        onClick={handleTabCheckout}
+                        disabled={tabLoading}
+                        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-xl hover:from-amber-600 hover:to-orange-600 hover:shadow-xl hover:-translate-y-0.5 transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                      >
+                        {tabLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            <span>กำลังบันทึก...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Receipt className="w-6 h-6" />
+                            เปิดบิล (ยังไม่ชำระ)
+                          </>
+                        )}
+                      </button>
+                    ) : tabMode && !selectedBooking ? (
+                      <button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-500 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed"
+                      >
+                        <Receipt className="w-6 h-6" />
+                        กรุณาเลือกการจองก่อน
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setShowPaymentModal(true)}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 hover:shadow-xl hover:-translate-y-0.5 transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg"
+                      >
+                        <DollarSign className="w-6 h-6" />
+                        ชำระเงิน
+                      </button>
+                    )}
                   </div>
                 </>
               )}
@@ -493,11 +620,24 @@ const POSPage = () => {
         </div>
       )}
 
+      {/* Booking Selector Modal */}
+      {showBookingSelector && (
+        <BookingSelectorModal
+          isOpen={showBookingSelector}
+          onClose={() => setShowBookingSelector(false)}
+          onSelect={(booking) => {
+            setSelectedBooking(booking);
+            setShowBookingSelector(false);
+          }}
+        />
+      )}
+
       {/* Payment Modal */}
       {showPaymentModal && (
         <PaymentModal
           cart={cart}
           total={total}
+          relatedBooking={tabMode ? selectedBooking?._id : undefined}
           onClose={() => setShowPaymentModal(false)}
           onSuccess={() => {
             clearCart();
@@ -512,7 +652,7 @@ const POSPage = () => {
 };
 
 // Payment Modal Component
-const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
+const PaymentModal = ({ cart, total, relatedBooking, onClose, onSuccess }) => {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [customer, setCustomer] = useState({ name: '', nickname: '', phone: '' });
   const [loading, setLoading] = useState(false);
@@ -595,6 +735,8 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
         ...(paymentMethod === 'cash' && receivedAmount && {
           receivedAmount: parseFloat(receivedAmount)
         }),
+        // Link to booking if in tab mode
+        ...(relatedBooking && { relatedBooking }),
       };
 
       const response = await salesAPI.create(saleData);
@@ -801,6 +943,149 @@ const PaymentModal = ({ cart, total, onClose, onSuccess }) => {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Booking Selector Modal Component
+const BookingSelectorModal = ({ isOpen, onClose, onSelect }) => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+
+  useEffect(() => {
+    if (isOpen) fetchActiveBookings();
+  }, [isOpen]);
+
+  const fetchActiveBookings = async () => {
+    setLoading(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const response = await bookingsAPI.getAll({
+        date: today,
+        limit: 100,
+      });
+      if (response.success) {
+        // Show checked-in and confirmed bookings
+        const activeBookings = (response.data || []).filter(
+          (b) => b.bookingStatus === 'checked-in' || b.bookingStatus === 'confirmed'
+        );
+        setBookings(activeBookings);
+      }
+    } catch (error) {
+      console.error('Error fetching active bookings:', error);
+      toast.error('ไม่สามารถโหลดรายการจองได้');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredBookings = bookings.filter((b) => {
+    if (!searchText) return true;
+    const search = searchText.toLowerCase();
+    return (
+      b.bookingCode?.toLowerCase().includes(search) ||
+      b.customer?.name?.toLowerCase().includes(search) ||
+      b.customer?.nickname?.toLowerCase().includes(search) ||
+      b.customer?.phone?.includes(search)
+    );
+  });
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'checked-in':
+        return { text: 'เช็คอินแล้ว', color: 'bg-green-100 text-green-700' };
+      case 'confirmed':
+        return { text: 'ยืนยันแล้ว', color: 'bg-blue-100 text-blue-700' };
+      default:
+        return { text: status, color: 'bg-gray-100 text-gray-700' };
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Receipt className="w-6 h-6" />
+              <div>
+                <h2 className="text-lg font-bold">เลือกการจอง</h2>
+                <p className="text-white/80 text-sm">เลือกการจองที่ต้องการผูกบิล</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-white/80 hover:text-white p-1">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="p-4 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="ค้นหา (รหัสจอง, ชื่อ, เบอร์โทร)..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            />
+          </div>
+        </div>
+
+        {/* Bookings List */}
+        <div className="overflow-y-auto max-h-[50vh] p-4">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-amber-500 border-t-transparent mx-auto mb-3"></div>
+              <p className="text-gray-500 text-sm">กำลังโหลด...</p>
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="text-center py-8">
+              <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">ไม่พบการจองที่ active วันนี้</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredBookings.map((booking) => {
+                const status = getStatusLabel(booking.bookingStatus);
+                return (
+                  <button
+                    key={booking._id}
+                    onClick={() => onSelect(booking)}
+                    className="w-full text-left p-4 border-2 border-gray-100 rounded-xl hover:border-amber-400 hover:bg-amber-50 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-bold text-sm text-gray-800">{booking.bookingCode}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.color}`}>
+                        {status.text}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {booking.customer?.nickname || booking.customer?.name || 'ไม่ระบุชื่อ'}
+                      {booking.customer?.phone && (
+                        <span className="text-gray-400 ml-2">({booking.customer.phone})</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {booking.court?.name || `สนาม ${booking.court?.courtNumber || '-'}`}
+                      {booking.timeSlot && (
+                        <span className="ml-1">
+                          • {booking.timeSlot.startTime} - {booking.timeSlot.endTime}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
