@@ -385,33 +385,38 @@ export default function GroupPlayPage() {
   return (
     <PageContainer variant="full"><div className="space-y-6">
       {/* Header */}
-      <PageHeader
-        title="ระบบตีก๊วน (Group Play)"
-        subtitle="จัดการกฎก๊วนสนาม ผู้เล่น เกม และการชำระเงิน"
-        icon={Users}
-        iconColor="blue"
-        actions={
+      <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl text-3xl">
+              🏸
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">ระบบตีก๊วน (Group Play)</h1>
+              <p className="text-emerald-100 text-sm mt-1">จัดการกฎก๊วนสนาม ผู้เล่น เกม และการชำระเงิน</p>
+            </div>
+          </div>
           <button
             onClick={fetchData}
-            className="px-4 py-2 bg-white border border-slate-300 text-text-primary rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all flex items-center gap-2 border border-white/30"
           >
             <RefreshCw size={18} />
             รีเฟรช
           </button>
-        }
-      />
+        </div>
+      </div>
 
       {/* Rule Display */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-emerald-200 border-l-4 border-l-emerald-500 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-primary">กฎก๊วนสนาม</h2>
+          <h2 className="text-lg font-semibold text-emerald-800 flex items-center gap-2">🏸 กฎก๊วนสนาม</h2>
           {selectedRule && (
             <div className="flex items-center gap-2">
               <button
                 onClick={handleToggleActive}
-                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                className={`px-3 py-1 text-sm rounded-lg font-medium transition-colors ${
                   selectedRule.isActive
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                     : 'bg-red-100 text-red-700 hover:bg-red-200'
                 }`}
               >
@@ -419,7 +424,7 @@ export default function GroupPlayPage() {
               </button>
               <button
                 onClick={handleEditRule}
-                className="px-3 py-1 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1"
+                className="px-3 py-1 text-sm bg-teal-100 text-teal-700 hover:bg-teal-200 rounded-lg transition-colors flex items-center gap-1 font-medium"
               >
                 <Edit size={14} />
                 แก้ไขกฎก๊วน
@@ -430,12 +435,12 @@ export default function GroupPlayPage() {
 
         {!selectedRule ? (
           <div className="text-center py-8 text-text-secondary">
-            <Users size={48} className="mx-auto mb-3 opacity-50" />
-            <p className="mb-2">ยังไม่มีกฎก๊วนสนาม</p>
-            <p className="text-sm mb-4">สร้างกฎก๊วนเพื่อเริ่มต้นใช้งานระบบตีก๊วน</p>
+            <div className="text-5xl mb-3">🏸</div>
+            <p className="mb-2 font-medium">ยังไม่มีกฎก๊วนสนาม</p>
+            <p className="text-sm mb-4">สร้างกฎก๊วนเพื่อเริ่มต้นเล่นกันเลย!</p>
             <button
               onClick={handleCreateRule}
-              className="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all inline-flex items-center gap-2 shadow-md"
             >
               <Plus size={18} />
               สร้างกฎก๊วนใหม่
@@ -474,12 +479,12 @@ export default function GroupPlayPage() {
             <div>
               <label className="text-xs text-text-secondary">สถานะ</label>
               <p className="text-sm font-medium mt-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                   selectedRule.isActive
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-emerald-100 text-emerald-700'
                     : 'bg-gray-100 text-gray-700'
                 }`}>
-                  {selectedRule.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                  {selectedRule.isActive ? '🟢 เปิดใช้งาน' : 'ปิดใช้งาน'}
                 </span>
               </p>
             </div>
@@ -493,63 +498,57 @@ export default function GroupPlayPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <button
               onClick={handleCheckIn}
-              className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+              className="px-4 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg font-semibold text-lg"
             >
-              <UserPlus size={20} />
+              <UserPlus size={22} />
               Check-in ผู้เล่น
             </button>
             <button
               onClick={handleStartGame}
               disabled={checkedInPlayers.length < 2}
-              className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              <Play size={20} />
+              <Play size={22} />
               เริ่มเกม
             </button>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-text-secondary">ผู้เล่นทั้งหมด</p>
-                  <p className="text-2xl font-bold text-text-primary mt-1">
-                    {checkedInPlayers.length}
-                  </p>
-                </div>
-                <Users className="text-primary-blue" size={32} />
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg p-5 relative overflow-hidden">
+              <Users className="absolute -right-2 -bottom-2 text-white/10" size={72} />
+              <div className="relative">
+                <p className="text-sm text-emerald-100">ผู้เล่นทั้งหมด</p>
+                <p className="text-3xl font-black text-white mt-1">
+                  {checkedInPlayers.length}
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-text-secondary">เกมที่กำลังเล่น</p>
-                  <p className="text-2xl font-bold text-text-primary mt-1">
-                    {currentGames.length}
-                  </p>
-                </div>
-                <Play className="text-green-500" size={32} />
+            <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg p-5 relative overflow-hidden">
+              <Play className="absolute -right-2 -bottom-2 text-white/10" size={72} />
+              <div className="relative">
+                <p className="text-sm text-orange-100">เกมที่กำลังเล่น</p>
+                <p className="text-3xl font-black text-white mt-1">
+                  {currentGames.length}
+                </p>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-text-secondary">ค่าเข้าร่วม</p>
-                  <p className="text-2xl font-bold text-text-primary mt-1">
-                    ฿{selectedRule.entryFee || 0}
-                  </p>
-                </div>
-                <Users className="text-yellow-500" size={32} />
+            <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg p-5 relative overflow-hidden">
+              <Users className="absolute -right-2 -bottom-2 text-white/10" size={72} />
+              <div className="relative">
+                <p className="text-sm text-cyan-100">ค่าเข้าร่วม</p>
+                <p className="text-3xl font-black text-white mt-1">
+                  ฿{selectedRule.entryFee || 0}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Players List */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-emerald-200 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-text-primary">
-                รายชื่อผู้เล่น ({processedPlayers.length} คน)
+              <h2 className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
+                👥 รายชื่อผู้เล่น ({processedPlayers.length} คน)
               </h2>
             </div>
 
@@ -563,7 +562,7 @@ export default function GroupPlayPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="ค้นหาชื่อหรือเบอร์โทร..."
-                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -571,76 +570,77 @@ export default function GroupPlayPage() {
 
             {checkedInPlayers.length === 0 ? (
               <div className="text-center py-8 text-text-secondary">
-                <Users size={48} className="mx-auto mb-3 opacity-50" />
-                <p>ยังไม่มีผู้เล่น check-in</p>
+                <div className="text-5xl mb-3">🏸</div>
+                <p className="font-medium">ยังไม่มีผู้เล่น check-in</p>
+                <p className="text-sm mt-1">กด Check-in เพื่อเพิ่มผู้เล่นเข้าก๊วน!</p>
               </div>
             ) : processedPlayers.length === 0 ? (
               <div className="text-center py-8 text-text-secondary">
-                <Users size={48} className="mx-auto mb-3 opacity-50" />
+                <Search size={48} className="mx-auto mb-3 opacity-50" />
                 <p>ไม่พบผู้เล่นที่ค้นหา</p>
               </div>
             ) : (
               <>
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                      <thead className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b-2 border-emerald-200">
                         <tr>
                           <th
-                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('name')}
                           >
                             <div className="flex items-center gap-2">
                               ผู้เล่น
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'name' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'name' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
                           <th
-                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('level')}
                           >
                             <div className="flex items-center gap-2">
                               ระดับ
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'level' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'level' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
                           <th
-                            className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('status')}
                           >
                             <div className="flex items-center gap-2">
                               สถานะ
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'status' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'status' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
                           <th
-                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-center text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('games')}
                           >
                             <div className="flex items-center justify-center gap-2">
                               เกม
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'games' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'games' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
                           <th
-                            className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-right text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('totalCost')}
                           >
                             <div className="flex items-center justify-end gap-2">
                               ค่าใช้จ่าย
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'totalCost' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'totalCost' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
                           <th
-                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors group"
+                            className="px-6 py-4 text-center text-xs font-semibold text-emerald-800 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors group"
                             onClick={() => handleSort('paymentStatus')}
                           >
                             <div className="flex items-center justify-center gap-2">
                               การชำระ
-                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'paymentStatus' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                              <ArrowUpDown className={`w-4 h-4 ${sortField === 'paymentStatus' ? 'text-emerald-600' : 'text-gray-400 group-hover:text-emerald-500'}`} />
                             </div>
                           </th>
-                          <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-center text-xs font-semibold text-emerald-800 uppercase tracking-wider">
                             จัดการ
                           </th>
                         </tr>
@@ -651,8 +651,8 @@ export default function GroupPlayPage() {
                           return (
                             <tr
                               key={index}
-                              className={`transition-all duration-150 ${
-                                index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                              className={`transition-all duration-150 hover:bg-emerald-50/50 ${
+                                index % 2 === 0 ? 'bg-white' : 'bg-emerald-50/30'
                               }`}
                             >
                               <td className="px-6 py-4">
@@ -663,7 +663,7 @@ export default function GroupPlayPage() {
                               </td>
                               <td className="px-6 py-4">
                                 {player.level ? (
-                                  <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
+                                  <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">
                                     {player.levelName || `Level ${player.level}`}
                                   </span>
                                 ) : (
@@ -680,8 +680,8 @@ export default function GroupPlayPage() {
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
-                                    <span className="text-sm font-medium text-slate-500">
+                                    <span className="w-2 h-2 bg-teal-400 rounded-full"></span>
+                                    <span className="text-sm font-medium text-teal-600">
                                       ว่าง
                                     </span>
                                   </div>
@@ -696,7 +696,7 @@ export default function GroupPlayPage() {
                                   const posSalesTotal = playerSales.reduce((sum, s) => sum + (s.total || 0), 0);
                                   return (
                                     <>
-                                      <div className="font-semibold text-green-600">฿{(player.totalCost || 0) + posSalesTotal}</div>
+                                      <div className="font-semibold text-emerald-600">฿{(player.totalCost || 0) + posSalesTotal}</div>
                                       {posSalesTotal > 0 && (
                                         <div className="text-xs text-orange-600 mt-1">
                                           รวมสินค้า POS ฿{posSalesTotal}
@@ -710,7 +710,7 @@ export default function GroupPlayPage() {
                                 <span
                                   className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                                     player.paymentStatus === 'paid'
-                                      ? 'bg-green-100 text-green-800 border border-green-200'
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                                       : 'bg-red-100 text-red-800 border border-red-200'
                                   }`}
                                 >
@@ -724,7 +724,7 @@ export default function GroupPlayPage() {
                                       setSelectedPlayer(player);
                                       setShowPlayerCostModal(true);
                                     }}
-                                    className="tooltip inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                    className="tooltip inline-flex items-center justify-center p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
                                     data-tooltip="ดูรายละเอียด"
                                   >
                                     <Eye size={16} />
@@ -734,7 +734,7 @@ export default function GroupPlayPage() {
                                       setSelectedPlayerForProduct(player);
                                       setShowAddProductModal(true);
                                     }}
-                                    className="tooltip inline-flex items-center justify-center p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                    className="tooltip inline-flex items-center justify-center p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
                                     data-tooltip="เพิ่มสินค้า"
                                   >
                                     <ShoppingCart size={16} />
@@ -755,7 +755,7 @@ export default function GroupPlayPage() {
                                         className={`tooltip inline-flex items-center justify-center p-2 rounded-lg transition-colors ${
                                           isDisabled
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-purple-500 text-white hover:bg-purple-600'
+                                            : 'bg-orange-500 text-white hover:bg-orange-600'
                                         }`}
                                         data-tooltip={tooltipText}
                                       >
@@ -809,7 +809,7 @@ export default function GroupPlayPage() {
                                   onClick={() => setCurrentPage(page)}
                                   className={`w-10 h-10 rounded-lg border font-medium text-sm transition-colors ${
                                     currentPage === page
-                                      ? 'bg-blue-600 text-white border-blue-600'
+                                      ? 'bg-emerald-600 text-white border-emerald-600'
                                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                   }`}
                                 >
@@ -849,24 +849,24 @@ export default function GroupPlayPage() {
 
           {/* Current Games */}
           {currentGames.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">
-                เกมที่กำลังเล่น ({currentGames.length})
+            <div className="bg-white rounded-xl shadow-sm border border-emerald-200 p-6">
+              <h2 className="text-lg font-semibold text-emerald-800 mb-4 flex items-center gap-2">
+                🏸 เกมที่กำลังเล่น ({currentGames.length})
               </h2>
               <div className="space-y-4">
                 {currentGames.map((game, index) => (
                   <div
                     key={index}
-                    className="border border-green-200 bg-green-50 rounded-lg p-4"
+                    className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 rounded-xl p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex-1">
-                        <span className="font-medium text-text-primary">
-                          {game.court?.name || `สนาม ${game.court?.courtNumber || game.gameNumber}`}
+                        <span className="font-semibold text-emerald-800">
+                          🏟️ {game.court?.name || `สนาม ${game.court?.courtNumber || game.gameNumber}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
+                        <span className="px-2 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs rounded-full font-medium animate-pulse">
                           กำลังเล่น
                         </span>
                         <button
@@ -874,7 +874,7 @@ export default function GroupPlayPage() {
                             setSelectedGameForEdit(game);
                             setShowEditPlayersModal(true);
                           }}
-                          className="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-1"
+                          className="px-3 py-1 bg-teal-500 text-white text-xs rounded-lg hover:bg-teal-600 transition-colors flex items-center gap-1 font-medium"
                         >
                           <Edit size={14} />
                           แก้ไข
@@ -884,7 +884,7 @@ export default function GroupPlayPage() {
                             setSelectedGameId({ playerId: game.playerId, gameNumber: game.gameNumber });
                             setShowFinishGameModal(true);
                           }}
-                          className="px-3 py-1 bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-600 transition-colors flex items-center gap-1"
+                          className="px-3 py-1 bg-orange-500 text-white text-xs rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1 font-medium"
                         >
                           <CheckCircle size={14} />
                           จบเกม
@@ -895,16 +895,16 @@ export default function GroupPlayPage() {
                     {/* Players List */}
                     {game.players && game.players.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-xs text-text-secondary mb-1">ผู้เล่น:</p>
+                        <p className="text-xs text-emerald-700 mb-1 font-medium">ผู้เล่น:</p>
                         <div className="flex flex-wrap gap-2">
                           {game.players.map((player, idx) => (
                             <span
                               key={idx}
-                              className="px-2 py-1 bg-white border border-green-200 rounded-full text-xs text-text-primary"
+                              className="px-2 py-1 bg-white border border-emerald-200 rounded-full text-xs text-text-primary shadow-sm"
                             >
                               {player.name}
                               {player.levelName && (
-                                <span className="ml-1 text-blue-600">
+                                <span className="ml-1 text-amber-600 font-medium">
                                   ({player.levelName})
                                 </span>
                               )}
@@ -914,8 +914,8 @@ export default function GroupPlayPage() {
                       </div>
                     )}
 
-                    <p className="text-sm text-text-secondary">
-                      เริ่มเมื่อ: {new Date(game.startTime).toLocaleTimeString('th-TH')}
+                    <p className="text-sm text-emerald-600">
+                      ⏱️ เริ่มเมื่อ: {new Date(game.startTime).toLocaleTimeString('th-TH')}
                     </p>
                   </div>
                 ))}
