@@ -4,6 +4,7 @@ const Booking = require('../models/booking.model');
 const Sale = require('../models/sale.model');
 const GroupPlay = require('../models/groupplay.model');
 const Court = require('../models/court.model');
+const Player = require('../models/player.model');
 const { protect } = require('../middleware/auth');
 
 // Protect all routes
@@ -970,6 +971,204 @@ router.get('/courts/usage', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการดึงรายงานการใช้งานสนาม',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/reports/dashboard
+ * @desc    Get all dashboard summary data in one call
+ * @access  Private
+ */
+router.get('/dashboard', async (req, res) => {
+  try {
+    const now = new Date();
+
+    // Today range
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23, 59, 59, 999);
+
+    // Yesterday range (for trends)
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    const yesterdayEnd = new Date(todayEnd);
+    yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+
+    // This month range
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    // Last month range (for trends)
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    // Week range (last 7 days)
+    const weekStart = new Date(todayStart);
+    weekStart.setDate(weekStart.getDate() - 6);
+
+    // --- Stats ---
+    const totalPlayers = await Player.countDocuments({ isDeleted: false });
+
+    const todayBookingsCount = await Booking.countDocuments({
+      date: { $gte: todayStart, $lte: todayEnd },
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+    });
+
+    const yesterdayBookingsCount = await Booking.countDocuments({
+      date: { $gte: yesterdayStart, $lte: yesterdayEnd },
+      deletedAt: null,
+      bookingStatus: { $ne: 'cancelled' },
+    });
+
+    // Helper: aggregate revenue for a date range
+    const getRevenue = async (start, end) => {
+      const [bookings] = await Booking.aggregate([
+        { $match: { date: { $gte: start, $lte: end }, paymentStatus: { $in: ['paid', 'partial'] } } },
+        { $group: { _id: null, total: { $sum: '$pricing.deposit' } } },
+      ]);
+      const [sales] = await Sale.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end }, paymentStatus: 'paid' } },
+        { $group: { _id: null, total: { $sum: '$total' } } },
+      ]);
+      const [gp] = await GroupPlay.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end } } },
+        { $unwind: '$players' },
+        { $match: { 'players.paymentStatus': 'paid', 'players.checkedOut': true } },
+        { $group: { _id: null, total: { $sum: '$players.totalCost' } } },
+      ]);
+      return (bookings?.total || 0) + (sales?.total || 0) + (gp?.total || 0);
+    };
+
+    const todayRevenue = await getRevenue(todayStart, todayEnd);
+    const yesterdayRevenue = await getRevenue(yesterdayStart, yesterdayEnd);
+    const monthlyRevenue = await getRevenue(monthStart, monthEnd);
+    const lastMonthRevenue = await getRevenue(lastMonthStart, lastMonthEnd);
+
+    // Calculate trend %
+    const calcTrend = (current, previous) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100 * 10) / 10;
+    };
+
+    // --- Recent Activities (last 5 bookings + sales merged) ---
+    const recentBookings = await Booking.find({ deletedAt: null })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('court', 'name')
+      .lean();
+
+    const recentSales = await Sale.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    const activities = [
+      ...recentBookings.map(b => ({
+        type: 'booking',
+        name: b.customer?.nickname || b.customer?.name || 'ลูกค้า',
+        action: `จองสนาม ${b.court?.name || '-'}`,
+        status: b.bookingStatus,
+        time: b.createdAt,
+      })),
+      ...recentSales.map(s => ({
+        type: 'sale',
+        name: s.customer?.name || 'ลูกค้า',
+        action: `ซื้อสินค้า ฿${(s.total || 0).toLocaleString()}`,
+        status: s.paymentStatus === 'paid' ? 'paid' : 'pending',
+        time: s.createdAt,
+      })),
+    ]
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 5);
+
+    // --- Courts Usage (this week, top 4) ---
+    const courtsUsageAgg = await Booking.aggregate([
+      {
+        $match: {
+          date: { $gte: weekStart, $lte: todayEnd },
+          deletedAt: null,
+          bookingStatus: { $ne: 'cancelled' },
+        },
+      },
+      {
+        $group: {
+          _id: '$court',
+          bookings: { $sum: 1 },
+        },
+      },
+      { $sort: { bookings: -1 } },
+      { $limit: 4 },
+      {
+        $lookup: {
+          from: 'courts',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'courtInfo',
+        },
+      },
+      { $unwind: { path: '$courtInfo', preserveNullAndEmptyArrays: true } },
+    ]);
+
+    const maxBookings = courtsUsageAgg[0]?.bookings || 1;
+    const courtsUsage = courtsUsageAgg.map(c => ({
+      name: c.courtInfo?.name || 'ไม่ทราบ',
+      bookings: c.bookings,
+      percentage: Math.round((c.bookings / maxBookings) * 100),
+    }));
+
+    // --- Weekly Bookings (last 7 days) ---
+    const dayLabels = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const weeklyBookings = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(todayStart);
+      dayStart.setDate(dayStart.getDate() - i);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const count = await Booking.countDocuments({
+        date: { $gte: dayStart, $lte: dayEnd },
+        deletedAt: null,
+        bookingStatus: { $ne: 'cancelled' },
+      });
+
+      const revenue = await getRevenue(dayStart, dayEnd);
+
+      weeklyBookings.push({
+        date: dayStart.toISOString().split('T')[0],
+        day: dayLabels[dayStart.getDay()],
+        count,
+        revenue,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        stats: {
+          totalPlayers,
+          todayBookings: todayBookingsCount,
+          todayRevenue,
+          monthlyRevenue,
+        },
+        trends: {
+          bookings: calcTrend(todayBookingsCount, yesterdayBookingsCount),
+          todayRevenue: calcTrend(todayRevenue, yesterdayRevenue),
+          monthlyRevenue: calcTrend(monthlyRevenue, lastMonthRevenue),
+        },
+        recentActivities: activities,
+        courtsUsage,
+        weeklyBookings,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูล Dashboard',
       error: error.message,
     });
   }

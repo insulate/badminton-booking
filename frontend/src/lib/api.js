@@ -697,6 +697,11 @@ export const reportsAPI = {
     const response = await api.get(url);
     return response.data;
   },
+
+  getDashboard: async () => {
+    const response = await api.get('/reports/dashboard');
+    return response.data;
+  },
 };
 
 // Attendance API
