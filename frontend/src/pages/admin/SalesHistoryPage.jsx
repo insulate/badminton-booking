@@ -28,6 +28,10 @@ const SalesHistoryPage = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
+  const [settleTarget, setSettleTarget] = useState(null);
+  const [settlePaymentMethod, setSettlePaymentMethod] = useState('cash');
+  const [settleReceivedAmount, setSettleReceivedAmount] = useState('');
+  const [settleLoading, setSettleLoading] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Filters - Default to today's date
@@ -100,6 +104,52 @@ const SalesHistoryPage = () => {
     } catch (error) {
       console.error('Load sale details error:', error);
       toast.error('ไม่สามารถโหลดรายละเอียดได้');
+    }
+  };
+
+  // Handle settle pending sale
+  const handleSettleSale = (sale) => {
+    setSettleTarget(sale);
+    setSettlePaymentMethod('cash');
+    setSettleReceivedAmount('');
+  };
+
+  const confirmSettle = async () => {
+    if (!settleTarget) return;
+    try {
+      setSettleLoading(true);
+      const data = {
+        mode: 'individual',
+        saleIds: [settleTarget._id],
+        paymentMethod: settlePaymentMethod,
+      };
+      if (settlePaymentMethod === 'cash' && settleReceivedAmount) {
+        data.receivedAmount = parseFloat(settleReceivedAmount);
+      }
+      const response = await salesAPI.settle(data);
+      if (response.success) {
+        toast.success('ชำระเงินสำเร็จ');
+        setSettleTarget(null);
+        loadSales();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาด');
+    } finally {
+      setSettleLoading(false);
+    }
+  };
+
+  // Handle void pending sale
+  const handleVoidSale = async (sale) => {
+    if (!confirm(`ยืนยันยกเลิกรายการ ${sale.saleCode}? สต็อกจะถูกคืนกลับ`)) return;
+    try {
+      const response = await salesAPI.void(sale._id);
+      if (response.success) {
+        toast.success('ยกเลิกรายการสำเร็จ สต็อกถูกคืนกลับแล้ว');
+        loadSales();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาด');
     }
   };
 
@@ -389,21 +439,49 @@ const SalesHistoryPage = () => {
                               ชำระแล้ว
                             </span>
                           )}
-                          {sale.relatedBooking && (
+                          {sale.paymentStatus === 'pending' && sale.relatedBooking ? (
                             <span className="ml-1 px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
                               {sale.relatedBooking.bookingCode || 'Tab'}
                             </span>
-                          )}
+                          ) : sale.paymentStatus === 'pending' && !sale.relatedBooking ? (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+                              {sale.customer?.type === 'member' ? 'สมาชิก' : 'Walk-in'}{sale.customer?.name ? `: ${sale.customer.name}` : ''}
+                            </span>
+                          ) : sale.relatedBooking ? (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                              {sale.relatedBooking.bookingCode || 'Tab'}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                          <button
-                            onClick={() => handleViewDetails(sale)}
-                            className="tooltip inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
-                            data-tooltip="ดูรายละเอียด"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span>ดูรายละเอียด</span>
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            {sale.paymentStatus === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handleSettleSale(sale)}
+                                  className="tooltip inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-medium"
+                                  data-tooltip="ชำระเงิน"
+                                >
+                                  ชำระ
+                                </button>
+                                <button
+                                  onClick={() => handleVoidSale(sale)}
+                                  className="tooltip inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium"
+                                  data-tooltip="ยกเลิกรายการ"
+                                >
+                                  ยกเลิก
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleViewDetails(sale)}
+                              className="tooltip inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all text-xs font-medium"
+                              data-tooltip="ดูรายละเอียด"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              ดู
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -631,6 +709,91 @@ const SalesHistoryPage = () => {
               >
                 ปิด
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Settle Modal */}
+      {settleTarget && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-5 rounded-t-2xl text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">ชำระเงิน</h2>
+                  <p className="text-white/80 text-sm">{settleTarget.saleCode}</p>
+                </div>
+                <button onClick={() => setSettleTarget(null)} className="text-white/80 hover:text-white p-1">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600">ยอดที่ต้องชำระ</p>
+                <p className="text-3xl font-bold text-gray-900">฿{formatPrice(settleTarget.total)}</p>
+                {settleTarget.customer?.name && (
+                  <p className="text-sm text-gray-500 mt-1">ลูกค้า: {settleTarget.customer.name}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">วิธีชำระเงิน</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'cash', label: 'เงินสด' },
+                    { value: 'promptpay', label: 'พร้อมเพย์' },
+                    { value: 'transfer', label: 'โอนเงิน' },
+                    { value: 'credit_card', label: 'บัตรเครดิต' },
+                  ].map((m) => (
+                    <button
+                      key={m.value}
+                      onClick={() => setSettlePaymentMethod(m.value)}
+                      className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                        settlePaymentMethod === m.value
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {settlePaymentMethod === 'cash' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">รับเงิน</label>
+                  <input
+                    type="number"
+                    value={settleReceivedAmount}
+                    onChange={(e) => setSettleReceivedAmount(e.target.value)}
+                    placeholder={`฿${formatPrice(settleTarget.total)}`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                  {settleReceivedAmount && parseFloat(settleReceivedAmount) >= settleTarget.total && (
+                    <p className="text-green-600 text-sm mt-1 font-medium">
+                      เงินทอน: ฿{formatPrice(parseFloat(settleReceivedAmount) - settleTarget.total)}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setSettleTarget(null)}
+                  className="flex-1 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={confirmSettle}
+                  disabled={settleLoading || (settlePaymentMethod === 'cash' && settleReceivedAmount && parseFloat(settleReceivedAmount) < settleTarget.total)}
+                  className="flex-1 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 disabled:opacity-50"
+                >
+                  {settleLoading ? 'กำลังบันทึก...' : 'ยืนยันชำระ'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

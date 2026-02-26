@@ -191,7 +191,7 @@ describe('Sales Tab (Pending/Settlement) API Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('เชื่อมโยงกับการจอง');
+      expect(response.body.message).toContain('กรุณาระบุชื่อลูกค้า');
     });
 
     it('should still create normal paid sales correctly', async () => {

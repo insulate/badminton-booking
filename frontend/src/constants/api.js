@@ -119,6 +119,7 @@ export const API_ENDPOINTS = {
     BY_BOOKING: (bookingId) => `/sales/booking/${bookingId}`,
     SETTLE: '/sales/settle',
     VOID: (id) => `/sales/${id}/void`,
+    ADD_ITEMS: (id) => `/sales/${id}/add-items`,
   },
 
   // Categories Management (Admin)

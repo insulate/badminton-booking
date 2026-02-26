@@ -528,6 +528,11 @@ export const salesAPI = {
     const response = await api.patch(API_ENDPOINTS.SALES.VOID(id));
     return response.data;
   },
+
+  addItems: async (id, data) => {
+    const response = await api.patch(API_ENDPOINTS.SALES.ADD_ITEMS(id), data);
+    return response.data;
+  },
 };
 
 // Categories API (Admin only)

@@ -20,10 +20,12 @@ router.get('/', protect, async (req, res) => {
     const filter = {};
     if (startDate || endDate) {
       filter.createdAt = {};
-      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (startDate) {
+        const start = new Date(startDate + 'T00:00:00');
+        filter.createdAt.$gte = start;
+      }
       if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
+        const end = new Date(endDate + 'T23:59:59.999');
         filter.createdAt.$lte = end;
       }
     }
@@ -77,7 +79,7 @@ router.get('/daily', protect, async (req, res) => {
       });
     }
 
-    const targetDate = new Date(date);
+    const targetDate = new Date(date + 'T00:00:00');
     const startOfDay = new Date(targetDate);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -240,20 +242,22 @@ router.post('/', protect, async (req, res) => {
       });
     }
 
-    // Validate pending sale must link to a booking
+    // Validate pending sale: must have relatedBooking OR customer name (walk-in)
     if (paymentStatus === 'pending') {
-      if (!relatedBooking) {
+      if (!relatedBooking && !customer?.name) {
         return res.status(400).json({
           success: false,
-          message: 'Tab sale ต้องเชื่อมโยงกับการจองสนาม',
+          message: 'กรุณาระบุชื่อลูกค้า หรือเลือกการจอง',
         });
       }
-      const booking = await Booking.findById(relatedBooking);
-      if (!booking || booking.deletedAt || booking.bookingStatus === 'cancelled') {
-        return res.status(400).json({
-          success: false,
-          message: 'ไม่พบการจอง หรือการจองถูกยกเลิกแล้ว',
-        });
+      if (relatedBooking) {
+        const booking = await Booking.findById(relatedBooking);
+        if (!booking || booking.deletedAt || booking.bookingStatus === 'cancelled') {
+          return res.status(400).json({
+            success: false,
+            message: 'ไม่พบการจอง หรือการจองถูกยกเลิกแล้ว',
+          });
+        }
       }
     }
 
@@ -551,6 +555,138 @@ router.post('/settle', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to settle sales',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PATCH /api/sales/:id/add-items
+ * @desc    Add items to an existing pending sale
+ * @access  Private (Admin/Staff)
+ */
+router.patch('/:id/add-items', protect, async (req, res) => {
+  try {
+    const { items } = req.body;
+    const sale = await Sale.findById(req.params.id);
+
+    if (!sale) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการขาย' });
+    }
+
+    if (sale.paymentStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'สามารถเพิ่มสินค้าได้เฉพาะรายการที่ยังไม่ชำระเงิน',
+      });
+    }
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกสินค้าอย่างน้อย 1 รายการ',
+      });
+    }
+
+    // Validate products and check stock
+    const processedItems = [];
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `ไม่พบสินค้า: ${item.product}`,
+        });
+      }
+
+      if (product.status !== 'active') {
+        return res.status(400).json({
+          success: false,
+          message: `สินค้า ${product.name} ไม่พร้อมขาย`,
+        });
+      }
+
+      if (product.trackStock !== false && product.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `สต็อกไม่เพียงพอสำหรับ ${product.name} (คงเหลือ ${product.stock})`,
+        });
+      }
+
+      processedItems.push({
+        product: product._id,
+        quantity: item.quantity,
+        price: product.price,
+        subtotal: product.price * item.quantity,
+      });
+    }
+
+    // Deduct stock atomically
+    const deductedProducts = [];
+    for (const item of processedItems) {
+      const productDoc = await Product.findById(item.product);
+      if (productDoc && productDoc.trackStock === false) {
+        deductedProducts.push(item);
+        continue;
+      }
+
+      const updated = await Product.findOneAndUpdate(
+        { _id: item.product, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+
+      if (!updated) {
+        // Rollback already deducted stock
+        for (const deducted of deductedProducts) {
+          const p = await Product.findById(deducted.product);
+          if (p && p.trackStock !== false) {
+            await Product.findByIdAndUpdate(deducted.product, {
+              $inc: { stock: deducted.quantity },
+            });
+          }
+        }
+        const product = await Product.findById(item.product);
+        return res.status(400).json({
+          success: false,
+          message: `สต็อกไม่เพียงพอสำหรับ ${product?.name || 'สินค้า'} กรุณาลองใหม่`,
+        });
+      }
+      deductedProducts.push(item);
+    }
+
+    // Merge items into sale: if same product exists, increase quantity
+    for (const newItem of processedItems) {
+      const existingIndex = sale.items.findIndex(
+        (i) => i.product.toString() === newItem.product.toString()
+      );
+
+      if (existingIndex >= 0) {
+        sale.items[existingIndex].quantity += newItem.quantity;
+        sale.items[existingIndex].subtotal += newItem.subtotal;
+      } else {
+        sale.items.push(newItem);
+      }
+    }
+
+    // Pre-save hook will recalculate total
+    await sale.save();
+
+    const populatedSale = await Sale.findById(sale._id)
+      .populate('items.product', 'name sku category image')
+      .populate('createdBy', 'name');
+
+    res.status(200).json({
+      success: true,
+      message: 'เพิ่มสินค้าเข้าบิลสำเร็จ',
+      data: populatedSale,
+    });
+  } catch (error) {
+    console.error('Error adding items to sale:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add items to sale',
       error: error.message,
     });
   }
