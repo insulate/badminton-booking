@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+import { X, User, Phone, Trophy, Calendar, Clock, DollarSign, Package, Users, ChevronDown, ChevronUp, ShoppingCart, ShoppingBag } from 'lucide-react';
 
-export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers, onClose }) {
+export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers, posSales = [], onClose }) {
   const [showFinishedGames, setShowFinishedGames] = useState(false);
 
   if (!player) return null;
@@ -16,6 +16,9 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
 
   // Calculate total cost from standalone items
   const standaloneItemsCost = standaloneItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  // Calculate total cost from POS sales
+  const posSalesTotal = posSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
 
   // Helper function to get players in a specific game
   const getPlayersInGame = (gameNumber) => {
@@ -451,8 +454,58 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
             </div>
           )}
 
+          {/* POS Sales */}
+          {posSales.length > 0 && (
+            <div>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="text-orange-600" size={20} />
+                    <span className="font-semibold text-text-primary">
+                      สินค้าจาก POS
+                    </span>
+                  </div>
+                  <span className="text-lg font-semibold text-orange-600">
+                    ฿{posSalesTotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {posSales.map((sale, saleIdx) => (
+                    <div key={saleIdx} className="bg-white border border-orange-100 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-text-primary">
+                          {sale.saleCode}
+                        </span>
+                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
+                          ค้างชำระ
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {sale.items?.map((item, itemIdx) => (
+                          <div key={itemIdx} className="flex items-center justify-between text-sm">
+                            <span className="text-text-secondary">
+                              {item.product?.name || 'สินค้า'} x {item.quantity}
+                            </span>
+                            <span className="text-text-primary">
+                              ฿{(item.subtotal || item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-orange-100 flex items-center justify-between text-sm font-medium">
+                        <span className="text-text-secondary">รวม</span>
+                        <span className="text-orange-600">฿{(sale.total || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* No Games */}
-          {(!player.games || player.games.length === 0) && standaloneItems.length === 0 && (
+          {(!player.games || player.games.length === 0) && standaloneItems.length === 0 && posSales.length === 0 && (
             <div className="text-center py-8 text-text-secondary">
               <Package size={48} className="mx-auto mb-3 opacity-50" />
               <p>ยังไม่มีข้อมูลเกมและสินค้า</p>
@@ -481,10 +534,18 @@ export default function PlayerCostDetailModal({ player, entryFee, sessionPlayers
                 </span>
               </div>
             )}
+            {posSalesTotal > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-text-secondary">สินค้าจาก POS</span>
+                <span className="text-orange-600">
+                  ฿{posSalesTotal.toFixed(2)}
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between pt-2 border-t border-slate-300">
               <span className="text-lg font-semibold text-text-primary">ยอดรวมทั้งหมด</span>
               <span className="text-2xl font-bold text-primary-blue">
-                ฿{(player.totalCost || 0).toFixed(2)}
+                ฿{((player.totalCost || 0) + posSalesTotal).toFixed(2)}
               </span>
             </div>
             <div className="flex items-center justify-between pt-2">

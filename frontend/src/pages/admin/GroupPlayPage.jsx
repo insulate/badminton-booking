@@ -17,7 +17,7 @@ import {
   ShoppingCart,
   Receipt
 } from 'lucide-react';
-import { groupPlayAPI, courtsAPI } from '../../lib/api';
+import { groupPlayAPI, courtsAPI, salesAPI } from '../../lib/api';
 import { ROUTES } from '../../constants';
 import CreateSessionModal from '../../components/groupplay/CreateSessionModal';
 import PlayerCheckInModal from '../../components/groupplay/PlayerCheckInModal';
@@ -60,6 +60,9 @@ export default function GroupPlayPage() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [selectedPlayerForCheckout, setSelectedPlayerForCheckout] = useState(null);
 
+  // POS pending sales
+  const [pendingSales, setPendingSales] = useState([]);
+
   // Players table state
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('name');
@@ -75,6 +78,24 @@ export default function GroupPlayPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+
+  const fetchPendingSales = async () => {
+    try {
+      const res = await salesAPI.getAll({ paymentStatus: 'pending' });
+      setPendingSales(res.data || []);
+    } catch (error) {
+      console.error('Error fetching pending sales:', error);
+    }
+  };
+
+  const getPlayerSales = (player) => {
+    if (!player || !pendingSales.length) return [];
+    return pendingSales.filter(sale => {
+      if (player.phone && sale.customer?.phone && sale.customer.phone === player.phone) return true;
+      if (sale.customer?.name && sale.customer.name === player.name) return true;
+      return false;
+    });
+  };
 
   const fetchData = async () => {
     try {
@@ -94,6 +115,9 @@ export default function GroupPlayPage() {
       } else {
         setSelectedRule(null);
       }
+
+      // Fetch pending sales from POS
+      fetchPendingSales();
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -109,6 +133,7 @@ export default function GroupPlayPage() {
       const response = await groupPlayAPI.getById(selectedRule._id);
       const session = response.data.session;
       setSelectedRule(session);
+      fetchPendingSales();
 
       // Update in rules list
       setRules(prev =>
@@ -186,15 +211,42 @@ export default function GroupPlayPage() {
     setShowCheckoutModal(true);
   };
 
-  const confirmCheckout = async () => {
+  const confirmCheckout = async ({ paymentMethod, receivedAmount, posSaleIds } = {}) => {
     if (!selectedRule || !selectedPlayerForCheckout) {
       return;
     }
 
     try {
+      // 1. Check out player in GroupPlay
       await groupPlayAPI.checkOut(selectedRule._id, selectedPlayerForCheckout._id);
+
+      // 2. Settle POS pending sales if any
+      if (posSaleIds && posSaleIds.length > 0 && paymentMethod) {
+        try {
+          // Send POS total as receivedAmount (not the full checkout amount)
+          // so backend calculates change correctly for POS portion only
+          const posSalesTotal = posSaleIds.reduce((sum, id) => {
+            const sale = pendingSales.find(s => s._id === id);
+            return sum + (sale?.total || 0);
+          }, 0);
+          await salesAPI.settle({
+            mode: 'individual',
+            saleIds: posSaleIds,
+            paymentMethod,
+            receivedAmount: paymentMethod === 'cash' ? posSalesTotal : undefined,
+          });
+        } catch (posError) {
+          console.error('Error settling POS sales:', posError);
+          toast.error('Check Out สำเร็จ แต่ปิดบิล POS ไม่สำเร็จ');
+          await refreshRule();
+          await fetchPendingSales();
+          return;
+        }
+      }
+
       toast.success('Check Out สำเร็จ');
       await refreshRule();
+      await fetchPendingSales();
     } catch (error) {
       console.error('Error checking out player:', error);
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการ Check Out');
@@ -639,7 +691,20 @@ export default function GroupPlayPage() {
                                 <span className="font-semibold text-gray-900">{player.games?.length || 0}</span>
                               </td>
                               <td className="px-6 py-4 text-right">
-                                <span className="font-semibold text-green-600">฿{player.totalCost || 0}</span>
+                                {(() => {
+                                  const playerSales = getPlayerSales(player);
+                                  const posSalesTotal = playerSales.reduce((sum, s) => sum + (s.total || 0), 0);
+                                  return (
+                                    <>
+                                      <div className="font-semibold text-green-600">฿{(player.totalCost || 0) + posSalesTotal}</div>
+                                      {posSalesTotal > 0 && (
+                                        <div className="text-xs text-orange-600 mt-1">
+                                          รวมสินค้า POS ฿{posSalesTotal}
+                                        </div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <span
@@ -941,6 +1006,7 @@ export default function GroupPlayPage() {
           player={selectedPlayer}
           entryFee={selectedRule?.entryFee || 0}
           sessionPlayers={selectedRule?.players || []}
+          posSales={getPlayerSales(selectedPlayer)}
           onClose={() => {
             setShowPlayerCostModal(false);
             setSelectedPlayer(null);
@@ -966,6 +1032,7 @@ export default function GroupPlayPage() {
       {showCheckoutModal && selectedPlayerForCheckout && (
         <CheckoutConfirmModal
           player={selectedPlayerForCheckout}
+          posSales={getPlayerSales(selectedPlayerForCheckout)}
           onConfirm={confirmCheckout}
           onClose={() => {
             setShowCheckoutModal(false);
