@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { ROUTES } from '../../constants';
 import useAuthStore from '../../store/authStore';
 import useSocket from '../../hooks/useSocket';
-import { bookingsAPI } from '../../lib/api';
+import { bookingsAPI, salesAPI } from '../../lib/api';
 import {
   LayoutDashboard,
   Users,
@@ -40,6 +40,7 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState({});
   const [pendingSlipsCount, setPendingSlipsCount] = useState(0);
+  const [pendingSalesCount, setPendingSalesCount] = useState(0);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
   const location = useLocation();
@@ -58,20 +59,39 @@ export default function AdminLayout() {
     }
   }, []);
 
+  // Fetch pending sales count
+  const fetchPendingSalesCount = useCallback(async () => {
+    try {
+      const response = await salesAPI.getPendingCount();
+      if (response.success) {
+        setPendingSalesCount(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching pending sales count:', error);
+    }
+  }, []);
+
   // Fetch on mount and periodically
   useEffect(() => {
     fetchPendingSlipsCount();
+    fetchPendingSalesCount();
     // Refresh every 30 seconds
-    const interval = setInterval(fetchPendingSlipsCount, 30000);
+    const interval = setInterval(() => {
+      fetchPendingSlipsCount();
+      fetchPendingSalesCount();
+    }, 30000);
     return () => clearInterval(interval);
-  }, [fetchPendingSlipsCount]);
+  }, [fetchPendingSlipsCount, fetchPendingSalesCount]);
 
-  // Refresh when navigating to bookings page
+  // Refresh when navigating to relevant pages
   useEffect(() => {
     if (location.pathname === '/admin/bookings') {
       fetchPendingSlipsCount();
     }
-  }, [location.pathname, fetchPendingSlipsCount]);
+    if (location.pathname === '/admin/sales') {
+      fetchPendingSalesCount();
+    }
+  }, [location.pathname, fetchPendingSlipsCount, fetchPendingSalesCount]);
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -191,6 +211,7 @@ export default function AdminLayout() {
     {
       name: 'ขายสินค้า',
       icon: ShoppingCart,
+      badge: pendingSalesCount > 0 ? pendingSalesCount : null,
       children: [
         {
           name: 'POS - ขายสินค้า',
@@ -201,6 +222,7 @@ export default function AdminLayout() {
           name: 'ประวัติการขาย',
           path: ROUTES.ADMIN.SALES,
           icon: Receipt,
+          badge: pendingSalesCount > 0 ? pendingSalesCount : null,
         },
         {
           name: 'จัดการสินค้า',

@@ -533,6 +533,11 @@ export const salesAPI = {
     const response = await api.patch(API_ENDPOINTS.SALES.ADD_ITEMS(id), data);
     return response.data;
   },
+
+  getPendingCount: async () => {
+    const response = await api.get('/sales/pending-count');
+    return response.data;
+  },
 };
 
 // Categories API (Admin only)

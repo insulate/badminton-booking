@@ -8,6 +8,21 @@ const { generateSaleCode } = require('../utils/saleCodeGenerator');
 const { protect, admin } = require('../middleware/auth');
 
 /**
+ * @route   GET /api/sales/pending-count
+ * @desc    Get count of pending (unpaid) sales
+ * @access  Private (Admin/Staff)
+ */
+router.get('/pending-count', protect, async (req, res) => {
+  try {
+    const count = await Sale.countDocuments({ paymentStatus: 'pending' });
+    res.json({ success: true, data: { count } });
+  } catch (error) {
+    console.error('Get pending sales count error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get pending sales count' });
+  }
+});
+
+/**
  * @route   GET /api/sales
  * @desc    Get all sales with filters
  * @access  Private (Admin/Staff)
