@@ -1025,6 +1025,7 @@ export default function GroupPlayPage() {
           onSuccess={async (sessionId, playerId, data) => {
             await groupPlayAPI.addPlayerProducts(sessionId, playerId, data);
             await refreshRule();
+            await fetchPendingSales();
           }}
         />
       )}

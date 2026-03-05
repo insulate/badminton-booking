@@ -5,7 +5,9 @@ const Player = require('../models/player.model');
 const Booking = require('../models/booking.model');
 const Court = require('../models/court.model');
 const Product = require('../models/product.model');
+const Sale = require('../models/sale.model');
 const { protect } = require('../middleware/auth');
+const { generateSaleCode } = require('../utils/saleCodeGenerator');
 const { getLevelName } = require('../constants/playerLevels');
 
 // Protect all routes
@@ -460,6 +462,29 @@ router.patch('/:id/game/:playerId/:gameNumber/finish', async (req, res) => {
           $inc: { stock: -item.quantity },
         });
       }
+
+      // Create POS sale for game items (paid, for reporting)
+      try {
+        const saleCode = await generateSaleCode();
+        const saleItems = items.map(item => ({
+          product: item.product,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.price * item.quantity,
+        }));
+        const total = saleItems.reduce((sum, i) => sum + i.subtotal, 0);
+
+        await Sale.create({
+          saleCode,
+          items: saleItems,
+          customer: { type: 'walk-in', name: `ก๊วน: ${session.sessionName || 'GroupPlay'}` },
+          total,
+          paymentStatus: 'paid',
+          paymentMethod: 'cash',
+        });
+      } catch (saleError) {
+        console.error('Error creating POS sale for game items:', saleError);
+      }
     }
 
     const updatedSession = await GroupPlay.findById(session._id)
@@ -532,35 +557,34 @@ router.post('/:id/player/:playerId/products', async (req, res) => {
       }
     }
 
-    // Calculate total cost from items
-    let totalItemsCost = 0;
-    for (const item of items) {
-      totalItemsCost += item.price * item.quantity;
-    }
-
-    // Add items to player's standalone items and update total cost
-    if (!sessionPlayer.standaloneItems) {
-      sessionPlayer.standaloneItems = [];
-    }
-
-    items.forEach(item => {
-      sessionPlayer.standaloneItems.push({
-        product: item.product,
-        quantity: item.quantity,
-        price: item.price,
-      });
-    });
-
-    sessionPlayer.totalCost = (sessionPlayer.totalCost || 0) + totalItemsCost;
-
-    await session.save();
-
     // Update product stock
     for (const item of items) {
       await Product.findByIdAndUpdate(item.product, {
         $inc: { stock: -item.quantity },
       });
     }
+
+    // Create POS sale (pending) with player's info as customer
+    const playerDoc = await Player.findById(sessionPlayer.player);
+    const customerName = playerDoc?.name || 'ลูกค้า';
+    const customerPhone = playerDoc?.phone || '';
+
+    const saleCode = await generateSaleCode();
+    const saleItems = items.map(item => ({
+      product: item.product,
+      quantity: item.quantity,
+      price: item.price,
+      subtotal: item.price * item.quantity,
+    }));
+    const total = saleItems.reduce((sum, i) => sum + i.subtotal, 0);
+
+    await Sale.create({
+      saleCode,
+      items: saleItems,
+      customer: { type: 'walk-in', name: customerName, phone: customerPhone },
+      total,
+      paymentStatus: 'pending',
+    });
 
     const updatedSession = await GroupPlay.findById(session._id)
       .populate('players.player', 'name phone level levelName')
