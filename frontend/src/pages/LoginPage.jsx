@@ -187,20 +187,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-slate-200">
-            <p className="text-xs text-text-muted text-center mb-2">ข้อมูลสำหรับทดสอบ:</p>
-            <div className="bg-slate-50 rounded-lg p-3 text-xs">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-text-secondary">Username:</span>
-                <code className="bg-white px-2 py-1 rounded text-primary-blue font-medium">admin</code>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-text-secondary">Password:</span>
-                <code className="bg-white px-2 py-1 rounded text-primary-blue font-medium">admin123</code>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
