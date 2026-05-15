@@ -167,6 +167,60 @@ cd frontend && npm run build
 **Rate Limiting:**
 - Login endpoint: 5 attempts per 15 minutes per IP (development: disabled in middleware/rateLimiter.js)
 
+## Production Server
+
+| Item | Value |
+|------|-------|
+| **IP** | `146.190.97.131` |
+| **OS** | Ubuntu 22.04.5 LTS |
+| **SSH User** | `root` |
+| **SSH Key** | `~/.ssh/id_ed25519_old` |
+| **SSH Alias** | `ssh luckybadminton` (configured in `~/.ssh/config`) |
+| **Project Path** | `/root/badminton-booking` |
+| **Deploy Method** | Docker Compose (`docker-compose.prod.yml`) |
+
+### Domains
+- **Frontend**: https://luckybadminton.com (via Cloudflare proxy)
+- **API**: https://api.luckybadminton.com → nginx → `badminton-backend:3000`
+- **Legacy API**: https://badminton-api.conypetshop.com (nginx config in `/root/badminton-booking/nginx/badminton.conf`)
+
+### Docker Containers
+| Container | Image | Role |
+|-----------|-------|------|
+| `badminton-nginx` | nginx:alpine | Reverse proxy, SSL termination (port 80/443) |
+| `badminton-frontend` | badminton-booking-frontend | React app (built from `./frontend`) |
+| `badminton-backend` | badminton-booking-backend | Express API (port 3000) |
+| `badminton-mongodb` | mongo:7.0 | Database |
+
+### Common Server Commands
+```bash
+# SSH into server
+ssh waste-tax
+
+# Check container status
+docker compose -f docker-compose.prod.yml ps
+
+# View backend logs
+docker logs badminton-backend --tail 50
+
+# Rebuild & redeploy frontend (e.g. after code change)
+cd /root/badminton-booking
+docker compose -f docker-compose.prod.yml build --no-cache frontend
+docker compose -f docker-compose.prod.yml up -d frontend
+
+# Rebuild & redeploy backend
+docker compose -f docker-compose.prod.yml build --no-cache backend
+docker compose -f docker-compose.prod.yml up -d backend
+
+# Restart all services
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### DNS (Cloudflare)
+- `luckybadminton.com` A record → `146.190.97.131` (Proxied)
+- `api.luckybadminton.com` A record → `146.190.97.131` (Proxied)
+- `www.luckybadminton.com` CNAME → `luckybadminton.com`
+
 ## Environment Configuration
 
 **Backend** requires `.env` file (see `backend/.env.example`):

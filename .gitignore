@@ -43,3 +43,7 @@ opencode.json
 .claude/
 .mcp.json
 nul
+
+# Production artifacts
+*.archive.gz
+dump_err.txt

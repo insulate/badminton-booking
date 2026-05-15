@@ -1,0 +1,1571 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e9]: B
+        - generic [ref=e10]: Badminton System
+      - generic [ref=e11]:
+        - link "สลิปรอตรวจสอบ" [ref=e12] [cursor=pointer]:
+          - /url: /admin/bookings
+          - img [ref=e13]
+        - button "ผู้ดูแลระบบ ผู้ดูแลระบบ ผ" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]:
+            - paragraph [ref=e19]: ผู้ดูแลระบบ
+            - paragraph [ref=e20]: ผู้ดูแลระบบ
+          - generic [ref=e22]: ผ
+          - img [ref=e23]
+  - complementary [ref=e25]:
+    - navigation [ref=e26]:
+      - generic [ref=e27]:
+        - link "Dashboard" [ref=e29] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e30]
+          - generic [ref=e35]: Dashboard
+        - link "ข้อมูลลูกค้า" [ref=e37] [cursor=pointer]:
+          - /url: /admin/players
+          - img [ref=e38]
+          - generic [ref=e42]: ข้อมูลลูกค้า
+        - link "ระบบตีก๊วน" [ref=e44] [cursor=pointer]:
+          - /url: /admin/groupplay
+          - img [ref=e45]
+          - generic [ref=e50]: ระบบตีก๊วน
+        - button "จัดการกะ" [ref=e52] [cursor=pointer]:
+          - generic [ref=e53]:
+            - img [ref=e54]
+            - generic [ref=e57]: จัดการกะ
+          - img [ref=e58]
+        - generic [ref=e60]:
+          - button "การจอง" [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]:
+              - img [ref=e63]
+              - generic [ref=e65]: การจอง
+            - img [ref=e245]
+          - generic [ref=e247]:
+            - link "จองสนาม" [active] [ref=e248] [cursor=pointer]:
+              - /url: /admin/booking
+              - img [ref=e249]
+              - generic [ref=e251]: จองสนาม
+            - link "รายการจอง" [ref=e252] [cursor=pointer]:
+              - /url: /admin/bookings
+              - img [ref=e253]
+              - generic [ref=e256]: รายการจอง
+            - link "การจองประจำ" [ref=e257] [cursor=pointer]:
+              - /url: /admin/recurring-bookings
+              - img [ref=e258]
+              - generic [ref=e263]: การจองประจำ
+        - button "ขายสินค้า" [ref=e69] [cursor=pointer]:
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - generic [ref=e75]: ขายสินค้า
+          - img [ref=e76]
+        - link "รายงานและสถิติ" [ref=e79] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e80]
+          - generic [ref=e82]: รายงานและสถิติ
+        - button "ตั้งค่า" [ref=e84] [cursor=pointer]:
+          - generic [ref=e85]:
+            - img [ref=e86]
+            - generic [ref=e89]: ตั้งค่า
+          - img [ref=e90]
+  - main [ref=e92]:
+    - generic [ref=e266]:
+      - generic [ref=e267]:
+        - generic [ref=e268]:
+          - img [ref=e270]
+          - generic [ref=e272]:
+            - heading "จองสนาม" [level=1] [ref=e273]
+            - paragraph [ref=e274]: เลือกวันที่และช่วงเวลาเพื่อจองสนามแบดมินตัน
+        - button "รีเฟรช" [ref=e276] [cursor=pointer]:
+          - img [ref=e277]
+          - text: รีเฟรช
+      - generic [ref=e282]:
+        - generic [ref=e284]:
+          - generic [ref=e285]:
+            - generic [ref=e286]: เลือกวันที่จอง
+            - textbox "เลือกวันที่จอง" [ref=e287]: 2026-02-09
+            - paragraph [ref=e288]: สามารถจองล่วงหน้าได้สูงสุด 30 วัน
+          - generic [ref=e290]:
+            - generic [ref=e291]:
+              - paragraph [ref=e292]: วันที่เลือก
+              - paragraph [ref=e293]: จันทร์ที่ 9/2/2569
+            - generic [ref=e295]: วันธรรมดา
+          - generic [ref=e296]:
+            - paragraph [ref=e297]: เลือกด่วน
+            - generic [ref=e298]:
+              - button "วันนี้" [ref=e299] [cursor=pointer]
+              - button "พรุ่งนี้" [ref=e300] [cursor=pointer]
+              - button "สัปดาห์หน้า" [ref=e301] [cursor=pointer]
+        - generic [ref=e302]:
+          - generic [ref=e303]:
+            - heading "ตารางสนาม" [level=3] [ref=e304]
+            - generic [ref=e305]:
+              - generic [ref=e308]: ว่าง
+              - generic [ref=e311]: ว่าง (Peak Hour)
+              - generic [ref=e314]: จองแล้ว (ชำระแล้ว)
+              - generic [ref=e317]: จองแล้ว (ยังไม่ชำระ)
+              - generic [ref=e320]: ก๊วนสนาม (Group Play)
+              - generic [ref=e323]: ปิดการจอง
+          - table [ref=e325]:
+            - rowgroup [ref=e326]:
+              - row "สนาม 07:00 -08:00 08:00 -09:00 09:00 -10:00 10:00 -11:00 11:00 -12:00 12:00 -13:00 13:00 -14:00 14:00 -15:00 15:00 -16:00 16:00 -17:00 17:00 -18:00 18:00 -19:00 19:00 -20:00 20:00 -21:00 21:00 -22:00" [ref=e327]:
+                - columnheader "สนาม" [ref=e328]
+                - columnheader "07:00 -08:00" [ref=e329]:
+                  - generic [ref=e330]: 07:00
+                  - generic [ref=e331]: "-08:00"
+                - columnheader "08:00 -09:00" [ref=e332]:
+                  - generic [ref=e333]: 08:00
+                  - generic [ref=e334]: "-09:00"
+                - columnheader "09:00 -10:00" [ref=e335]:
+                  - generic [ref=e336]: 09:00
+                  - generic [ref=e337]: "-10:00"
+                - columnheader "10:00 -11:00" [ref=e338]:
+                  - generic [ref=e339]: 10:00
+                  - generic [ref=e340]: "-11:00"
+                - columnheader "11:00 -12:00" [ref=e341]:
+                  - generic [ref=e342]: 11:00
+                  - generic [ref=e343]: "-12:00"
+                - columnheader "12:00 -13:00" [ref=e344]:
+                  - generic [ref=e345]: 12:00
+                  - generic [ref=e346]: "-13:00"
+                - columnheader "13:00 -14:00" [ref=e347]:
+                  - generic [ref=e348]: 13:00
+                  - generic [ref=e349]: "-14:00"
+                - columnheader "14:00 -15:00" [ref=e350]:
+                  - generic [ref=e351]: 14:00
+                  - generic [ref=e352]: "-15:00"
+                - columnheader "15:00 -16:00" [ref=e353]:
+                  - generic [ref=e354]: 15:00
+                  - generic [ref=e355]: "-16:00"
+                - columnheader "16:00 -17:00" [ref=e356]:
+                  - generic [ref=e357]: 16:00
+                  - generic [ref=e358]: "-17:00"
+                - columnheader "17:00 -18:00" [ref=e359]:
+                  - generic [ref=e360]: 17:00
+                  - generic [ref=e361]: "-18:00"
+                - columnheader "18:00 -19:00" [ref=e362]:
+                  - generic [ref=e363]: 18:00
+                  - generic [ref=e364]: "-19:00"
+                - columnheader "19:00 -20:00" [ref=e365]:
+                  - generic [ref=e366]: 19:00
+                  - generic [ref=e367]: "-20:00"
+                - columnheader "20:00 -21:00" [ref=e368]:
+                  - generic [ref=e369]: 20:00
+                  - generic [ref=e370]: "-21:00"
+                - columnheader "21:00 -22:00" [ref=e371]:
+                  - generic [ref=e372]: 21:00
+                  - generic [ref=e373]: "-22:00"
+            - rowgroup [ref=e374]:
+              - row "A01 A1 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e375]:
+                - cell "A01 A1" [ref=e376]:
+                  - generic [ref=e377]:
+                    - generic [ref=e378]: A01
+                    - generic [ref=e379]: A1
+                - cell ":00 ว่าง :30 ว่าง" [ref=e380]:
+                  - generic [ref=e381]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e382] [cursor=pointer]:
+                      - generic [ref=e383]:
+                        - generic [ref=e384]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e385] [cursor=pointer]:
+                      - generic [ref=e386]:
+                        - generic [ref=e387]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e388]:
+                  - generic [ref=e389]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e390] [cursor=pointer]:
+                      - generic [ref=e391]:
+                        - generic [ref=e392]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e393] [cursor=pointer]:
+                      - generic [ref=e394]:
+                        - generic [ref=e395]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e396]:
+                  - generic [ref=e397]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e398] [cursor=pointer]:
+                      - generic [ref=e399]:
+                        - generic [ref=e400]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e401] [cursor=pointer]:
+                      - generic [ref=e402]:
+                        - generic [ref=e403]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e404]:
+                  - generic [ref=e405]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e406] [cursor=pointer]:
+                      - generic [ref=e407]:
+                        - generic [ref=e408]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e409] [cursor=pointer]:
+                      - generic [ref=e410]:
+                        - generic [ref=e411]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e412]:
+                  - generic [ref=e413]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e414] [cursor=pointer]:
+                      - generic [ref=e415]:
+                        - generic [ref=e416]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e417] [cursor=pointer]:
+                      - generic [ref=e418]:
+                        - generic [ref=e419]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e420]:
+                  - generic [ref=e421]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e422] [cursor=pointer]:
+                      - generic [ref=e423]:
+                        - generic [ref=e424]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e425] [cursor=pointer]:
+                      - generic [ref=e426]:
+                        - generic [ref=e427]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e428]:
+                  - generic [ref=e429]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e430] [cursor=pointer]:
+                      - generic [ref=e431]:
+                        - generic [ref=e432]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e433] [cursor=pointer]:
+                      - generic [ref=e434]:
+                        - generic [ref=e435]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e436]:
+                  - generic [ref=e437]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e438] [cursor=pointer]:
+                      - generic [ref=e439]:
+                        - generic [ref=e440]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e441] [cursor=pointer]:
+                      - generic [ref=e442]:
+                        - generic [ref=e443]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e444]:
+                  - generic [ref=e445]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e446] [cursor=pointer]:
+                      - generic [ref=e447]:
+                        - generic [ref=e448]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e449] [cursor=pointer]:
+                      - generic [ref=e450]:
+                        - generic [ref=e451]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e452]:
+                  - generic [ref=e453]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e454] [cursor=pointer]:
+                      - generic [ref=e455]:
+                        - generic [ref=e456]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e457] [cursor=pointer]:
+                      - generic [ref=e458]:
+                        - generic [ref=e459]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e460]:
+                  - generic [ref=e461]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e462] [cursor=pointer]:
+                      - generic [ref=e463]:
+                        - generic [ref=e464]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e465] [cursor=pointer]:
+                      - generic [ref=e466]:
+                        - generic [ref=e467]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e468]:
+                  - generic [ref=e469]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e470] [cursor=pointer]:
+                      - generic [ref=e471]:
+                        - generic [ref=e472]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e473] [cursor=pointer]:
+                      - generic [ref=e474]:
+                        - generic [ref=e475]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e476]:
+                  - generic [ref=e477]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e478] [cursor=pointer]:
+                      - generic [ref=e479]:
+                        - generic [ref=e480]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e481] [cursor=pointer]:
+                      - generic [ref=e482]:
+                        - generic [ref=e483]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e484]:
+                  - generic [ref=e485]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e486] [cursor=pointer]:
+                      - generic [ref=e487]:
+                        - generic [ref=e488]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e489] [cursor=pointer]:
+                      - generic [ref=e490]:
+                        - generic [ref=e491]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e492]:
+                  - generic [ref=e493]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e494] [cursor=pointer]:
+                      - generic [ref=e495]:
+                        - generic [ref=e496]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e497] [cursor=pointer]:
+                      - generic [ref=e498]:
+                        - generic [ref=e499]: :30
+                        - text: ว่าง
+              - row "A02 A2 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e500]:
+                - cell "A02 A2" [ref=e501]:
+                  - generic [ref=e502]:
+                    - generic [ref=e503]: A02
+                    - generic [ref=e504]: A2
+                - cell ":00 ว่าง :30 ว่าง" [ref=e505]:
+                  - generic [ref=e506]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e507] [cursor=pointer]:
+                      - generic [ref=e508]:
+                        - generic [ref=e509]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e510] [cursor=pointer]:
+                      - generic [ref=e511]:
+                        - generic [ref=e512]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e513]:
+                  - generic [ref=e514]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e515] [cursor=pointer]:
+                      - generic [ref=e516]:
+                        - generic [ref=e517]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e518] [cursor=pointer]:
+                      - generic [ref=e519]:
+                        - generic [ref=e520]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e521]:
+                  - generic [ref=e522]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e523] [cursor=pointer]:
+                      - generic [ref=e524]:
+                        - generic [ref=e525]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e526] [cursor=pointer]:
+                      - generic [ref=e527]:
+                        - generic [ref=e528]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e529]:
+                  - generic [ref=e530]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e531] [cursor=pointer]:
+                      - generic [ref=e532]:
+                        - generic [ref=e533]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e534] [cursor=pointer]:
+                      - generic [ref=e535]:
+                        - generic [ref=e536]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e537]:
+                  - generic [ref=e538]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e539] [cursor=pointer]:
+                      - generic [ref=e540]:
+                        - generic [ref=e541]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e542] [cursor=pointer]:
+                      - generic [ref=e543]:
+                        - generic [ref=e544]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e545]:
+                  - generic [ref=e546]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e547] [cursor=pointer]:
+                      - generic [ref=e548]:
+                        - generic [ref=e549]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e550] [cursor=pointer]:
+                      - generic [ref=e551]:
+                        - generic [ref=e552]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e553]:
+                  - generic [ref=e554]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e555] [cursor=pointer]:
+                      - generic [ref=e556]:
+                        - generic [ref=e557]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e558] [cursor=pointer]:
+                      - generic [ref=e559]:
+                        - generic [ref=e560]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e561]:
+                  - generic [ref=e562]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e563] [cursor=pointer]:
+                      - generic [ref=e564]:
+                        - generic [ref=e565]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e566] [cursor=pointer]:
+                      - generic [ref=e567]:
+                        - generic [ref=e568]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e569]:
+                  - generic [ref=e570]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e571] [cursor=pointer]:
+                      - generic [ref=e572]:
+                        - generic [ref=e573]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e574] [cursor=pointer]:
+                      - generic [ref=e575]:
+                        - generic [ref=e576]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e577]:
+                  - generic [ref=e578]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e579] [cursor=pointer]:
+                      - generic [ref=e580]:
+                        - generic [ref=e581]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e582] [cursor=pointer]:
+                      - generic [ref=e583]:
+                        - generic [ref=e584]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e585]:
+                  - generic [ref=e586]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e587] [cursor=pointer]:
+                      - generic [ref=e588]:
+                        - generic [ref=e589]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e590] [cursor=pointer]:
+                      - generic [ref=e591]:
+                        - generic [ref=e592]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e593]:
+                  - generic [ref=e594]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e595] [cursor=pointer]:
+                      - generic [ref=e596]:
+                        - generic [ref=e597]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e598] [cursor=pointer]:
+                      - generic [ref=e599]:
+                        - generic [ref=e600]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e601]:
+                  - generic [ref=e602]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e603] [cursor=pointer]:
+                      - generic [ref=e604]:
+                        - generic [ref=e605]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e606] [cursor=pointer]:
+                      - generic [ref=e607]:
+                        - generic [ref=e608]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e609]:
+                  - generic [ref=e610]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e611] [cursor=pointer]:
+                      - generic [ref=e612]:
+                        - generic [ref=e613]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e614] [cursor=pointer]:
+                      - generic [ref=e615]:
+                        - generic [ref=e616]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e617]:
+                  - generic [ref=e618]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e619] [cursor=pointer]:
+                      - generic [ref=e620]:
+                        - generic [ref=e621]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e622] [cursor=pointer]:
+                      - generic [ref=e623]:
+                        - generic [ref=e624]: :30
+                        - text: ว่าง
+              - row "A03 A3 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e625]:
+                - cell "A03 A3" [ref=e626]:
+                  - generic [ref=e627]:
+                    - generic [ref=e628]: A03
+                    - generic [ref=e629]: A3
+                - cell ":00 ว่าง :30 ว่าง" [ref=e630]:
+                  - generic [ref=e631]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e632] [cursor=pointer]:
+                      - generic [ref=e633]:
+                        - generic [ref=e634]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e635] [cursor=pointer]:
+                      - generic [ref=e636]:
+                        - generic [ref=e637]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e638]:
+                  - generic [ref=e639]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e640] [cursor=pointer]:
+                      - generic [ref=e641]:
+                        - generic [ref=e642]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e643] [cursor=pointer]:
+                      - generic [ref=e644]:
+                        - generic [ref=e645]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e646]:
+                  - generic [ref=e647]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e648] [cursor=pointer]:
+                      - generic [ref=e649]:
+                        - generic [ref=e650]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e651] [cursor=pointer]:
+                      - generic [ref=e652]:
+                        - generic [ref=e653]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e654]:
+                  - generic [ref=e655]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e656] [cursor=pointer]:
+                      - generic [ref=e657]:
+                        - generic [ref=e658]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e659] [cursor=pointer]:
+                      - generic [ref=e660]:
+                        - generic [ref=e661]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e662]:
+                  - generic [ref=e663]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e664] [cursor=pointer]:
+                      - generic [ref=e665]:
+                        - generic [ref=e666]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e667] [cursor=pointer]:
+                      - generic [ref=e668]:
+                        - generic [ref=e669]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e670]:
+                  - generic [ref=e671]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e672] [cursor=pointer]:
+                      - generic [ref=e673]:
+                        - generic [ref=e674]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e675] [cursor=pointer]:
+                      - generic [ref=e676]:
+                        - generic [ref=e677]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e678]:
+                  - generic [ref=e679]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e680] [cursor=pointer]:
+                      - generic [ref=e681]:
+                        - generic [ref=e682]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e683] [cursor=pointer]:
+                      - generic [ref=e684]:
+                        - generic [ref=e685]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e686]:
+                  - generic [ref=e687]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e688] [cursor=pointer]:
+                      - generic [ref=e689]:
+                        - generic [ref=e690]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e691] [cursor=pointer]:
+                      - generic [ref=e692]:
+                        - generic [ref=e693]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e694]:
+                  - generic [ref=e695]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e696] [cursor=pointer]:
+                      - generic [ref=e697]:
+                        - generic [ref=e698]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e699] [cursor=pointer]:
+                      - generic [ref=e700]:
+                        - generic [ref=e701]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e702]:
+                  - generic [ref=e703]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e704] [cursor=pointer]:
+                      - generic [ref=e705]:
+                        - generic [ref=e706]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e707] [cursor=pointer]:
+                      - generic [ref=e708]:
+                        - generic [ref=e709]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e710]:
+                  - generic [ref=e711]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e712] [cursor=pointer]:
+                      - generic [ref=e713]:
+                        - generic [ref=e714]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e715] [cursor=pointer]:
+                      - generic [ref=e716]:
+                        - generic [ref=e717]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e718]:
+                  - generic [ref=e719]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e720] [cursor=pointer]:
+                      - generic [ref=e721]:
+                        - generic [ref=e722]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e723] [cursor=pointer]:
+                      - generic [ref=e724]:
+                        - generic [ref=e725]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e726]:
+                  - generic [ref=e727]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e728] [cursor=pointer]:
+                      - generic [ref=e729]:
+                        - generic [ref=e730]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e731] [cursor=pointer]:
+                      - generic [ref=e732]:
+                        - generic [ref=e733]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e734]:
+                  - generic [ref=e735]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e736] [cursor=pointer]:
+                      - generic [ref=e737]:
+                        - generic [ref=e738]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e739] [cursor=pointer]:
+                      - generic [ref=e740]:
+                        - generic [ref=e741]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e742]:
+                  - generic [ref=e743]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e744] [cursor=pointer]:
+                      - generic [ref=e745]:
+                        - generic [ref=e746]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e747] [cursor=pointer]:
+                      - generic [ref=e748]:
+                        - generic [ref=e749]: :30
+                        - text: ว่าง
+              - row "B01 B1 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e750]:
+                - cell "B01 B1" [ref=e751]:
+                  - generic [ref=e752]:
+                    - generic [ref=e753]: B01
+                    - generic [ref=e754]: B1
+                - cell ":00 ว่าง :30 ว่าง" [ref=e755]:
+                  - generic [ref=e756]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e757] [cursor=pointer]:
+                      - generic [ref=e758]:
+                        - generic [ref=e759]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e760] [cursor=pointer]:
+                      - generic [ref=e761]:
+                        - generic [ref=e762]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e763]:
+                  - generic [ref=e764]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e765] [cursor=pointer]:
+                      - generic [ref=e766]:
+                        - generic [ref=e767]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e768] [cursor=pointer]:
+                      - generic [ref=e769]:
+                        - generic [ref=e770]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e771]:
+                  - generic [ref=e772]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e773] [cursor=pointer]:
+                      - generic [ref=e774]:
+                        - generic [ref=e775]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e776] [cursor=pointer]:
+                      - generic [ref=e777]:
+                        - generic [ref=e778]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e779]:
+                  - generic [ref=e780]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e781] [cursor=pointer]:
+                      - generic [ref=e782]:
+                        - generic [ref=e783]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e784] [cursor=pointer]:
+                      - generic [ref=e785]:
+                        - generic [ref=e786]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e787]:
+                  - generic [ref=e788]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e789] [cursor=pointer]:
+                      - generic [ref=e790]:
+                        - generic [ref=e791]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e792] [cursor=pointer]:
+                      - generic [ref=e793]:
+                        - generic [ref=e794]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e795]:
+                  - generic [ref=e796]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e797] [cursor=pointer]:
+                      - generic [ref=e798]:
+                        - generic [ref=e799]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e800] [cursor=pointer]:
+                      - generic [ref=e801]:
+                        - generic [ref=e802]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e803]:
+                  - generic [ref=e804]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e805] [cursor=pointer]:
+                      - generic [ref=e806]:
+                        - generic [ref=e807]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e808] [cursor=pointer]:
+                      - generic [ref=e809]:
+                        - generic [ref=e810]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e811]:
+                  - generic [ref=e812]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e813] [cursor=pointer]:
+                      - generic [ref=e814]:
+                        - generic [ref=e815]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e816] [cursor=pointer]:
+                      - generic [ref=e817]:
+                        - generic [ref=e818]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e819]:
+                  - generic [ref=e820]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e821] [cursor=pointer]:
+                      - generic [ref=e822]:
+                        - generic [ref=e823]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e824] [cursor=pointer]:
+                      - generic [ref=e825]:
+                        - generic [ref=e826]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e827]:
+                  - generic [ref=e828]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e829] [cursor=pointer]:
+                      - generic [ref=e830]:
+                        - generic [ref=e831]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e832] [cursor=pointer]:
+                      - generic [ref=e833]:
+                        - generic [ref=e834]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e835]:
+                  - generic [ref=e836]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e837] [cursor=pointer]:
+                      - generic [ref=e838]:
+                        - generic [ref=e839]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e840] [cursor=pointer]:
+                      - generic [ref=e841]:
+                        - generic [ref=e842]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e843]:
+                  - generic [ref=e844]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e845] [cursor=pointer]:
+                      - generic [ref=e846]:
+                        - generic [ref=e847]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e848] [cursor=pointer]:
+                      - generic [ref=e849]:
+                        - generic [ref=e850]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e851]:
+                  - generic [ref=e852]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e853] [cursor=pointer]:
+                      - generic [ref=e854]:
+                        - generic [ref=e855]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e856] [cursor=pointer]:
+                      - generic [ref=e857]:
+                        - generic [ref=e858]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e859]:
+                  - generic [ref=e860]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e861] [cursor=pointer]:
+                      - generic [ref=e862]:
+                        - generic [ref=e863]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e864] [cursor=pointer]:
+                      - generic [ref=e865]:
+                        - generic [ref=e866]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e867]:
+                  - generic [ref=e868]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e869] [cursor=pointer]:
+                      - generic [ref=e870]:
+                        - generic [ref=e871]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e872] [cursor=pointer]:
+                      - generic [ref=e873]:
+                        - generic [ref=e874]: :30
+                        - text: ว่าง
+              - row "B02 B2 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e875]:
+                - cell "B02 B2" [ref=e876]:
+                  - generic [ref=e877]:
+                    - generic [ref=e878]: B02
+                    - generic [ref=e879]: B2
+                - cell ":00 ว่าง :30 ว่าง" [ref=e880]:
+                  - generic [ref=e881]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e882] [cursor=pointer]:
+                      - generic [ref=e883]:
+                        - generic [ref=e884]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e885] [cursor=pointer]:
+                      - generic [ref=e886]:
+                        - generic [ref=e887]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e888]:
+                  - generic [ref=e889]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e890] [cursor=pointer]:
+                      - generic [ref=e891]:
+                        - generic [ref=e892]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e893] [cursor=pointer]:
+                      - generic [ref=e894]:
+                        - generic [ref=e895]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e896]:
+                  - generic [ref=e897]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e898] [cursor=pointer]:
+                      - generic [ref=e899]:
+                        - generic [ref=e900]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e901] [cursor=pointer]:
+                      - generic [ref=e902]:
+                        - generic [ref=e903]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e904]:
+                  - generic [ref=e905]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e906] [cursor=pointer]:
+                      - generic [ref=e907]:
+                        - generic [ref=e908]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e909] [cursor=pointer]:
+                      - generic [ref=e910]:
+                        - generic [ref=e911]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e912]:
+                  - generic [ref=e913]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e914] [cursor=pointer]:
+                      - generic [ref=e915]:
+                        - generic [ref=e916]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e917] [cursor=pointer]:
+                      - generic [ref=e918]:
+                        - generic [ref=e919]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e920]:
+                  - generic [ref=e921]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e922] [cursor=pointer]:
+                      - generic [ref=e923]:
+                        - generic [ref=e924]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e925] [cursor=pointer]:
+                      - generic [ref=e926]:
+                        - generic [ref=e927]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e928]:
+                  - generic [ref=e929]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e930] [cursor=pointer]:
+                      - generic [ref=e931]:
+                        - generic [ref=e932]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e933] [cursor=pointer]:
+                      - generic [ref=e934]:
+                        - generic [ref=e935]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e936]:
+                  - generic [ref=e937]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e938] [cursor=pointer]:
+                      - generic [ref=e939]:
+                        - generic [ref=e940]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e941] [cursor=pointer]:
+                      - generic [ref=e942]:
+                        - generic [ref=e943]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e944]:
+                  - generic [ref=e945]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e946] [cursor=pointer]:
+                      - generic [ref=e947]:
+                        - generic [ref=e948]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e949] [cursor=pointer]:
+                      - generic [ref=e950]:
+                        - generic [ref=e951]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e952]:
+                  - generic [ref=e953]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e954] [cursor=pointer]:
+                      - generic [ref=e955]:
+                        - generic [ref=e956]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e957] [cursor=pointer]:
+                      - generic [ref=e958]:
+                        - generic [ref=e959]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e960]:
+                  - generic [ref=e961]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e962] [cursor=pointer]:
+                      - generic [ref=e963]:
+                        - generic [ref=e964]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e965] [cursor=pointer]:
+                      - generic [ref=e966]:
+                        - generic [ref=e967]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e968]:
+                  - generic [ref=e969]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e970] [cursor=pointer]:
+                      - generic [ref=e971]:
+                        - generic [ref=e972]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e973] [cursor=pointer]:
+                      - generic [ref=e974]:
+                        - generic [ref=e975]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e976]:
+                  - generic [ref=e977]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e978] [cursor=pointer]:
+                      - generic [ref=e979]:
+                        - generic [ref=e980]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e981] [cursor=pointer]:
+                      - generic [ref=e982]:
+                        - generic [ref=e983]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e984]:
+                  - generic [ref=e985]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e986] [cursor=pointer]:
+                      - generic [ref=e987]:
+                        - generic [ref=e988]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e989] [cursor=pointer]:
+                      - generic [ref=e990]:
+                        - generic [ref=e991]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e992]:
+                  - generic [ref=e993]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e994] [cursor=pointer]:
+                      - generic [ref=e995]:
+                        - generic [ref=e996]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e997] [cursor=pointer]:
+                      - generic [ref=e998]:
+                        - generic [ref=e999]: :30
+                        - text: ว่าง
+              - row "B03 B3 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e1000]:
+                - cell "B03 B3" [ref=e1001]:
+                  - generic [ref=e1002]:
+                    - generic [ref=e1003]: B03
+                    - generic [ref=e1004]: B3
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1005]:
+                  - generic [ref=e1006]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e1007] [cursor=pointer]:
+                      - generic [ref=e1008]:
+                        - generic [ref=e1009]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e1010] [cursor=pointer]:
+                      - generic [ref=e1011]:
+                        - generic [ref=e1012]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1013]:
+                  - generic [ref=e1014]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e1015] [cursor=pointer]:
+                      - generic [ref=e1016]:
+                        - generic [ref=e1017]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e1018] [cursor=pointer]:
+                      - generic [ref=e1019]:
+                        - generic [ref=e1020]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1021]:
+                  - generic [ref=e1022]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e1023] [cursor=pointer]:
+                      - generic [ref=e1024]:
+                        - generic [ref=e1025]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e1026] [cursor=pointer]:
+                      - generic [ref=e1027]:
+                        - generic [ref=e1028]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1029]:
+                  - generic [ref=e1030]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e1031] [cursor=pointer]:
+                      - generic [ref=e1032]:
+                        - generic [ref=e1033]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e1034] [cursor=pointer]:
+                      - generic [ref=e1035]:
+                        - generic [ref=e1036]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1037]:
+                  - generic [ref=e1038]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e1039] [cursor=pointer]:
+                      - generic [ref=e1040]:
+                        - generic [ref=e1041]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e1042] [cursor=pointer]:
+                      - generic [ref=e1043]:
+                        - generic [ref=e1044]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1045]:
+                  - generic [ref=e1046]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e1047] [cursor=pointer]:
+                      - generic [ref=e1048]:
+                        - generic [ref=e1049]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e1050] [cursor=pointer]:
+                      - generic [ref=e1051]:
+                        - generic [ref=e1052]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1053]:
+                  - generic [ref=e1054]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e1055] [cursor=pointer]:
+                      - generic [ref=e1056]:
+                        - generic [ref=e1057]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e1058] [cursor=pointer]:
+                      - generic [ref=e1059]:
+                        - generic [ref=e1060]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1061]:
+                  - generic [ref=e1062]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e1063] [cursor=pointer]:
+                      - generic [ref=e1064]:
+                        - generic [ref=e1065]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e1066] [cursor=pointer]:
+                      - generic [ref=e1067]:
+                        - generic [ref=e1068]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1069]:
+                  - generic [ref=e1070]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e1071] [cursor=pointer]:
+                      - generic [ref=e1072]:
+                        - generic [ref=e1073]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e1074] [cursor=pointer]:
+                      - generic [ref=e1075]:
+                        - generic [ref=e1076]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1077]:
+                  - generic [ref=e1078]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e1079] [cursor=pointer]:
+                      - generic [ref=e1080]:
+                        - generic [ref=e1081]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e1082] [cursor=pointer]:
+                      - generic [ref=e1083]:
+                        - generic [ref=e1084]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1085]:
+                  - generic [ref=e1086]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e1087] [cursor=pointer]:
+                      - generic [ref=e1088]:
+                        - generic [ref=e1089]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e1090] [cursor=pointer]:
+                      - generic [ref=e1091]:
+                        - generic [ref=e1092]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1093]:
+                  - generic [ref=e1094]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e1095] [cursor=pointer]:
+                      - generic [ref=e1096]:
+                        - generic [ref=e1097]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e1098] [cursor=pointer]:
+                      - generic [ref=e1099]:
+                        - generic [ref=e1100]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1101]:
+                  - generic [ref=e1102]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e1103] [cursor=pointer]:
+                      - generic [ref=e1104]:
+                        - generic [ref=e1105]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e1106] [cursor=pointer]:
+                      - generic [ref=e1107]:
+                        - generic [ref=e1108]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1109]:
+                  - generic [ref=e1110]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e1111] [cursor=pointer]:
+                      - generic [ref=e1112]:
+                        - generic [ref=e1113]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e1114] [cursor=pointer]:
+                      - generic [ref=e1115]:
+                        - generic [ref=e1116]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1117]:
+                  - generic [ref=e1118]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e1119] [cursor=pointer]:
+                      - generic [ref=e1120]:
+                        - generic [ref=e1121]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e1122] [cursor=pointer]:
+                      - generic [ref=e1123]:
+                        - generic [ref=e1124]: :30
+                        - text: ว่าง
+              - row "C01 C1 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e1125]:
+                - cell "C01 C1" [ref=e1126]:
+                  - generic [ref=e1127]:
+                    - generic [ref=e1128]: C01
+                    - generic [ref=e1129]: C1
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1130]:
+                  - generic [ref=e1131]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e1132] [cursor=pointer]:
+                      - generic [ref=e1133]:
+                        - generic [ref=e1134]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e1135] [cursor=pointer]:
+                      - generic [ref=e1136]:
+                        - generic [ref=e1137]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1138]:
+                  - generic [ref=e1139]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e1140] [cursor=pointer]:
+                      - generic [ref=e1141]:
+                        - generic [ref=e1142]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e1143] [cursor=pointer]:
+                      - generic [ref=e1144]:
+                        - generic [ref=e1145]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1146]:
+                  - generic [ref=e1147]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e1148] [cursor=pointer]:
+                      - generic [ref=e1149]:
+                        - generic [ref=e1150]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e1151] [cursor=pointer]:
+                      - generic [ref=e1152]:
+                        - generic [ref=e1153]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1154]:
+                  - generic [ref=e1155]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e1156] [cursor=pointer]:
+                      - generic [ref=e1157]:
+                        - generic [ref=e1158]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e1159] [cursor=pointer]:
+                      - generic [ref=e1160]:
+                        - generic [ref=e1161]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1162]:
+                  - generic [ref=e1163]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e1164] [cursor=pointer]:
+                      - generic [ref=e1165]:
+                        - generic [ref=e1166]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e1167] [cursor=pointer]:
+                      - generic [ref=e1168]:
+                        - generic [ref=e1169]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1170]:
+                  - generic [ref=e1171]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e1172] [cursor=pointer]:
+                      - generic [ref=e1173]:
+                        - generic [ref=e1174]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e1175] [cursor=pointer]:
+                      - generic [ref=e1176]:
+                        - generic [ref=e1177]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1178]:
+                  - generic [ref=e1179]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e1180] [cursor=pointer]:
+                      - generic [ref=e1181]:
+                        - generic [ref=e1182]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e1183] [cursor=pointer]:
+                      - generic [ref=e1184]:
+                        - generic [ref=e1185]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1186]:
+                  - generic [ref=e1187]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e1188] [cursor=pointer]:
+                      - generic [ref=e1189]:
+                        - generic [ref=e1190]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e1191] [cursor=pointer]:
+                      - generic [ref=e1192]:
+                        - generic [ref=e1193]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1194]:
+                  - generic [ref=e1195]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e1196] [cursor=pointer]:
+                      - generic [ref=e1197]:
+                        - generic [ref=e1198]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e1199] [cursor=pointer]:
+                      - generic [ref=e1200]:
+                        - generic [ref=e1201]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1202]:
+                  - generic [ref=e1203]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e1204] [cursor=pointer]:
+                      - generic [ref=e1205]:
+                        - generic [ref=e1206]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e1207] [cursor=pointer]:
+                      - generic [ref=e1208]:
+                        - generic [ref=e1209]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1210]:
+                  - generic [ref=e1211]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e1212] [cursor=pointer]:
+                      - generic [ref=e1213]:
+                        - generic [ref=e1214]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e1215] [cursor=pointer]:
+                      - generic [ref=e1216]:
+                        - generic [ref=e1217]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1218]:
+                  - generic [ref=e1219]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e1220] [cursor=pointer]:
+                      - generic [ref=e1221]:
+                        - generic [ref=e1222]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e1223] [cursor=pointer]:
+                      - generic [ref=e1224]:
+                        - generic [ref=e1225]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1226]:
+                  - generic [ref=e1227]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e1228] [cursor=pointer]:
+                      - generic [ref=e1229]:
+                        - generic [ref=e1230]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e1231] [cursor=pointer]:
+                      - generic [ref=e1232]:
+                        - generic [ref=e1233]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1234]:
+                  - generic [ref=e1235]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e1236] [cursor=pointer]:
+                      - generic [ref=e1237]:
+                        - generic [ref=e1238]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e1239] [cursor=pointer]:
+                      - generic [ref=e1240]:
+                        - generic [ref=e1241]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1242]:
+                  - generic [ref=e1243]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e1244] [cursor=pointer]:
+                      - generic [ref=e1245]:
+                        - generic [ref=e1246]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e1247] [cursor=pointer]:
+                      - generic [ref=e1248]:
+                        - generic [ref=e1249]: :30
+                        - text: ว่าง
+              - row "C02 C2 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e1250]:
+                - cell "C02 C2" [ref=e1251]:
+                  - generic [ref=e1252]:
+                    - generic [ref=e1253]: C02
+                    - generic [ref=e1254]: C2
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1255]:
+                  - generic [ref=e1256]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e1257] [cursor=pointer]:
+                      - generic [ref=e1258]:
+                        - generic [ref=e1259]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e1260] [cursor=pointer]:
+                      - generic [ref=e1261]:
+                        - generic [ref=e1262]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1263]:
+                  - generic [ref=e1264]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e1265] [cursor=pointer]:
+                      - generic [ref=e1266]:
+                        - generic [ref=e1267]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e1268] [cursor=pointer]:
+                      - generic [ref=e1269]:
+                        - generic [ref=e1270]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1271]:
+                  - generic [ref=e1272]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e1273] [cursor=pointer]:
+                      - generic [ref=e1274]:
+                        - generic [ref=e1275]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e1276] [cursor=pointer]:
+                      - generic [ref=e1277]:
+                        - generic [ref=e1278]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1279]:
+                  - generic [ref=e1280]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e1281] [cursor=pointer]:
+                      - generic [ref=e1282]:
+                        - generic [ref=e1283]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e1284] [cursor=pointer]:
+                      - generic [ref=e1285]:
+                        - generic [ref=e1286]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1287]:
+                  - generic [ref=e1288]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e1289] [cursor=pointer]:
+                      - generic [ref=e1290]:
+                        - generic [ref=e1291]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e1292] [cursor=pointer]:
+                      - generic [ref=e1293]:
+                        - generic [ref=e1294]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1295]:
+                  - generic [ref=e1296]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e1297] [cursor=pointer]:
+                      - generic [ref=e1298]:
+                        - generic [ref=e1299]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e1300] [cursor=pointer]:
+                      - generic [ref=e1301]:
+                        - generic [ref=e1302]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1303]:
+                  - generic [ref=e1304]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e1305] [cursor=pointer]:
+                      - generic [ref=e1306]:
+                        - generic [ref=e1307]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e1308] [cursor=pointer]:
+                      - generic [ref=e1309]:
+                        - generic [ref=e1310]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1311]:
+                  - generic [ref=e1312]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e1313] [cursor=pointer]:
+                      - generic [ref=e1314]:
+                        - generic [ref=e1315]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e1316] [cursor=pointer]:
+                      - generic [ref=e1317]:
+                        - generic [ref=e1318]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1319]:
+                  - generic [ref=e1320]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e1321] [cursor=pointer]:
+                      - generic [ref=e1322]:
+                        - generic [ref=e1323]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e1324] [cursor=pointer]:
+                      - generic [ref=e1325]:
+                        - generic [ref=e1326]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1327]:
+                  - generic [ref=e1328]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e1329] [cursor=pointer]:
+                      - generic [ref=e1330]:
+                        - generic [ref=e1331]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e1332] [cursor=pointer]:
+                      - generic [ref=e1333]:
+                        - generic [ref=e1334]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1335]:
+                  - generic [ref=e1336]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e1337] [cursor=pointer]:
+                      - generic [ref=e1338]:
+                        - generic [ref=e1339]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e1340] [cursor=pointer]:
+                      - generic [ref=e1341]:
+                        - generic [ref=e1342]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1343]:
+                  - generic [ref=e1344]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e1345] [cursor=pointer]:
+                      - generic [ref=e1346]:
+                        - generic [ref=e1347]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e1348] [cursor=pointer]:
+                      - generic [ref=e1349]:
+                        - generic [ref=e1350]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1351]:
+                  - generic [ref=e1352]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e1353] [cursor=pointer]:
+                      - generic [ref=e1354]:
+                        - generic [ref=e1355]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e1356] [cursor=pointer]:
+                      - generic [ref=e1357]:
+                        - generic [ref=e1358]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1359]:
+                  - generic [ref=e1360]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e1361] [cursor=pointer]:
+                      - generic [ref=e1362]:
+                        - generic [ref=e1363]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e1364] [cursor=pointer]:
+                      - generic [ref=e1365]:
+                        - generic [ref=e1366]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1367]:
+                  - generic [ref=e1368]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e1369] [cursor=pointer]:
+                      - generic [ref=e1370]:
+                        - generic [ref=e1371]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e1372] [cursor=pointer]:
+                      - generic [ref=e1373]:
+                        - generic [ref=e1374]: :30
+                        - text: ว่าง
+              - row "C03 C3 :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง :00 ว่าง :30 ว่าง" [ref=e1375]:
+                - cell "C03 C3" [ref=e1376]:
+                  - generic [ref=e1377]:
+                    - generic [ref=e1378]: C03
+                    - generic [ref=e1379]: C3
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1380]:
+                  - generic [ref=e1381]:
+                    - generic "คลิกเพื่อจอง 07:00" [ref=e1382] [cursor=pointer]:
+                      - generic [ref=e1383]:
+                        - generic [ref=e1384]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 07:30" [ref=e1385] [cursor=pointer]:
+                      - generic [ref=e1386]:
+                        - generic [ref=e1387]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1388]:
+                  - generic [ref=e1389]:
+                    - generic "คลิกเพื่อจอง 08:00" [ref=e1390] [cursor=pointer]:
+                      - generic [ref=e1391]:
+                        - generic [ref=e1392]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 08:30" [ref=e1393] [cursor=pointer]:
+                      - generic [ref=e1394]:
+                        - generic [ref=e1395]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1396]:
+                  - generic [ref=e1397]:
+                    - generic "คลิกเพื่อจอง 09:00" [ref=e1398] [cursor=pointer]:
+                      - generic [ref=e1399]:
+                        - generic [ref=e1400]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 09:30" [ref=e1401] [cursor=pointer]:
+                      - generic [ref=e1402]:
+                        - generic [ref=e1403]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1404]:
+                  - generic [ref=e1405]:
+                    - generic "คลิกเพื่อจอง 10:00" [ref=e1406] [cursor=pointer]:
+                      - generic [ref=e1407]:
+                        - generic [ref=e1408]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 10:30" [ref=e1409] [cursor=pointer]:
+                      - generic [ref=e1410]:
+                        - generic [ref=e1411]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1412]:
+                  - generic [ref=e1413]:
+                    - generic "คลิกเพื่อจอง 11:00" [ref=e1414] [cursor=pointer]:
+                      - generic [ref=e1415]:
+                        - generic [ref=e1416]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 11:30" [ref=e1417] [cursor=pointer]:
+                      - generic [ref=e1418]:
+                        - generic [ref=e1419]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1420]:
+                  - generic [ref=e1421]:
+                    - generic "คลิกเพื่อจอง 12:00" [ref=e1422] [cursor=pointer]:
+                      - generic [ref=e1423]:
+                        - generic [ref=e1424]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 12:30" [ref=e1425] [cursor=pointer]:
+                      - generic [ref=e1426]:
+                        - generic [ref=e1427]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1428]:
+                  - generic [ref=e1429]:
+                    - generic "คลิกเพื่อจอง 13:00" [ref=e1430] [cursor=pointer]:
+                      - generic [ref=e1431]:
+                        - generic [ref=e1432]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 13:30" [ref=e1433] [cursor=pointer]:
+                      - generic [ref=e1434]:
+                        - generic [ref=e1435]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1436]:
+                  - generic [ref=e1437]:
+                    - generic "คลิกเพื่อจอง 14:00" [ref=e1438] [cursor=pointer]:
+                      - generic [ref=e1439]:
+                        - generic [ref=e1440]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 14:30" [ref=e1441] [cursor=pointer]:
+                      - generic [ref=e1442]:
+                        - generic [ref=e1443]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1444]:
+                  - generic [ref=e1445]:
+                    - generic "คลิกเพื่อจอง 15:00" [ref=e1446] [cursor=pointer]:
+                      - generic [ref=e1447]:
+                        - generic [ref=e1448]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 15:30" [ref=e1449] [cursor=pointer]:
+                      - generic [ref=e1450]:
+                        - generic [ref=e1451]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1452]:
+                  - generic [ref=e1453]:
+                    - generic "คลิกเพื่อจอง 16:00" [ref=e1454] [cursor=pointer]:
+                      - generic [ref=e1455]:
+                        - generic [ref=e1456]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 16:30" [ref=e1457] [cursor=pointer]:
+                      - generic [ref=e1458]:
+                        - generic [ref=e1459]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1460]:
+                  - generic [ref=e1461]:
+                    - generic "คลิกเพื่อจอง 17:00" [ref=e1462] [cursor=pointer]:
+                      - generic [ref=e1463]:
+                        - generic [ref=e1464]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 17:30" [ref=e1465] [cursor=pointer]:
+                      - generic [ref=e1466]:
+                        - generic [ref=e1467]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1468]:
+                  - generic [ref=e1469]:
+                    - generic "คลิกเพื่อจอง 18:00" [ref=e1470] [cursor=pointer]:
+                      - generic [ref=e1471]:
+                        - generic [ref=e1472]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 18:30" [ref=e1473] [cursor=pointer]:
+                      - generic [ref=e1474]:
+                        - generic [ref=e1475]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1476]:
+                  - generic [ref=e1477]:
+                    - generic "คลิกเพื่อจอง 19:00" [ref=e1478] [cursor=pointer]:
+                      - generic [ref=e1479]:
+                        - generic [ref=e1480]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 19:30" [ref=e1481] [cursor=pointer]:
+                      - generic [ref=e1482]:
+                        - generic [ref=e1483]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1484]:
+                  - generic [ref=e1485]:
+                    - generic "คลิกเพื่อจอง 20:00" [ref=e1486] [cursor=pointer]:
+                      - generic [ref=e1487]:
+                        - generic [ref=e1488]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 20:30" [ref=e1489] [cursor=pointer]:
+                      - generic [ref=e1490]:
+                        - generic [ref=e1491]: :30
+                        - text: ว่าง
+                - cell ":00 ว่าง :30 ว่าง" [ref=e1492]:
+                  - generic [ref=e1493]:
+                    - generic "คลิกเพื่อจอง 21:00" [ref=e1494] [cursor=pointer]:
+                      - generic [ref=e1495]:
+                        - generic [ref=e1496]: :00
+                        - text: ว่าง
+                    - generic "คลิกเพื่อจอง 21:30" [ref=e1497] [cursor=pointer]:
+                      - generic [ref=e1498]:
+                        - generic [ref=e1499]: :30
+                        - text: ว่าง
+          - generic [ref=e1501]:
+            - generic [ref=e1502]: ทั้งหมด 9 สนาม × 15 ช่วงเวลา = 135 ช่อง
+            - generic [ref=e1503]: "ว่าง: 135 ช่อง"
+      - generic [ref=e1504]:
+        - generic [ref=e1506]:
+          - img [ref=e1508]
+          - generic [ref=e1512]:
+            - heading "วันปิดการจอง" [level=3] [ref=e1513]
+            - paragraph [ref=e1514]: กำหนดวันที่ไม่เปิดให้จอง (เช่น วันจัดแข่งขัน)
+        - generic [ref=e1515]:
+          - generic [ref=e1516]:
+            - textbox [ref=e1518]
+            - textbox "เหตุผล (เช่น วันจัดแข่งขัน)" [ref=e1520]
+            - button "เพิ่ม" [disabled] [ref=e1521]:
+              - img [ref=e1522]
+              - text: เพิ่ม
+          - generic [ref=e1523]:
+            - img [ref=e1524]
+            - paragraph [ref=e1528]: ยังไม่มีวันปิดการจอง
