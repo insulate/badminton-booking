@@ -114,6 +114,13 @@ export const customerBookingsAPI = {
     return response.data;
   },
 
+  getCourtAvailability: async ({ date, timeSlotId, duration, startMinute = 0 }) => {
+    const response = await api.get(API_ENDPOINTS.BOOKINGS.PUBLIC_COURT_AVAILABILITY, {
+      params: { date, timeSlotId, duration, startMinute }
+    });
+    return response.data;
+  },
+
   create: async (data) => {
     const token = localStorage.getItem('playerToken');
     const response = await api.post(API_ENDPOINTS.BOOKINGS.CUSTOMER_CREATE, data, {

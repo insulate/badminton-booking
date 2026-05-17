@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { X, Calendar, Clock, User, Phone, Flame } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { X, Calendar, Clock, User, Phone, Flame, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { customerBookingsAPI } from '../../lib/api';
 import { formatDateToString } from '../../utils/dateUtils';
@@ -15,6 +15,9 @@ export default function BookingSlotModal({
 }) {
   const [selectedDuration, setSelectedDuration] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [availableCourts, setAvailableCourts] = useState([]);
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [courtsLoading, setCourtsLoading] = useState(false);
 
   // Find slot index in availability array (moved before useMemo)
   const slotIndex = useMemo(() => {
@@ -46,6 +49,40 @@ export default function BookingSlotModal({
   // Duration options (0.5 step)
   const durationOptions = Array.from({ length: maxDuration * 2 }, (_, i) => (i + 1) * 0.5);
 
+  // Fetch available courts whenever duration or slot changes
+  useEffect(() => {
+    if (!isOpen || !slot || !selectedDate) return;
+
+    const fetchCourts = async () => {
+      setCourtsLoading(true);
+      setSelectedCourt(null);
+      try {
+        const res = await customerBookingsAPI.getCourtAvailability({
+          date: formatDateToString(selectedDate),
+          timeSlotId: slot.timeSlotId,
+          duration: selectedDuration,
+          startMinute: 0,
+        });
+        setAvailableCourts(res.data?.courts || []);
+      } catch {
+        setAvailableCourts([]);
+      } finally {
+        setCourtsLoading(false);
+      }
+    };
+
+    fetchCourts();
+  }, [isOpen, slot, selectedDate, selectedDuration]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedDuration(1);
+      setSelectedCourt(null);
+      setAvailableCourts([]);
+    }
+  }, [isOpen]);
+
   // Early return AFTER all hooks
   if (!isOpen || !slot) return null;
 
@@ -65,10 +102,19 @@ export default function BookingSlotModal({
     });
   };
 
+  const courtTypeBadge = (type) => {
+    if (type === 'premium') return <span className="text-xs px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded">Premium</span>;
+    if (type === 'vip') return <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-600 rounded">VIP</span>;
+    return null;
+  };
+
   // Handle confirm booking
   const handleConfirm = async () => {
-    // ป้องกันการกดปุ่มซ้ำ
     if (loading) return;
+    if (!selectedCourt) {
+      toast.error('กรุณาเลือกสนาม');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -76,13 +122,13 @@ export default function BookingSlotModal({
         date: formatDateToString(selectedDate),
         timeSlot: slot.timeSlotId,
         duration: selectedDuration,
+        court: selectedCourt._id,
       });
 
       if (response.success) {
         onSuccess(response.data);
         onClose();
       } else {
-        // แสดง error เมื่อ success === false
         toast.error(response.message || 'ไม่สามารถจองได้ กรุณาลองใหม่อีกครั้ง');
       }
     } catch (error) {
@@ -180,6 +226,45 @@ export default function BookingSlotModal({
         {/* Divider */}
         <div className="border-t border-gray-200 my-4" />
 
+        {/* Court Selector */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-3 flex items-center gap-1.5">
+            <MapPin className="w-4 h-4 text-blue-600" />
+            เลือกสนาม
+          </p>
+
+          {courtsLoading ? (
+            <div className="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-14 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : availableCourts.length === 0 ? (
+            <p className="text-sm text-red-500 text-center py-3">ไม่มีสนามว่างในช่วงเวลานี้</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {availableCourts.map((court) => (
+                <button
+                  key={court._id}
+                  onClick={() => setSelectedCourt(court)}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    selectedCourt?._id === court._id
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-800 text-sm">{court.courtNumber}</div>
+                  <div className="text-xs text-gray-500 truncate">{court.name}</div>
+                  {courtTypeBadge(court.type)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-4" />
+
         {/* Player Info */}
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2">ข้อมูลผู้จอง</p>
@@ -206,6 +291,11 @@ export default function BookingSlotModal({
               {totalPrice.toLocaleString()} บาท
             </span>
           </div>
+          {selectedCourt && (
+            <div className="mt-1 text-sm text-gray-500 text-right">
+              สนาม {selectedCourt.courtNumber} — {selectedCourt.name}
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -219,8 +309,8 @@ export default function BookingSlotModal({
           </button>
           <button
             onClick={handleConfirm}
-            disabled={loading}
-            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+            disabled={loading || !selectedCourt || courtsLoading || availableCourts.length === 0}
+            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'กำลังจอง...' : 'ยืนยันการจอง'}
           </button>

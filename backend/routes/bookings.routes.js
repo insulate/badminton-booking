@@ -26,6 +26,54 @@ const { isDateBlocked } = require('../utils/blockedDateChecker');
 const { notifyNewBooking, notifySlipUploaded } = require('../services/socket.service');
 
 /**
+ * @route   GET /api/bookings/public/court-availability
+ * @desc    Get available courts for a specific date/timeslot/duration (public)
+ * @access  Public
+ */
+router.get('/public/court-availability', async (req, res) => {
+  try {
+    const { date, timeSlotId, duration = 1, startMinute = 0 } = req.query;
+
+    if (!date || !timeSlotId) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาระบุวันที่และช่วงเวลา',
+      });
+    }
+
+    const bookingDate = new Date(date);
+    bookingDate.setHours(0, 0, 0, 0);
+
+    const allCourts = await Court.find({ deletedAt: null, status: 'available' }).sort({ courtNumber: 1 });
+
+    const courtsWithStatus = await Promise.all(
+      allCourts.map(async (court) => {
+        const { available } = await checkAvailability({
+          courtId: court._id,
+          date: bookingDate,
+          timeSlotId,
+          duration: parseFloat(duration),
+          startMinute: parseInt(startMinute),
+        });
+        return available ? { _id: court._id, courtNumber: court.courtNumber, name: court.name, type: court.type } : null;
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      data: { courts: courtsWithStatus.filter(Boolean) },
+    });
+  } catch (error) {
+    console.error('Get court availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสนาม',
+      error: error.message,
+    });
+  }
+});
+
+/**
  * @route   GET /api/bookings/public/availability
  * @desc    Get availability count by time slot (public)
  * @access  Public
@@ -90,7 +138,7 @@ router.get('/pending-slips-count', protect, admin, async (req, res) => {
  */
 router.post('/customer', protectPlayer, async (req, res) => {
   try {
-    const { date, timeSlot, duration, startMinute } = req.body;
+    const { date, timeSlot, duration, startMinute, court: courtId } = req.body;
     const player = req.player;
 
     // Validate input
@@ -98,6 +146,13 @@ router.post('/customer', protectPlayer, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'กรุณาระบุวันที่และเวลา',
+      });
+    }
+
+    if (!courtId) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณาเลือกสนาม',
       });
     }
 
@@ -180,6 +235,15 @@ router.post('/customer', protectPlayer, async (req, res) => {
       });
     }
 
+    // Validate court exists and is active
+    const courtDoc = await Court.findOne({ _id: courtId, status: 'available', deletedAt: null });
+    if (!courtDoc) {
+      return res.status(400).json({
+        success: false,
+        message: 'ไม่พบสนามที่เลือก หรือสนามไม่เปิดให้ใช้งาน',
+      });
+    }
+
     // Check availability
     const availability = await getAvailabilityByTimeSlot(bookingDate);
     const slotAvailability = availability.availability.find(
@@ -193,17 +257,33 @@ router.post('/customer', protectPlayer, async (req, res) => {
       });
     }
 
-    // Calculate price
+    // Check specific court availability for the full duration
     const bookingDuration = duration || 1;
-    const pricePerHour = player.isMember 
-      ? slotAvailability.pricing.member 
+    const courtAvailability = await checkAvailability({
+      courtId,
+      date: bookingDate,
+      timeSlotId: timeSlot,
+      duration: bookingDuration,
+      startMinute: startMinute || 0,
+    });
+
+    if (!courtAvailability.available) {
+      return res.status(409).json({
+        success: false,
+        message: 'สนามนี้ถูกจองแล้วในช่วงเวลาที่เลือก กรุณาเลือกสนามอื่น',
+      });
+    }
+
+    // Calculate price
+    const pricePerHour = player.isMember
+      ? slotAvailability.pricing.member
       : slotAvailability.pricing.normal;
     const subtotal = pricePerHour * bookingDuration;
 
     // Generate booking code
     const bookingCode = await generateBookingCode(bookingDate);
 
-    // Create booking without court - status: payment_pending until slip uploaded
+    // Create booking with selected court - reserved immediately
     const paymentDeadline = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     const booking = await Booking.create({
@@ -214,7 +294,7 @@ router.post('/customer', protectPlayer, async (req, res) => {
         phone: player.phone,
       },
       player: player._id,
-      court: null, // Admin will assign later
+      court: courtId,
       date: bookingDate,
       timeSlot,
       duration: bookingDuration,

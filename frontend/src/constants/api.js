@@ -85,6 +85,7 @@ export const API_ENDPOINTS = {
     UPDATE_PAYMENT: (id) => `/bookings/${id}/payment`,
     // Customer booking
     PUBLIC_AVAILABILITY: '/bookings/public/availability',
+    PUBLIC_COURT_AVAILABILITY: '/bookings/public/court-availability',
     CUSTOMER_CREATE: '/bookings/customer',
     CUSTOMER_MY_BOOKINGS: '/bookings/customer/my-bookings',
     CUSTOMER_GET: (id) => `/bookings/customer/${id}`,
