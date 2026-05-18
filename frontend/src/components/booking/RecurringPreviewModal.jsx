@@ -2,6 +2,12 @@ import { useState } from 'react';
 
 const DAY_NAMES = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
+const calcEndTime = (startTime, startMinute, duration) => {
+  const [h, m] = startTime.split(':').map(Number);
+  const total = h * 60 + m + (startMinute || 0) + Math.round(duration * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+};
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('th-TH', {
@@ -79,7 +85,14 @@ const RecurringPreviewModal = ({
                 <div>
                   <span className="text-gray-600">เวลา:</span>
                   <span className="ml-2 font-medium">
-                    {summary.timeSlot?.startTime} ({summary.duration === 0.5 ? '30 นาที' : summary.duration % 1 === 0 ? `${summary.duration} ชม.` : `${Math.floor(summary.duration)} ชม. 30 น.`})
+                    {summary.timeSlot?.startTime
+                      ? (() => {
+                          const sm = formData?.startMinute || 0;
+                          const start = calcEndTime(summary.timeSlot.startTime, sm, 0);
+                          const end = calcEndTime(summary.timeSlot.startTime, sm, summary.duration);
+                          return `${start} – ${end}`;
+                        })()
+                      : '-'}
                   </span>
                 </div>
                 <div>

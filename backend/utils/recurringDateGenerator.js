@@ -39,7 +39,7 @@ const generateRecurringDates = (startDate, endDate, daysOfWeek) => {
  * @param {Number} params.duration - Duration in hours
  * @returns {Promise<Object>} { validDates, skippedDates }
  */
-const checkBulkAvailability = async ({ dates, courtId, timeSlotId, duration }) => {
+const checkBulkAvailability = async ({ dates, courtId, timeSlotId, duration, startMinute = 0 }) => {
   const validDates = [];
   const skippedDates = [];
 
@@ -62,6 +62,7 @@ const checkBulkAvailability = async ({ dates, courtId, timeSlotId, duration }) =
         date,
         timeSlotId,
         duration,
+        startMinute,
       });
 
       if (!availability.available) {

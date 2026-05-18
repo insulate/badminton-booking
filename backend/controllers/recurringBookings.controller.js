@@ -18,7 +18,7 @@ const {
  */
 const previewRecurringBooking = async (req, res) => {
   try {
-    const { daysOfWeek, startDate, endDate, court, timeSlot, duration = 1 } = req.body;
+    const { daysOfWeek, startDate, endDate, court, timeSlot, duration = 1, startMinute = 0 } = req.body;
 
     // Validate request
     const validation = validateRecurringRequest({
@@ -70,6 +70,7 @@ const previewRecurringBooking = async (req, res) => {
       courtId: court,
       timeSlotId: timeSlot,
       duration,
+      startMinute,
     });
 
     if (validDates.length === 0) {
@@ -153,6 +154,7 @@ const createRecurringBooking = async (req, res) => {
       endDate,
       court,
       timeSlot,
+      startMinute = 0,
       duration = 1,
       paymentMode = 'per_session',
       notes,
@@ -216,6 +218,7 @@ const createRecurringBooking = async (req, res) => {
       courtId: court,
       timeSlotId: timeSlot,
       duration,
+      startMinute,
     });
 
     if (validDates.length === 0) {
@@ -288,7 +291,7 @@ const createRecurringBooking = async (req, res) => {
         date,
         timeSlot,
         duration,
-        startMinute: 0,
+        startMinute: startMinute || 0,
         pricing: {
           subtotal: priceInfo.subtotal,
           discount: 0,

@@ -2,6 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { courtsAPI, timeslotsAPI, playersAPI } from '../../lib/api';
 
+const calcEndTime = (startTime, startMinute, duration) => {
+  const [h, m] = startTime.split(':').map(Number);
+  const total = h * 60 + m + (startMinute || 0) + Math.round(duration * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+};
+
 const DAY_OPTIONS = [
   { value: 0, label: 'อา', fullLabel: 'อาทิตย์' },
   { value: 1, label: 'จ', fullLabel: 'จันทร์' },
@@ -21,6 +27,7 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
     customerId: '', // เพิ่มสำหรับเก็บ ID ของลูกค้าที่เลือก
     court: '',
     timeSlot: '',
+    startMinute: 0,
     duration: 1,
     daysOfWeek: [],
     startDate: '',
@@ -160,13 +167,14 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+    if (name === 'timeSlot') {
+      const [slotId, minute] = value.split('|');
+      setFormData((prev) => ({ ...prev, timeSlot: slotId, startMinute: parseInt(minute || '0') }));
+      if (errors.timeSlot) setErrors((prev) => ({ ...prev, timeSlot: '' }));
+      return;
     }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleDayToggle = (day) => {
@@ -258,6 +266,7 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
       courtInfo: selectedCourt,
       timeSlot: formData.timeSlot,
       timeSlotInfo: selectedTimeSlot,
+      startMinute: formData.startMinute,
       duration: parseFloat(formData.duration),
       daysOfWeek: formData.daysOfWeek,
       startDate: formData.startDate,
@@ -466,19 +475,25 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
           </label>
           <select
             name="timeSlot"
-            value={formData.timeSlot}
+            value={formData.timeSlot ? `${formData.timeSlot}|${formData.startMinute}` : ''}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               errors.timeSlot ? 'border-red-300' : 'border-gray-300'
             }`}
           >
             <option value="">เลือกช่วงเวลา</option>
-            {timeSlots.map((ts) => (
-              <option key={ts._id} value={ts._id}>
-                {ts.startTime} - {ts.endTime}
-                {ts.peakHour && ' (Peak)'}
-              </option>
-            ))}
+            {timeSlots.flatMap((ts) => {
+              const [h, m] = ts.startTime.split(':').map(Number);
+              const halfHour = `${String(h).padStart(2, '0')}:30`;
+              return [
+                <option key={`${ts._id}|0`} value={`${ts._id}|0`}>
+                  {ts.startTime}{ts.peakHour ? ' (Peak)' : ''}
+                </option>,
+                <option key={`${ts._id}|30`} value={`${ts._id}|30`}>
+                  {halfHour}{ts.peakHour ? ' (Peak)' : ''}
+                </option>,
+              ];
+            })}
           </select>
           {errors.timeSlot && <p className="mt-1 text-xs text-red-600">{errors.timeSlot}</p>}
         </div>
@@ -487,25 +502,35 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
       {/* Duration */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          ระยะเวลา <span className="text-red-500">*</span>
+          ระยะเวลา (ชั่วโมง) <span className="text-red-500">*</span>
         </label>
-        <div className="flex flex-wrap gap-2">
+        <select
+          name="duration"
+          value={formData.duration}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
           {Array.from({ length: 8 }, (_, i) => (i + 1) * 0.5).map((hours) => (
-            <button
-              key={hours}
-              type="button"
-              onClick={() => setFormData((prev) => ({ ...prev, duration: hours }))}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                parseFloat(formData.duration) === hours
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชม.` : `${Math.floor(hours)} ชม. 30 น.`}
-            </button>
+            <option key={hours} value={hours}>
+              {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชั่วโมง` : `${Math.floor(hours)} ชม. 30 นาที`}
+            </option>
           ))}
-        </div>
+        </select>
       </div>
+
+      {/* Booking time preview */}
+      {formData.timeSlot && formData.duration && (() => {
+        const selectedTs = timeSlots.find((ts) => ts._id === formData.timeSlot);
+        if (!selectedTs) return null;
+        const startDisplay = calcEndTime(selectedTs.startTime, formData.startMinute, 0);
+        const endDisplay = calcEndTime(selectedTs.startTime, formData.startMinute, parseFloat(formData.duration));
+        return (
+          <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 flex items-center gap-2 text-blue-700 text-sm">
+            <span>ช่วงเวลาจริง:</span>
+            <span className="text-base font-semibold">{startDisplay} – {endDisplay}</span>
+          </div>
+        );
+      })()}
 
       {/* Days of Week Selection */}
       <div>

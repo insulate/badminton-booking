@@ -124,6 +124,7 @@ const RecurringBookingsPage = () => {
         endDate: formData.endDate,
         court: formData.court,
         timeSlot: formData.timeSlot,
+        startMinute: formData.startMinute || 0,
         duration: formData.duration,
         paymentMode: formData.paymentMode,
         notes: formData.notes,
