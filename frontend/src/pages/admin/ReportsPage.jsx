@@ -193,7 +193,7 @@ const ReportsPage = () => {
           <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
             <button
               onClick={() => setSelectedPeriod('day')}
-              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'day'
                   ? 'bg-white text-blue-600 shadow-md transform scale-105'
                   : 'text-gray-600 hover:text-gray-900'
@@ -206,7 +206,7 @@ const ReportsPage = () => {
             </button>
             <button
               onClick={() => setSelectedPeriod('month')}
-              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'month'
                   ? 'bg-white text-blue-600 shadow-md transform scale-105'
                   : 'text-gray-600 hover:text-gray-900'
@@ -219,7 +219,7 @@ const ReportsPage = () => {
             </button>
             <button
               onClick={() => setSelectedPeriod('year')}
-              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 py-2 sm:px-5 sm:py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 selectedPeriod === 'year'
                   ? 'bg-white text-blue-600 shadow-md transform scale-105'
                   : 'text-gray-600 hover:text-gray-900'

@@ -26,7 +26,7 @@ export default function PageHeader({
   };
 
   return (
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
       <div className="flex items-center gap-3">
         {Icon && (
           <div className={`${colorClasses[iconColor]} p-3 rounded-lg`}>
