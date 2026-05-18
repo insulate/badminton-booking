@@ -140,7 +140,7 @@ const FloorPlanSettingsPage = () => {
   const getImageUrl = (path) => {
     if (!path) return '';
     // Remove /api from base URL for static files
-    const baseUrl = API_BASE_URL.replace('/api', '');
+    const baseUrl = API_BASE_URL.replace(/\/api$/, '');
     return `${baseUrl}${path}`;
   };
 

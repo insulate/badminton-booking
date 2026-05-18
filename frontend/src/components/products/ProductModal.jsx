@@ -41,7 +41,7 @@ const ProductModal = ({ product, onClose, onSuccess }) => {
       if (product.image) {
         const imageUrl = product.image.startsWith('data:')
           ? product.image
-          : `${(API_URL || 'http://localhost:3000/api').replace('/api', '')}${product.image}`;
+          : `${(API_URL || 'http://localhost:3000/api').replace(/\/api$/, '')}${product.image}`;
         setImagePreview(imageUrl);
       }
     }
