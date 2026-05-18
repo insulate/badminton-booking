@@ -487,20 +487,24 @@ const RecurringBookingForm = ({ onPreview, onCancel, loading = false }) => {
       {/* Duration */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          ระยะเวลา (ชั่วโมง) <span className="text-red-500">*</span>
+          ระยะเวลา <span className="text-red-500">*</span>
         </label>
-        <select
-          name="duration"
-          value={formData.duration}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
+        <div className="flex flex-wrap gap-2">
           {Array.from({ length: 8 }, (_, i) => (i + 1) * 0.5).map((hours) => (
-            <option key={hours} value={hours}>
-              {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชั่วโมง` : `${Math.floor(hours)} ชม. 30 นาที`}
-            </option>
+            <button
+              key={hours}
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, duration: hours }))}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                parseFloat(formData.duration) === hours
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {hours === 0.5 ? '30 นาที' : hours % 1 === 0 ? `${hours} ชม.` : `${Math.floor(hours)} ชม. 30 น.`}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {/* Days of Week Selection */}
