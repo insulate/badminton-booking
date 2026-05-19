@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import RecurringBookingForm from '../../components/booking/RecurringBookingForm';
 import RecurringPreviewModal from '../../components/booking/RecurringPreviewModal';
-import { recurringBookingsAPI } from '../../lib/api';
+import { recurringBookingsAPI, bookingsAPI } from '../../lib/api';
 
 const DAY_NAMES = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
@@ -52,6 +52,7 @@ const RecurringBookingsPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [groupBookings, setGroupBookings] = useState([]);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelSingleLoading, setCancelSingleLoading] = useState(new Set());
 
   // Bulk Payment states
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -181,6 +182,32 @@ const RecurringBookingsPage = () => {
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก');
     } finally {
       setCancelLoading(false);
+    }
+  };
+
+  // Handle cancel single booking session
+  const handleCancelSingleBooking = async (bookingId) => {
+    if (!confirm('ยืนยันยกเลิกการจองครั้งนี้?')) return;
+
+    setCancelSingleLoading((prev) => new Set(prev).add(bookingId));
+    try {
+      await bookingsAPI.cancel(bookingId);
+      setGroupBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? { ...b, bookingStatus: 'cancelled' } : b))
+      );
+      setSelectedGroup((prev) => ({
+        ...prev,
+        cancelledBookings: (prev.cancelledBookings || 0) + 1,
+      }));
+      toast.success('ยกเลิกการจองครั้งนี้สำเร็จ');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการยกเลิก');
+    } finally {
+      setCancelSingleLoading((prev) => {
+        const next = new Set(prev);
+        next.delete(bookingId);
+        return next;
+      });
     }
   };
 
@@ -522,6 +549,7 @@ const RecurringBookingsPage = () => {
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">ราคา</th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">สถานะ</th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">ชำระเงิน</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">จัดการ</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -573,6 +601,18 @@ const RecurringBookingsPage = () => {
                                   ? 'บางส่วน'
                                   : 'รอชำระ'}
                               </span>
+                            </td>
+                            <td className="px-4 py-2">
+                              {booking.bookingStatus === 'confirmed' &&
+                                new Date(booking.date) >= new Date(new Date().setHours(0, 0, 0, 0)) && (
+                                  <button
+                                    onClick={() => handleCancelSingleBooking(booking._id)}
+                                    disabled={cancelSingleLoading.has(booking._id)}
+                                    className="text-xs text-red-600 hover:text-red-800 disabled:opacity-50 whitespace-nowrap"
+                                  >
+                                    {cancelSingleLoading.has(booking._id) ? 'กำลังยกเลิก...' : 'ยกเลิกครั้งนี้'}
+                                  </button>
+                                )}
                             </td>
                           </tr>
                         ))}
