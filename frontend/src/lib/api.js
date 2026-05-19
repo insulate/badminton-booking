@@ -846,6 +846,11 @@ export const recurringBookingsAPI = {
     return response.data;
   },
 
+  cancelSession: async (groupId, bookingId) => {
+    const response = await api.patch(`/recurring-bookings/${groupId}/bookings/${bookingId}/cancel`);
+    return response.data;
+  },
+
   updatePayment: async (id, data) => {
     const response = await api.patch(`/recurring-bookings/${id}/payment`, data);
     return response.data;

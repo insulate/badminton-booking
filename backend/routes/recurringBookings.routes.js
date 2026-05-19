@@ -9,6 +9,7 @@ const {
   getRecurringBookingById,
   getBookingsInGroup,
   cancelRecurringBooking,
+  cancelSessionInGroup,
   updateBulkPayment,
 } = require('../controllers/recurringBookings.controller');
 
@@ -53,6 +54,13 @@ router.get('/:id/bookings', protect, validateObjectId(), getBookingsInGroup);
  * @access  Private (Admin/Staff)
  */
 router.patch('/:id/cancel', protect, validateObjectId(), cancelRecurringBooking);
+
+/**
+ * @route   PATCH /api/recurring-bookings/:groupId/bookings/:bookingId/cancel
+ * @desc    Cancel a single session in a recurring group (no soft-delete)
+ * @access  Private (Admin/Staff)
+ */
+router.patch('/:groupId/bookings/:bookingId/cancel', protect, validateObjectId('groupId'), validateObjectId('bookingId'), cancelSessionInGroup);
 
 /**
  * @route   PATCH /api/recurring-bookings/:id/payment

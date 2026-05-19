@@ -430,7 +430,6 @@ const getBookingsInGroup = async (req, res) => {
   try {
     const bookings = await Booking.find({
       recurringGroupId: req.params.id,
-      deletedAt: null,
     })
       .populate('court', 'courtNumber name')
       .populate('timeSlot', 'startTime endTime')
@@ -588,6 +587,37 @@ const updateBulkPayment = async (req, res) => {
   }
 };
 
+/**
+ * Cancel a single session within a recurring group (no soft-delete)
+ * PATCH /api/recurring-bookings/:groupId/bookings/:bookingId/cancel
+ */
+const cancelSessionInGroup = async (req, res) => {
+  try {
+    const { groupId, bookingId } = req.params;
+
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      recurringGroupId: groupId,
+    });
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'ไม่พบการจองที่ต้องการ' });
+    }
+
+    if (booking.bookingStatus === 'cancelled') {
+      return res.status(400).json({ success: false, message: 'การจองนี้ถูกยกเลิกไปแล้ว' });
+    }
+
+    booking.bookingStatus = 'cancelled';
+    await booking.save();
+
+    res.status(200).json({ success: true, message: 'ยกเลิกการจองครั้งนี้สำเร็จ', data: booking });
+  } catch (error) {
+    console.error('Cancel session in group error:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการยกเลิก', error: error.message });
+  }
+};
+
 module.exports = {
   previewRecurringBooking,
   createRecurringBooking,
@@ -595,5 +625,6 @@ module.exports = {
   getRecurringBookingById,
   getBookingsInGroup,
   cancelRecurringBooking,
+  cancelSessionInGroup,
   updateBulkPayment,
 };

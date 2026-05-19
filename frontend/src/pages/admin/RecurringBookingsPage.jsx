@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import RecurringBookingForm from '../../components/booking/RecurringBookingForm';
 import RecurringPreviewModal from '../../components/booking/RecurringPreviewModal';
-import { recurringBookingsAPI, bookingsAPI } from '../../lib/api';
+import { recurringBookingsAPI } from '../../lib/api';
 
 const DAY_NAMES = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
@@ -191,7 +191,7 @@ const RecurringBookingsPage = () => {
 
     setCancelSingleLoading((prev) => new Set(prev).add(bookingId));
     try {
-      await bookingsAPI.cancel(bookingId);
+      await recurringBookingsAPI.cancelSession(selectedGroup._id, bookingId);
       setGroupBookings((prev) =>
         prev.map((b) => (b._id === bookingId ? { ...b, bookingStatus: 'cancelled' } : b))
       );
