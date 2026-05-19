@@ -540,6 +540,7 @@ const RecurringBookingsPage = () => {
                   {/* Bookings List */}
                   <h3 className="font-semibold text-gray-900 mb-3">รายการจองทั้งหมด</h3>
                   <div className="bg-gray-50 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
                     <table className="min-w-full">
                       <thead className="bg-gray-100">
                         <tr>
@@ -618,6 +619,7 @@ const RecurringBookingsPage = () => {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 </div>
 
