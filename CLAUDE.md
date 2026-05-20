@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
      - `git rebase`
      - `git reset --hard`
      - หรือคำสั่งที่มีผลกับ history โดยไม่ได้รับคำสั่งชัดเจนจากผู้ใช้
-   - ถ้าจำเป็นต้องยกตัวอย่างคำสั่ง git ให้ใส่ใน code block และระบุชัดเจนว่าเป็น “example only”
+   - ถ้าจำเป็นต้องยกตัวอย่างคำสั่ง git ให้ใส่ใน code block และระบุชัดเจนว่าเป็น "example only"
 
 2. **ภาษาในการสื่อสาร**
    - คำอธิบายทั้งหมด (reasoning, explanation, summary, comments ในข้อความตอบ) ให้ใช้ **ภาษาไทย**
@@ -29,14 +29,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
      - ควรเพิ่ม/อัปเดต **Jest tests** (backend)
      - ควรเพิ่ม/อัปเดต **Playwright tests** ถ้าเกี่ยวกับ flow การใช้งานจริงของผู้ใช้
    - ถ้าไม่สามารถเขียนเทสได้ ให้ระบุเหตุผลให้ชัดเจน
-   - 
-4. **Clarifying Questions (ถ้าจำเป็น)**
+
+5. **Clarifying Questions (ถ้าจำเป็น)**
    - ถามสิ่งที่จำเป็นต่อการออกแบบ schema, flow, หรือ constraint ให้ครบ
    - ถ้าข้อมูลพอแล้ว ให้บอกว่าคิดสมมติอะไรเพิ่มเองบ้าง (assumptions)
 
 ## Project Overview
 
-Badminton Court Booking System - A monorepo with React frontend and Express backend for managing court bookings, POS sales, and venue operations.
+Badminton Court Booking System - A monorepo with React frontend and Express backend for managing court bookings, POS sales, group play sessions, shifts, and venue operations.
 
 ### Tech Stack
 - **Frontend**: React 18 + Vite + TailwindCSS (localhost:5173)
@@ -84,6 +84,8 @@ npm test -- auth.test.js
 npm run test:e2e -- auth.spec.js
 ```
 
+> **หมายเหตุ**: Backend Jest tests ต้องการ MongoDB รันที่ `localhost:27017` (local) เพราะใช้ test database แยกต่างหาก ไม่ใช่ Atlas URI จาก `.env` ถ้า local MongoDB ไม่ได้รัน tests จะ timeout
+
 ### Database Seeding
 
 ```bash
@@ -115,10 +117,11 @@ cd frontend && npm run build
 
 - **app.js** - Express app configuration, CORS, middleware, and route registration
 - **bin/www** - Server startup script
-- **models/** - Mongoose schemas (User, Booking, Court, TimeSlot, Product, Sale, Category, Setting, Counter)
-- **routes/** - API endpoints (`/api/auth`, `/api/bookings`, `/api/courts`, `/api/timeslots`, `/api/products`, `/api/sales`, `/api/categories`, `/api/settings`, `/api/users`)
+- **models/** - Mongoose schemas (see Data Models section)
+- **routes/** - API endpoints (see Important API Routes section)
 - **controllers/** - Business logic for routes
 - **middleware/** - Auth (JWT), booking validation, rate limiting, upload (multer), ObjectId validation
+- **utils/availabilityChecker.js** - Core availability logic: `checkAvailability`, `getAvailableCourts`, `getCourtSchedule`, `getAvailabilityByTimeSlot`
 - **config/** - Database connection
 - **seeders/** - Database seed scripts
 - **scripts/** - Utility scripts
@@ -129,13 +132,20 @@ cd frontend && npm run build
 - **src/App.jsx** - Route definitions using React Router
 - **src/pages/** - Page components
   - `LoginPage.jsx` - Public login page
-  - `admin/` - Protected admin pages (Dashboard, Booking, Bookings, POS, UserManagement, CategoryManagement)
+  - `admin/` - Protected admin pages:
+    - `DashboardPage.jsx`, `BookingPage.jsx`, `BookingsPage.jsx`
+    - `RecurringBookingsPage.jsx` - Manage recurring booking groups (create, view sessions, cancel single session or entire group)
+    - `ReportsPage.jsx` - Revenue/booking/product/court usage reports (daily/monthly/yearly tabs)
+    - `POSPage.jsx`, `SalesHistoryPage.jsx`
+    - `GroupPlayPage.jsx`, `PlayersPage.jsx`
+    - `ShiftPage.jsx`, `AttendancePage.jsx`
+    - `UserManagementPage.jsx`, `CategoryManagementPage.jsx`
   - `admin/settings/` - Settings pages (Venue, Operating Hours, Booking, Payment, General, Courts, TimeSlots, Products)
 - **src/components/** - Reusable components (booking, products, timeslots, layout, common)
 - **src/stores/** - Zustand stores (authStore.js)
 - **src/lib/api.js** - Axios API client with auth interceptors
 - **src/constants/** - API endpoints, routes, and shared constants
-- **e2e/** - Playwright E2E tests (auth.spec.js, bookings.spec.js, pos.spec.js, settings.spec.js)
+- **e2e/** - Playwright E2E tests
 
 ### Key Architectural Patterns
 
@@ -148,10 +158,23 @@ cd frontend && npm run build
 
 **Booking System:**
 - Auto-generates booking codes using Counter model
-- Validates court availability and time slot conflicts (middleware/bookingValidation.js)
-- Supports multi-hour bookings with duration field
-- Tracks booking status: pending, confirmed, cancelled, completed
-- Payment tracking: unpaid, partial, paid
+- Validates court availability and time slot conflicts (`middleware/bookingValidation.js`)
+- Supports multi-hour bookings with `duration` field (float: 0.5, 1, 1.5, 2, ...)
+- Supports half-slot bookings with `startMinute: 0 | 30` — bookings can start at `:00` or `:30` within a 1-hour TimeSlot
+- Tracks booking status: `pending`, `confirmed`, `cancelled`, `completed`
+- Payment tracking: `unpaid`, `partial`, `paid`
+- Soft-delete via `deletedAt` field — queries should include `deletedAt: null` to exclude deleted bookings (except `getBookingsInGroup` which intentionally shows cancelled sessions)
+
+**Recurring Bookings System:**
+- `RecurringBookingGroup` model groups multiple `Booking` documents under one `groupCode` (e.g. `RG202605190001`)
+- Each booking in the group has `recurringGroupId` pointing back to the group
+- Cancel entire group: `PATCH /api/recurring-bookings/:id/cancel` — calls `booking.cancel()` which sets `bookingStatus='cancelled'` AND `deletedAt` (soft-delete)
+- Cancel single session: `PATCH /api/recurring-bookings/:groupId/bookings/:bookingId/cancel` — sets only `bookingStatus='cancelled'` without soft-delete, so session remains visible in detail modal and court slot is freed
+
+**Availability Checking:**
+- `availabilityChecker.js` filters `bookingStatus: { $ne: 'cancelled' }` AND `deletedAt: null`
+- Half-slot tracking uses composite keys: `{slotId}_first` (`:00` half) and `{slotId}_second` (`:30` half)
+- Dates stored as UTC midnight Bangkok time — e.g. Bangkok June 4 = `2026-06-03T17:00:00.000Z` in UTC. When constructing date strings for availability checks, convert from UTC+7
 
 **POS System:**
 - Sales linked to Categories and Products
@@ -159,13 +182,21 @@ cd frontend && npm run build
 - Tracks inventory changes on product sales
 - Payment method options: cash, bank_transfer, promptpay
 
+**Shift System:**
+- Staff open/close shifts manually
+- Shift summary tracks revenue, expenses, and sales within the shift period
+
+**Group Play System:**
+- Ad-hoc group sessions with player check-in, game tracking, and per-player billing
+- Players linked via Player model
+
 **File Uploads:**
-- Product images: multer middleware (middleware/upload.js)
+- Product images: multer middleware (`middleware/upload.js`)
 - Stored in `backend/uploads/products/`
 - Served at `/uploads/products/` endpoint
 
 **Rate Limiting:**
-- Login endpoint: 5 attempts per 15 minutes per IP (development: disabled in middleware/rateLimiter.js)
+- Login endpoint: 5 attempts per 15 minutes per IP (development: disabled in `middleware/rateLimiter.js`)
 
 ## Production Server
 
@@ -195,7 +226,7 @@ cd frontend && npm run build
 ### Common Server Commands
 ```bash
 # SSH into server
-ssh waste-tax
+ssh luckybadminton
 
 # Check container status
 docker compose -f docker-compose.prod.yml ps
@@ -236,6 +267,7 @@ JWT_EXPIRE=30d
 ## Testing Notes
 
 - **Jest tests** run with `--runInBand` to prevent DB conflicts
+- **Jest tests** require local MongoDB at `localhost:27017` — they use a separate test DB, not the Atlas URI from `.env`
 - **Playwright** auto-starts both frontend/backend via webServer config
 - E2E tests use `http://localhost:5173` as baseURL
 - Test environment uses separate test database (configured in test files)
@@ -245,21 +277,42 @@ JWT_EXPIRE=30d
 - `POST /api/auth/login` - User authentication
 - `GET /api/bookings` - List bookings with filters (date, court, status)
 - `POST /api/bookings` - Create booking (auto-generates booking code)
+- `POST /api/bookings/check-availability` - Check court availability for a given date/slot/duration
+- `GET /api/bookings/public/court-availability` - Get available courts (public, by timeSlotId + date)
 - `GET /api/courts` - List courts with availability
 - `GET /api/timeslots` - Get time slots with pricing
 - `POST /api/sales` - Create POS sale (auto-generates sale code)
 - `GET /api/settings` - Get all settings
 - `PATCH /api/settings/:key` - Update specific setting
+- `POST /api/recurring-bookings/preview` - Preview recurring booking dates and pricing
+- `POST /api/recurring-bookings` - Create recurring booking group
+- `GET /api/recurring-bookings` - List all recurring booking groups
+- `GET /api/recurring-bookings/:id/bookings` - Get all sessions in a group (including cancelled)
+- `PATCH /api/recurring-bookings/:id/cancel` - Cancel entire recurring group (soft-delete)
+- `PATCH /api/recurring-bookings/:groupId/bookings/:bookingId/cancel` - Cancel single session only (no soft-delete)
+- `PATCH /api/recurring-bookings/:id/payment` - Update bulk payment for a group
+- `GET /api/reports/revenue/daily` - Daily revenue report
+- `GET /api/reports/revenue/monthly` - Monthly revenue report
+- `GET /api/reports/bookings/summary` - Booking summary report
+- `GET /api/reports/courts/usage` - Court usage report
+- `GET /api/reports/dashboard` - Dashboard stats
+- `GET /api/shifts/current` - Get current open shift
+- `POST /api/shifts/open` / `POST /api/shifts/:id/close` - Open/close shift
 
 ## Data Models
 
 **Core Collections:**
 - **User** - username, password (hashed), role (admin/staff)
-- **Booking** - bookingCode, customer info, court, date, timeSlot, duration, pricing, status, payment
+- **Booking** - bookingCode, customer info, court, date, timeSlot, duration, startMinute (0|30), pricing, bookingStatus (pending/confirmed/cancelled/completed), payment, recurringGroupId, deletedAt (soft-delete)
+- **RecurringBookingGroup** - groupCode, customer info, court, timeSlot, startMinute, duration, daysOfWeek, startDate, endDate, totalBookings, cancelledBookings
 - **Court** - name, status (active/inactive), description
 - **TimeSlot** - startTime, endTime, pricing (weekday/weekend/holiday)
 - **Product** - name, SKU, category, price, quantity, image
 - **Sale** - saleCode, items[], totalAmount, paymentMethod, paymentStatus
 - **Category** - name, type (product/service)
 - **Setting** - key-value pairs for system configuration
-- **Counter** - Auto-incrementing counters for bookingCode and saleCode
+- **Counter** - Auto-incrementing counters for bookingCode, saleCode, groupCode
+- **GroupPlay** - group play session with player list, games, and product purchases
+- **Player** - player profile linked to group play sessions
+- **Shift** - staff shift with open/close time, expenses, revenue summary
+- **Attendance** - staff attendance records
