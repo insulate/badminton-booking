@@ -3,8 +3,10 @@ import toast from 'react-hot-toast';
 import { Users, Plus, Search, RefreshCw, Trash2, Edit2, UserCheck } from 'lucide-react';
 import { userAPI } from '../../lib/api';
 import { PageContainer, PageHeader } from '../../components/common';
+import useAuthStore from '../../store/authStore';
 
 export default function Settings() {
+  const { user: currentUser } = useAuthStore();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +30,13 @@ export default function Settings() {
       const response = await userAPI.getAll(params);
 
       if (response.success) {
-        setUsers(response.data);
-        setFilteredUsers(response.data);
+        const sorted = [...response.data].sort((a, b) => {
+          if (a._id === currentUser?._id) return -1;
+          if (b._id === currentUser?._id) return 1;
+          return 0;
+        });
+        setUsers(sorted);
+        setFilteredUsers(sorted);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -287,13 +294,19 @@ export default function Settings() {
                             >
                               <Edit2 size={18} />
                             </button>
-                            <button
-                              onClick={() => handleDelete(user._id, user.username)}
-                              className="tooltip p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              data-tooltip="ลบ"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                            {user._id === currentUser?._id ? (
+                              <span className="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-500 rounded-lg">
+                                บัญชีของคุณ
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDelete(user._id, user.username)}
+                                className="tooltip p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                data-tooltip="ลบ"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            )}
                           </>
                         )}
                       </div>

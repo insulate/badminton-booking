@@ -213,7 +213,7 @@ const deleteUser = async (req, res) => {
     if (user._id.toString() === req.user.id) {
       return res.status(400).json({
         success: false,
-        message: 'You cannot delete your own account'
+        message: 'ไม่สามารถลบบัญชีของตัวเองได้'
       });
     }
 
