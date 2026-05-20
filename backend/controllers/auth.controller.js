@@ -35,7 +35,7 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
       });
     }
 
@@ -53,7 +53,7 @@ const login = async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
       });
     }
 

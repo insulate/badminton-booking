@@ -36,6 +36,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // ไม่ redirect เมื่อเป็น login endpoint เอง (401 = wrong credentials ไม่ใช่ session expired)
+      const isLoginEndpoint = error.config?.url?.includes('/auth/login');
+      if (isLoginEndpoint) return Promise.reject(error);
+
       // Check if this is a customer or admin request
       const isCustomerPath = window.location.pathname.startsWith('/booking') ||
         window.location.pathname.startsWith('/my-bookings') ||

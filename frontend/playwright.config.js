@@ -14,9 +14,28 @@ export default defineConfig({
   },
 
   projects: [
+    // สร้าง admin auth state ก่อนรัน tests ที่ต้องการ auth
     {
-      name: 'chromium',
+      name: 'setup',
+      testMatch: /auth\.setup\.js/,
+    },
+
+    // Tests ที่ต้องการ auth (booking, pos, etc.) — ใช้ storageState ที่ setup สร้างไว้
+    {
+      name: 'admin-authenticated',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/admin.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: /auth\.spec\.js/,
+    },
+
+    // Auth flow tests (login/logout) — ไม่ใช้ pre-existing auth
+    {
+      name: 'auth-flows',
       use: { ...devices['Desktop Chrome'] },
+      testMatch: /auth\.spec\.js/,
     },
   ],
 
