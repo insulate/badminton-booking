@@ -43,7 +43,7 @@ const login = async (req, res) => {
     if (user.deletedAt) {
       return res.status(401).json({
         success: false,
-        message: 'Your account has been deleted'
+        message: 'บัญชีนี้ถูกระงับการใช้งาน'
       });
     }
 

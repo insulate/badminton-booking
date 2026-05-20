@@ -6,7 +6,8 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  restoreUser
+  restoreUser,
+  permanentDelete,
 } = require('../controllers/user.controller');
 const { protect, admin } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
@@ -34,6 +35,11 @@ router.get('/:id', validateObjectId(), getUserById);
 // @desc    Update user
 // @access  Private/Admin
 router.put('/:id', validateObjectId(), updateUser);
+
+// @route   DELETE /api/users/:id/permanent
+// @desc    Hard delete user permanently (for test cleanup)
+// @access  Private/Admin
+router.delete('/:id/permanent', validateObjectId(), permanentDelete);
 
 // @route   DELETE /api/users/:id
 // @desc    Soft delete user

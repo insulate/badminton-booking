@@ -300,11 +300,32 @@ const restoreUser = async (req, res) => {
   }
 };
 
+// @desc    Permanently delete user from database (hard delete)
+// @route   DELETE /api/users/:id/permanent
+// @access  Private/Admin
+const permanentDelete = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (user._id.toString() === req.user.id) {
+      return res.status(400).json({ success: false, message: 'ไม่สามารถลบบัญชีของตัวเองได้' });
+    }
+    await user.deleteOne();
+    res.status(200).json({ success: true, message: 'ลบผู้ใช้ออกจากระบบถาวรแล้ว' });
+  } catch (error) {
+    console.error('Permanent delete user error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
-  restoreUser
+  restoreUser,
+  permanentDelete,
 };

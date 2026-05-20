@@ -28,7 +28,14 @@ export default defineConfig({
         storageState: 'e2e/.auth/admin.json',
       },
       dependencies: ['setup'],
+      teardown: 'cleanup',
       testIgnore: /auth\.spec\.js/,
+    },
+
+    // Teardown: ลบ test users หลัง admin-authenticated จบ
+    {
+      name: 'cleanup',
+      testMatch: /cleanup\.teardown\.js/,
     },
 
     // Auth flow tests (login/logout) — ไม่ใช้ pre-existing auth
