@@ -1,22 +1,43 @@
 import { test as teardown } from '@playwright/test';
 import { readFileSync } from 'fs';
 
-teardown('ลบ test users ถาวรหลังเทสจบ', async ({ request }) => {
+teardown('ลบ test data ถาวรหลังเทสจบ', async ({ request }) => {
   const authData = JSON.parse(readFileSync('e2e/.auth/admin.json', 'utf-8'));
   const token = authData.origins?.[0]?.localStorage?.find((i) => i.name === 'token')?.value;
   if (!token) return;
 
-  const res = await request.get('http://localhost:3000/api/users?includeDeleted=true', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok()) return;
+  const headers = { Authorization: `Bearer ${token}` };
 
-  const { data } = await res.json();
-  for (const user of data ?? []) {
-    if (user.username.startsWith('testuser_')) {
-      await request.delete(`http://localhost:3000/api/users/${user._id}/permanent`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  // ลบ test users (permanent delete)
+  const usersRes = await request.get('http://localhost:3000/api/users?includeDeleted=true', { headers });
+  if (usersRes.ok()) {
+    const { data } = await usersRes.json();
+    for (const user of data ?? []) {
+      if (user.username.startsWith('testuser_')) {
+        await request.delete(`http://localhost:3000/api/users/${user._id}/permanent`, { headers });
+      }
+    }
+  }
+
+  // ลบ test courts ที่ขึ้นต้นด้วย TCT (soft-delete เพียงพอ — ไม่ปรากฏในรายการอีก)
+  const courtsRes = await request.get('http://localhost:3000/api/courts', { headers });
+  if (courtsRes.ok()) {
+    const { data: courts } = await courtsRes.json();
+    for (const court of courts ?? []) {
+      if (court.courtNumber.startsWith('TCT')) {
+        await request.delete(`http://localhost:3000/api/courts/${court._id}`, { headers });
+      }
+    }
+  }
+
+  // ลบ test players ที่ชื่อขึ้นต้นด้วย "Test Player "
+  const playersRes = await request.get('http://localhost:3000/api/players', { headers });
+  if (playersRes.ok()) {
+    const { data: players } = await playersRes.json();
+    for (const player of players ?? []) {
+      if (player.name?.startsWith('Test Player ')) {
+        await request.delete(`http://localhost:3000/api/players/${player._id}`, { headers });
+      }
     }
   }
 });
