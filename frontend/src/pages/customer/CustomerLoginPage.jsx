@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Phone, Lock, LogIn } from 'lucide-react';
+import { Phone, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { playerAuthAPI } from '../../lib/api';
 import usePlayerAuthStore from '../../store/playerAuthStore';
@@ -16,6 +16,7 @@ export default function CustomerLoginPage() {
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Get redirect path from query params
   const searchParams = new URLSearchParams(location.search);
@@ -30,8 +31,18 @@ export default function CustomerLoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
 
+    if (!formData.phone.trim()) {
+      setError('กรุณากรอกเบอร์โทรศัพท์');
+      return;
+    }
+    if (!formData.password) {
+      setError('กรุณากรอกรหัสผ่าน');
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await playerAuthAPI.login({
         phone: formData.phone,
@@ -44,9 +55,8 @@ export default function CustomerLoginPage() {
         toast.success('เข้าสู่ระบบสำเร็จ');
         navigate(redirectTo);
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+    } catch (err) {
+      setError(err.response?.data?.message || 'เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง');
     } finally {
       setLoading(false);
     }
@@ -78,10 +88,9 @@ export default function CustomerLoginPage() {
                   type="tel"
                   name="phone"
                   value={formData.phone}
-                  onChange={handleChange}
+                  onChange={(e) => { setError(''); handleChange(e); }}
                   placeholder="0812345678"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent ${error ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
               </div>
             </div>
@@ -97,13 +106,20 @@ export default function CustomerLoginPage() {
                   type="password"
                   name="password"
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={(e) => { setError(''); handleChange(e); }}
                   placeholder="รหัสผ่าน"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent ${error ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
                 />
               </div>
             </div>
+
+            {/* Inline Error */}
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
 
             {/* Submit Button */}
             <button
