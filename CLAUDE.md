@@ -271,6 +271,9 @@ JWT_EXPIRE=30d
 - **Playwright** auto-starts both frontend/backend via webServer config
 - E2E tests use `http://localhost:5173` as baseURL
 - Test environment uses separate test database (configured in test files)
+- **E2E project order**: `setup` (สร้าง admin session) → `admin-authenticated` (รัน tests) → `cleanup` teardown (hard-delete `testuser_*` จาก DB)
+- **E2E test data**: tests สร้าง users ชื่อ `testuser_*` — teardown ใช้ `DELETE /api/users/:id/permanent` ล้างหลังรันจบ
+- **Auth error messages**: login endpoint คืนข้อความภาษาไทย (`'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'`, `'บัญชีนี้ถูกระงับการใช้งาน'`) — E2E tests assert ข้อความเหล่านี้
 
 ## Important API Routes
 
@@ -298,6 +301,12 @@ JWT_EXPIRE=30d
 - `GET /api/reports/dashboard` - Dashboard stats
 - `GET /api/shifts/current` - Get current open shift
 - `POST /api/shifts/open` / `POST /api/shifts/:id/close` - Open/close shift
+- `GET /api/users` - List users (`?includeDeleted=true` to include soft-deleted)
+- `POST /api/users` - Create user
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Soft delete user (sets `deletedAt`)
+- `PATCH /api/users/:id/restore` - Restore soft-deleted user
+- `DELETE /api/users/:id/permanent` - Hard delete user permanently (admin only, used by E2E teardown)
 
 ## Data Models
 
