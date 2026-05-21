@@ -40,4 +40,16 @@ teardown('ลบ test data ถาวรหลังเทสจบ', async ({ re
       }
     }
   }
+
+  // ลบ test timeslots (ชั่วโมง 00:00–05:59 ไม่ใช่เวลาเปิดทำการจริง)
+  const timeslotsRes = await request.get('http://localhost:3000/api/timeslots', { headers });
+  if (timeslotsRes.ok()) {
+    const { data: timeslots } = await timeslotsRes.json();
+    for (const ts of timeslots ?? []) {
+      const hour = parseInt(ts.startTime?.split(':')[0] ?? '99', 10);
+      if (hour < 6) {
+        await request.delete(`http://localhost:3000/api/timeslots/${ts._id}`, { headers });
+      }
+    }
+  }
 });
