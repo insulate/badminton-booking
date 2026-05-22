@@ -281,11 +281,6 @@ export default function AdminLayout() {
           icon: CreditCard,
         },
         {
-          name: 'การตั้งค่าทั่วไป',
-          path: ROUTES.ADMIN.SETTINGS_GENERAL,
-          icon: SettingsIcon,
-        },
-        {
           name: 'รูปแผนผังสนาม',
           path: ROUTES.ADMIN.SETTINGS_FLOOR_PLAN,
           icon: Map,

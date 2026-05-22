@@ -191,21 +191,6 @@ const settingSchema = new mongoose.Schema(
       ],
     },
 
-    // การตั้งค่าอื่นๆ
-    general: {
-      currency: {
-        type: String,
-        default: 'THB',
-      },
-      timezone: {
-        type: String,
-        default: 'Asia/Bangkok',
-      },
-      language: {
-        type: String,
-        default: 'th',
-      },
-    },
   },
   {
     timestamps: true,

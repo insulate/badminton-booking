@@ -31,7 +31,6 @@ import VenueSettingsPage from './pages/admin/settings/VenueSettingsPage';
 import OperatingHoursPage from './pages/admin/settings/OperatingHoursPage';
 import BookingSettingsPage from './pages/admin/settings/BookingSettingsPage';
 import PaymentSettingsPage from './pages/admin/settings/PaymentSettingsPage';
-import GeneralSettingsPage from './pages/admin/settings/GeneralSettingsPage';
 import FloorPlanSettingsPage from './pages/admin/settings/FloorPlanSettingsPage';
 import PlayerLevelsSettingsPage from './pages/admin/settings/PlayerLevelsSettingsPage';
 
@@ -163,7 +162,6 @@ function App() {
           <Route path="settings/operating" element={<OperatingHoursPage />} />
           <Route path="settings/booking" element={<BookingSettingsPage />} />
           <Route path="settings/payment" element={<PaymentSettingsPage />} />
-          <Route path="settings/general" element={<GeneralSettingsPage />} />
           <Route path="settings/floor-plan" element={<FloorPlanSettingsPage />} />
           <Route path="settings/player-levels" element={<PlayerLevelsSettingsPage />} />
 

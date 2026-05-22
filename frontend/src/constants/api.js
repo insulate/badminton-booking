@@ -38,7 +38,6 @@ export const API_ENDPOINTS = {
     UPDATE_OPERATING: '/settings/operating',
     UPDATE_BOOKING: '/settings/booking',
     UPDATE_PAYMENT: '/settings/payment',
-    UPDATE_GENERAL: '/settings/general',
     RESET: '/settings/reset',
     VENUE_INFO: '/settings/venue-info', // Public
     FLOOR_PLAN: '/settings/floor-plan',

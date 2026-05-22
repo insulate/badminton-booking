@@ -35,11 +35,6 @@ const defaultSettings = {
       accountName: '',
     },
   },
-  general: {
-    currency: 'THB',
-    timezone: 'Asia/Bangkok',
-    language: 'th',
-  },
 };
 
 const seedSettings = async () => {

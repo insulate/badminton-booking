@@ -241,11 +241,6 @@ export const settingsAPI = {
     return response.data;
   },
 
-  updateGeneral: async (data) => {
-    const response = await api.patch(API_ENDPOINTS.SETTINGS.UPDATE_GENERAL, data);
-    return response.data;
-  },
-
   reset: async () => {
     const response = await api.post(API_ENDPOINTS.SETTINGS.RESET);
     return response.data;

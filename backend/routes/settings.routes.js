@@ -37,7 +37,7 @@ router.put('/', protect, admin, async (req, res) => {
     let settings = await Setting.findOne();
 
     // Whitelist allowed fields to prevent mass assignment vulnerabilities
-    const allowedFields = ['venue', 'operating', 'booking', 'payment', 'general', 'playerLevels'];
+    const allowedFields = ['venue', 'operating', 'booking', 'payment', 'playerLevels'];
     const updateData = {};
 
     allowedFields.forEach((field) => {
@@ -201,37 +201,6 @@ router.patch('/payment', protect, admin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการอัพเดทการตั้งค่าการชำระเงิน',
-      error: error.message,
-    });
-  }
-});
-
-/**
- * @route   PATCH /api/settings/general
- * @desc    Update general settings
- * @access  Private (Admin)
- */
-router.patch('/general', protect, admin, async (req, res) => {
-  try {
-    const settings = await Setting.getSettings();
-
-    settings.general = {
-      ...settings.general,
-      ...req.body,
-    };
-
-    await settings.save();
-
-    res.json({
-      success: true,
-      message: 'อัพเดทการตั้งค่าทั่วไปสำเร็จ',
-      data: settings.general,
-    });
-  } catch (error) {
-    console.error('Update general settings error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'เกิดข้อผิดพลาดในการอัพเดทการตั้งค่าทั่วไป',
       error: error.message,
     });
   }
