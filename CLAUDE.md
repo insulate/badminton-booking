@@ -76,8 +76,8 @@ npm run test:watch  # Watch mode
 
 # E2E tests (with Playwright)
 cd frontend && npm run test:e2e
-npm run test:e2e:ui      # UI mode
-npm run test:e2e:debug   # Debug mode
+npm run test:e2e:ui      # UI mode (รันจาก root ได้เลย — script cd เข้า frontend อัตโนมัติ)
+cd frontend && npm run test:e2e:debug   # Debug mode
 
 # Run specific test files
 npm test -- auth.test.js
@@ -277,6 +277,8 @@ JWT_EXPIRE=30d
   - courts รหัส `TCT*` → `DELETE /api/courts/:id` (soft-delete)
   - players ชื่อ `Test Player *` → `DELETE /api/players/:id`
 - **Auth error messages**: login endpoint คืนข้อความภาษาไทย (`'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'`, `'บัญชีนี้ถูกระงับการใช้งาน'`) — E2E tests assert ข้อความเหล่านี้
+- **`test.describe.configure()`** ต้องวางไว้ **ข้างใน** describe block เสมอ (ไม่ใช่ top-level) เพราะ `--ui` mode โหลดไฟล์แบบ concurrent — การเรียก top-level จะทำให้ global state ของ Playwright เสียหายและทำให้ไฟล์อื่นใน project เดียวกัน error
+- **Settings tests** (เช่น venue) ที่แก้ไขข้อมูล shared — ให้ backup ข้อมูลเดิมใน `beforeAll` และ restore ใน `afterAll` ผ่าน API แทนการใช้ teardown (เพราะ settings ไม่ใช่ test data ที่สร้างขึ้นใหม่)
 
 ## Important API Routes
 
