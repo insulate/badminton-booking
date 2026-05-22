@@ -279,6 +279,8 @@ JWT_EXPIRE=30d
 - **Auth error messages**: login endpoint คืนข้อความภาษาไทย (`'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'`, `'บัญชีนี้ถูกระงับการใช้งาน'`) — E2E tests assert ข้อความเหล่านี้
 - **`test.describe.configure()`** ต้องวางไว้ **ข้างใน** describe block เสมอ (ไม่ใช่ top-level) เพราะ `--ui` mode โหลดไฟล์แบบ concurrent — การเรียก top-level จะทำให้ global state ของ Playwright เสียหายและทำให้ไฟล์อื่นใน project เดียวกัน error
 - **Settings tests** (เช่น venue) ที่แก้ไขข้อมูล shared — ให้ backup ข้อมูลเดิมใน `beforeAll` และ restore ใน `afterAll` ผ่าน API แทนการใช้ teardown (เพราะ settings ไม่ใช่ test data ที่สร้างขึ้นใหม่)
+- **Operating hours tests** (`operating-hours.spec.js`) — backup `data.operating` จาก `GET /api/settings/venue-info` (public, ไม่ต้องใช้ token), restore ผ่าน `PATCH /api/settings/operating` (ต้องใช้ token) — cross-page ที่ได้รับผลกระทบคือ **RulesPage** (`/rules`) ซึ่งแสดงเวลาเปิด-ปิดและวันทำการ
+- **Day checkboxes** ใน OperatingHoursPage มี `className="hidden"` — ต้องคลิกผ่าน label หรือ span ข้างใน (`page.getByText(thaiLabel, { exact: true }).click()`) ไม่ใช่ผ่าน checkbox โดยตรง; ตรวจสอบว่า selected หรือไม่จากการที่ label มี class `bg-green-50`
 
 ## Important API Routes
 
