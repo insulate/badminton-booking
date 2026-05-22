@@ -288,6 +288,9 @@ JWT_EXPIRE=30d
 - **Booking creation API fields** — `POST /api/bookings` รับ `{ court, timeSlot, date, customer: { name, phone }, duration }` (ไม่ใช่ `courtId`, `timeSlotId`, `customerName`, `customerPhone`)
 - **Court status** — `GET /api/courts` คืน `status: 'available'` (ไม่ใช่ `'active'`) — filter court ที่ใช้งานได้ด้วย `!c.deletedAt` แทน `c.status === 'active'`
 - **Booking status transitions** — valid: `confirmed → ['checked-in', 'cancelled']`, `checked-in → ['completed']`; `confirmed → payment_pending` ไม่ valid; `PATCH /:id/cancel` endpoint อนุญาตยกเลิกได้จากทุก status ยกเว้น `'cancelled'` และ `'completed'`
+- **File upload ใน Playwright** — `input[type="file"]` ที่ซ่อนด้วย `className="hidden"` สามารถ set ได้โดยตรงโดยไม่ต้องคลิก drop zone: `page.locator('input[type="file"]').setInputFiles({ name, mimeType, buffer })` — ใช้ object form แทน path เพื่อสร้าง file จาก Buffer ใน-memory (เช่น tiny PNG base64) ไม่ต้องสร้างไฟล์จริงบน disk
+- **`window.confirm()` dialog ใน Playwright** — ต้องลงทะเบียน handler **ก่อน** action ที่ trigger dialog: `page.once('dialog', d => d.accept())` แล้วค่อย click ปุ่ม; ถ้าลงทะเบียนหลัง click dialog จะถูก dismiss อัตโนมัติและ handler ไม่ทำงาน
+- **Floor plan settings tests** (`floor-plan-settings.spec.js`) — backup path ผ่าน `GET /api/settings/floor-plan` (public, ไม่ต้องใช้ token); ไม่สามารถ restore ไฟล์ต้นฉบับได้ถ้ามีรูปอยู่ก่อนรัน tests เพราะ backend ลบไฟล์เก่าออก filesystem อัตโนมัติเมื่อมีการ upload ใหม่ — afterAll จึง cleanup เฉพาะกรณี originalImagePath เป็น empty string; cross-page ที่ได้รับผลกระทบคือ **HomePage** (`/`) ซึ่งแสดงรูปแผนผังด้วย `<img alt="Floor Plan">`
 
 ## Important API Routes
 
