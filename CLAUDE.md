@@ -281,6 +281,8 @@ JWT_EXPIRE=30d
 - **Settings tests** (เช่น venue) ที่แก้ไขข้อมูล shared — ให้ backup ข้อมูลเดิมใน `beforeAll` และ restore ใน `afterAll` ผ่าน API แทนการใช้ teardown (เพราะ settings ไม่ใช่ test data ที่สร้างขึ้นใหม่)
 - **Operating hours tests** (`operating-hours.spec.js`) — backup `data.operating` จาก `GET /api/settings/venue-info` (public, ไม่ต้องใช้ token), restore ผ่าน `PATCH /api/settings/operating` (ต้องใช้ token) — cross-page ที่ได้รับผลกระทบคือ **RulesPage** (`/rules`) ซึ่งแสดงเวลาเปิด-ปิดและวันทำการ
 - **Day checkboxes** ใน OperatingHoursPage มี `className="hidden"` — ต้องคลิกผ่าน label หรือ span ข้างใน (`page.getByText(thaiLabel, { exact: true }).click()`) ไม่ใช่ผ่าน checkbox โดยตรง; ตรวจสอบว่า selected หรือไม่จากการที่ label มี class `bg-green-50`
+- **Booking settings tests** (`booking-settings.spec.js`) — backup ผ่าน `GET /api/settings` (admin route ต้องใช้ token ตั้งแต่ `beforeAll` ต่างจาก operating-hours ที่ใช้ public endpoint), restore ผ่าน `PATCH /api/settings/booking` — cross-page ที่ได้รับผลกระทบคือ **CustomerBookingPage** (`/booking`) ซึ่งอ่าน `advanceBookingDays` จาก `GET /api/settings/venue-info` เพื่อกำหนดจำนวน date buttons ใน date strip
+- **`cancellationHours` validation** — field มี `min="0"` ทำให้ `fill('')` ใน Playwright ทำให้ React แปลง `Number('') = 0` ซึ่ง valid เสมอ → ต้องทดสอบด้วยค่า `-1` (rangeUnderflow) แทนการ clear field; ต่างจาก `advanceBookingDays` (min=1), `minBookingHours` (min=0.5), `maxBookingHours` (min=1) ที่ `Number('') = 0` < min → invalid ได้ปกติ
 
 ## Important API Routes
 
