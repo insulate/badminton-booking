@@ -746,4 +746,22 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @route   DELETE /api/groupplay/:id
+ * @desc    Delete a group play session (used by E2E teardown)
+ * @access  Private
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const session = await GroupPlay.findByIdAndDelete(req.params.id);
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'ไม่พบ session' });
+    }
+    res.json({ success: true, message: 'ลบ session สำเร็จ' });
+  } catch (error) {
+    console.error('Error deleting group play session:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบ session' });
+  }
+});
+
 module.exports = router;

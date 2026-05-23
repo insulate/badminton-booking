@@ -44,6 +44,17 @@ teardown('ลบ test data ถาวรหลังเทสจบ', async ({ re
   await deleteTestPlayers('http://localhost:3000/api/players');
   await deleteTestPlayers('http://localhost:3000/api/players?includeDeleted=true');
 
+  // ลบ test groupplay sessions ที่ชื่อขึ้นต้นด้วย "Test GP" หรือ "Test E2E"
+  const gpRes = await request.get('http://localhost:3000/api/groupplay', { headers });
+  if (gpRes.ok()) {
+    const { data: sessions } = await gpRes.json();
+    for (const s of sessions ?? []) {
+      if (s.sessionName?.startsWith('Test GP') || s.sessionName?.startsWith('Test E2E')) {
+        await request.delete(`http://localhost:3000/api/groupplay/${s._id}`, { headers }).catch(() => {});
+      }
+    }
+  }
+
   // ลบ test timeslots (ชั่วโมง 00:00–05:59 ไม่ใช่เวลาเปิดทำการจริง)
   const timeslotsRes = await request.get('http://localhost:3000/api/timeslots', { headers });
   if (timeslotsRes.ok()) {
