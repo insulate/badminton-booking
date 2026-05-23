@@ -30,16 +30,19 @@ teardown('ลบ test data ถาวรหลังเทสจบ', async ({ re
     }
   }
 
-  // ลบ test players ที่ชื่อขึ้นต้นด้วย "Test Player "
-  const playersRes = await request.get('http://localhost:3000/api/players', { headers });
-  if (playersRes.ok()) {
-    const { data: players } = await playersRes.json();
+  // ลบ test players ที่ชื่อขึ้นต้นด้วย "Test Player " (permanent delete ทั้ง active และ soft-deleted)
+  const deleteTestPlayers = async (url) => {
+    const res = await request.get(url, { headers });
+    if (!res.ok()) return;
+    const { data: players } = await res.json();
     for (const player of players ?? []) {
       if (player.name?.startsWith('Test Player ')) {
-        await request.delete(`http://localhost:3000/api/players/${player._id}`, { headers });
+        await request.delete(`http://localhost:3000/api/players/${player._id}/permanent`, { headers }).catch(() => {});
       }
     }
-  }
+  };
+  await deleteTestPlayers('http://localhost:3000/api/players');
+  await deleteTestPlayers('http://localhost:3000/api/players?includeDeleted=true');
 
   // ลบ test timeslots (ชั่วโมง 00:00–05:59 ไม่ใช่เวลาเปิดทำการจริง)
   const timeslotsRes = await request.get('http://localhost:3000/api/timeslots', { headers });

@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, level, password, notes } = req.body;
+    const { name, phone, nickname, level, password, notes } = req.body;
 
     // Check if required fields are provided
     if (!phone) {
@@ -88,6 +88,8 @@ router.post('/', async (req, res) => {
       phone: phone.replace(/-/g, ''),
       notes: notes || '',
     };
+
+    if (nickname) playerData.nickname = nickname;
 
     // Add level if provided
     if (level) {
@@ -207,7 +209,7 @@ router.get('/:id', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const { name, phone, level, notes, status, password } = req.body;
+    const { name, phone, nickname, level, notes, status, password } = req.body;
 
     const player = await Player.findOne({ _id: req.params.id, isDeleted: false });
 
@@ -236,6 +238,7 @@ router.put('/:id', async (req, res) => {
     // Update fields
     if (name) player.name = name;
     if (phone) player.phone = phone.replace(/-/g, '');
+    if (nickname !== undefined) player.nickname = nickname;
     if (level !== undefined) {
       player.level = level;
       player.levelName = getLevelName(level);
@@ -354,6 +357,36 @@ router.post('/:id/restore', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'เกิดข้อผิดพลาดในการกู้คืนข้อมูลผู้เล่น',
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/players/:id/permanent
+ * @desc    Permanently delete a player (used by E2E test teardown)
+ * @access  Private
+ */
+router.delete('/:id/permanent', async (req, res) => {
+  try {
+    const player = await Player.findByIdAndDelete(req.params.id);
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบผู้เล่น',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'ลบผู้เล่นถาวรสำเร็จ',
+    });
+  } catch (error) {
+    console.error('Error permanently deleting player:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการลบผู้เล่นถาวร',
       error: error.message,
     });
   }
