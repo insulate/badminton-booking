@@ -281,8 +281,18 @@ const SalesHistoryPage = () => {
               <select
                 value={paymentStatusFilter}
                 onChange={(e) => {
-                  setPaymentStatusFilter(e.target.value);
+                  const newStatus = e.target.value;
+                  setPaymentStatusFilter(newStatus);
                   setPagination(prev => ({ ...prev, page: 1 }));
+                  // pending sale อาจค้างมาหลายวัน → ล้าง date filter เพื่อให้เห็นทั้งหมด
+                  if (newStatus === 'pending') {
+                    setStartDate('');
+                    setEndDate('');
+                  } else if (!startDate && !endDate) {
+                    // restore วันนี้เมื่อเปลี่ยนกลับจาก pending
+                    setStartDate(getToday());
+                    setEndDate(getToday());
+                  }
                 }}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white shadow-sm hover:shadow-md"
               >

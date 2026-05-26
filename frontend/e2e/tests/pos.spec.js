@@ -350,4 +350,27 @@ test.describe('POS Page (/admin/pos)', () => {
     await expect(saleRow).toBeVisible({ timeout: 8000 });
     await expect(saleRow.getByText('ชำระแล้ว')).toBeVisible();
   });
+
+  // ── T16 (Cross-Page / Bug Regression) ────────────────────────────────────
+  // Bug: pending sale ที่เปิดค้างมาจากวันก่อนหน้าจะไม่ปรากฏใน SalesHistoryPage
+  // เพราะ default filter เป็น "วันนี้" — fix: เมื่อเลือก "ค้างชำระ" ให้ล้าง date filter
+  test('T16 (Cross-Page) — SalesHistoryPage: เลือก "ค้างชำระ" แสดง pending sale แม้ date filter = วันนี้', async ({ page }) => {
+    if (!pendingSaleId) test.skip(true, 'ไม่มี pendingSaleId จาก T13');
+
+    await page.goto('/admin/sales');
+    await page.waitForSelector('.animate-spin', { state: 'detached', timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle');
+
+    // จำลอง: date filter = วันนี้ (default) แต่ pending sale อาจเป็นวันอื่น
+    // เลือก filter "ค้างชำระ (Tab)" → ควรล้าง date filter อัตโนมัติ
+    await page.locator('select').nth(1).selectOption('pending'); // payment status select
+    await page.waitForLoadState('networkidle');
+
+    // date inputs ควรถูกล้างออก (empty)
+    await expect(page.locator('input[type="date"]').first()).toHaveValue('');
+    await expect(page.locator('input[type="date"]').last()).toHaveValue('');
+
+    // pending sale จาก T13 ต้องปรากฏในตาราง
+    await expect(page.locator('table tbody tr').filter({ hasText: 'ค้างชำระ' }).first()).toBeVisible({ timeout: 8000 });
+  });
 });
