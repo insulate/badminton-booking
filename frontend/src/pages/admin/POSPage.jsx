@@ -86,7 +86,7 @@ const POSPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productsAPI.getAll({ status: 'active' });
+      const response = await productsAPI.getAll({ status: 'active', limit: 500 });
       if (response.success) {
         setProducts(response.data || []);
       }
