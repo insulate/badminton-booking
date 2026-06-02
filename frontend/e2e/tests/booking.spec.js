@@ -47,6 +47,11 @@ test.describe('Booking System E2E (/admin/booking, /admin/bookings, /admin/recur
   let recurringGroupId = null;
   let recurringGroupCode = null;
 
+  // สร้างผ่าน API ใน beforeAll สำหรับ T27 (reschedule) และ T28 (conflict)
+  let bookingIdToReschedule = null;
+  let bookingCodeToReschedule = null;
+  let blockingBookingId = null;
+
   // ── beforeAll ───────────────────────────────────────────────────────────────
   test.beforeAll(async () => {
     const authData = JSON.parse(readFileSync('e2e/.auth/admin.json', 'utf-8'));
@@ -111,6 +116,39 @@ test.describe('Booking System E2E (/admin/booking, /admin/bookings, /admin/recur
       bookingIdToCancel = cancelData.data?._id ?? null;
     }
 
+    // 5. สร้าง booking สำหรับ T27/T28 (reschedule + conflict)
+    const rescheduleRes = await ctx.post(`${BASE}/api/bookings`, {
+      headers,
+      data: {
+        court: courtId,
+        timeSlot: timeSlotId,
+        date: getBkkDateStr(5),
+        customer: { name: 'Test Booking Reschedule', phone: '0895432100' },
+        duration: 1,
+      },
+    });
+    if (rescheduleRes.ok()) {
+      const rescheduleData = await rescheduleRes.json();
+      bookingIdToReschedule = rescheduleData.data?._id ?? null;
+      bookingCodeToReschedule = rescheduleData.data?.bookingCode ?? null;
+    }
+
+    // 6. สร้าง blocking booking วันที่ 6 สำหรับ T28 (conflict) — court+timeSlot เดิม
+    const blockRes = await ctx.post(`${BASE}/api/bookings`, {
+      headers,
+      data: {
+        court: courtId,
+        timeSlot: timeSlotId,
+        date: getBkkDateStr(6),
+        customer: { name: 'Test Booking Block', phone: '0894321000' },
+        duration: 1,
+      },
+    });
+    if (blockRes.ok()) {
+      const blockData = await blockRes.json();
+      blockingBookingId = blockData.data?._id ?? null;
+    }
+
     await ctx.dispose();
   });
 
@@ -121,7 +159,7 @@ test.describe('Booking System E2E (/admin/booking, /admin/bookings, /admin/recur
     const headers = { Authorization: `Bearer ${token}` };
 
     // ยกเลิก bookings ที่เหลืออยู่
-    for (const id of [bookingIdFromUI, bookingIdForMgmt, bookingIdToCancel]) {
+    for (const id of [bookingIdFromUI, bookingIdForMgmt, bookingIdToCancel, bookingIdToReschedule, blockingBookingId]) {
       if (id) {
         await ctx.patch(`${BASE}/api/bookings/${id}/cancel`, { headers }).catch(() => {});
       }
@@ -513,6 +551,105 @@ test.describe('Booking System E2E (/admin/booking, /admin/bookings, /admin/recur
 
     // mark ว่า cancel แล้วใน afterAll ไม่ต้อง cancel ซ้ำ
     bookingIdToCancel = null;
+  });
+
+  test('T27 — Reschedule booking → วันที่เปลี่ยนสำเร็จ', async ({ page }) => {
+    if (!bookingIdToReschedule || !bookingCodeToReschedule) {
+      test.skip(true, 'ไม่มี bookingIdToReschedule จาก beforeAll');
+    }
+
+    const p = new AdminBookingsListPage(page);
+    await p.goto();
+
+    // ล้าง date filter แล้วค้นหาด้วย booking code
+    await p.dateFromInput.fill('');
+    await p.dateToInput.fill('');
+    await p.searchByCode(bookingCodeToReschedule);
+
+    const row = p.getBookingRow(bookingCodeToReschedule);
+    await expect(row).toBeVisible({ timeout: 8000 });
+
+    // เปิด detail modal
+    await p.viewDetailBtnInRow(row).click();
+    await expect(page.getByText(bookingCodeToReschedule).first()).toBeVisible({ timeout: 8000 });
+
+    // คลิก "แก้ไขเวลา"
+    await page.getByRole('button', { name: 'แก้ไขเวลา' }).click();
+
+    // รอ edit form ปรากฏ
+    const editForm = page.locator('.bg-blue-50.rounded-lg');
+    await expect(editForm).toBeVisible({ timeout: 5000 });
+
+    // เปลี่ยนวันที่เป็น day 7 (ไม่มีการจองอื่น)
+    const targetDate = getBkkDateStr(7);
+    await editForm.locator('input[type="date"]').fill(targetDate);
+
+    // เลือก timeslot เดิม
+    await editForm.locator('select').first().selectOption({ value: timeSlotId });
+
+    // กด "บันทึก"
+    await page.getByRole('button', { name: 'บันทึก' }).click();
+    await waitForToast(page, 'แก้ไขเวลาสำเร็จ');
+
+    // verify ผ่าน API ว่า date เปลี่ยนแล้ว
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/api/bookings/${bookingIdToReschedule}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const updated = res.ok() ? (await res.json()).data : null;
+    await ctx.dispose();
+
+    expect(updated).not.toBeNull();
+    // date ต้องไม่ใช่ day 5 (วันที่สร้าง) → ต้องเป็น day 7
+    const updatedDateUTC = updated.date.slice(0, 10); // "YYYY-MM-DD"
+    const originalDateUTC = getBkkDateStr(5);
+    expect(updatedDateUTC).not.toBe(originalDateUTC);
+  });
+
+  test('T28 — Reschedule ไปยัง slot ที่ถูกจองแล้ว → แสดง error', async ({ page }) => {
+    if (!bookingIdToReschedule || !bookingCodeToReschedule || !blockingBookingId) {
+      test.skip(true, 'ไม่มี booking IDs จาก beforeAll');
+    }
+
+    const p = new AdminBookingsListPage(page);
+    await p.goto();
+
+    // ล้าง date filter แล้วค้นหา (booking อยู่ day 7 หลัง T27 reschedule)
+    await p.dateFromInput.fill('');
+    await p.dateToInput.fill('');
+    await p.searchByCode(bookingCodeToReschedule);
+
+    const row = p.getBookingRow(bookingCodeToReschedule);
+    await expect(row).toBeVisible({ timeout: 8000 });
+
+    // เปิด detail modal
+    await p.viewDetailBtnInRow(row).click();
+    await expect(page.getByText(bookingCodeToReschedule).first()).toBeVisible({ timeout: 8000 });
+
+    // คลิก "แก้ไขเวลา"
+    await page.getByRole('button', { name: 'แก้ไขเวลา' }).click();
+    const editForm = page.locator('.bg-blue-50.rounded-lg');
+    await expect(editForm).toBeVisible({ timeout: 5000 });
+
+    // เปลี่ยนวันที่เป็น day 6 ซึ่งถูกจองโดย blockingBookingId แล้ว
+    const blockedDate = getBkkDateStr(6);
+    await editForm.locator('input[type="date"]').fill(blockedDate);
+    await editForm.locator('select').first().selectOption({ value: timeSlotId });
+
+    // กด "บันทึก" → ต้องได้ error
+    await page.getByRole('button', { name: 'บันทึก' }).click();
+    await waitForToast(page, 'สนามถูกจองในเวลานี้แล้ว');
+
+    // verify ผ่าน API ว่า booking ยังอยู่ที่เดิม (day 7 ไม่เปลี่ยน)
+    const ctx = await playwrightRequest.newContext();
+    const res = await ctx.get(`${BASE}/api/bookings/${bookingIdToReschedule}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const booking = res.ok() ? (await res.json()).data : null;
+    await ctx.dispose();
+
+    expect(booking).not.toBeNull();
+    expect(booking.date.slice(0, 10)).not.toBe(blockedDate);
   });
 
   // ════════════════════════════════════════════════════════════════════════════

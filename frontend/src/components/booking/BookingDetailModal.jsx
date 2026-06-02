@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X, Calendar, Clock, MapPin, User, Phone, Mail, CreditCard, DollarSign, Image, CheckCircle, XCircle, Clock3, ShoppingCart, Plus, Trash2, Receipt, Minus, Search, Package } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { settingsAPI, bookingsAPI, courtsAPI, salesAPI, productsAPI } from '../../lib/api';
+import { settingsAPI, bookingsAPI, courtsAPI, timeslotsAPI, salesAPI, productsAPI } from '../../lib/api';
 
 // ใช้ base URL สำหรับ static files (ไม่มี /api)
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace(/\/api$/, '');
@@ -25,6 +25,12 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
   const [selectedCourtId, setSelectedCourtId] = useState('');
   const [allCourts, setAllCourts] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
+
+  // Time editing state
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [timeEditData, setTimeEditData] = useState({ date: '', timeSlot: '', startMinute: 0, duration: 1 });
+  const [allTimeSlots, setAllTimeSlots] = useState([]);
+  const [timeEditLoading, setTimeEditLoading] = useState(false);
 
   // Tab/linked sales state
   const [linkedSales, setLinkedSales] = useState([]);
@@ -50,22 +56,32 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
     }
   };
 
-  // Fetch courts for assignment
+  // Fetch courts and timeslots for assignment/reschedule
   useEffect(() => {
-    const fetchCourts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await courtsAPI.getAll();
-        if (response.success) {
-          setAllCourts(response.data);
-        }
+        const [courtsRes, timeslotsRes] = await Promise.all([courtsAPI.getAll(), timeslotsAPI.getAll()]);
+        if (courtsRes.success) setAllCourts(courtsRes.data);
+        if (timeslotsRes.success) setAllTimeSlots(timeslotsRes.data);
       } catch (error) {
-        console.error('Error fetching courts:', error);
+        console.error('Error fetching courts/timeslots:', error);
       }
     };
 
-    if (isOpen) {
-      fetchCourts();
+    if (isOpen && booking) {
+      fetchData();
       fetchLinkedSales();
+      setIsEditingTime(false);
+      if (booking.date) {
+        const d = new Date(booking.date);
+        const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        setTimeEditData({
+          date: localDate,
+          timeSlot: booking.timeSlot?._id || '',
+          startMinute: booking.startMinute || 0,
+          duration: booking.duration || 1,
+        });
+      }
     }
   }, [isOpen, booking?._id]);
 
@@ -91,6 +107,35 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการกำหนดสนาม');
     } finally {
       setAssignLoading(false);
+    }
+  };
+
+  // Handle reschedule booking time
+  const handleReschedule = async () => {
+    if (!timeEditData.date || !timeEditData.timeSlot) {
+      toast.error('กรุณาเลือกวันที่และช่วงเวลา');
+      return;
+    }
+    try {
+      setTimeEditLoading(true);
+      const response = await bookingsAPI.reschedule(booking._id, {
+        date: timeEditData.date,
+        timeSlot: timeEditData.timeSlot,
+        startMinute: timeEditData.startMinute,
+        duration: timeEditData.duration,
+      });
+      if (response.success) {
+        toast.success('แก้ไขเวลาสำเร็จ');
+        setIsEditingTime(false);
+        onUpdate?.(response.data);
+      } else {
+        toast.error(response.message || 'ไม่สามารถแก้ไขเวลาได้');
+      }
+    } catch (error) {
+      console.error('Reschedule error:', error);
+      toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการแก้ไขเวลา');
+    } finally {
+      setTimeEditLoading(false);
     }
   };
 
@@ -315,8 +360,98 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 border-b pb-2">ข้อมูลการจอง</h3>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <h3 className="font-semibold text-gray-900">ข้อมูลการจอง</h3>
+                    {!isEditingTime && booking.bookingStatus !== 'completed' && booking.bookingStatus !== 'cancelled' && (
+                      booking.recurringGroupId ? (
+                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">กลุ่มซ้ำ</span>
+                      ) : (
+                        <button
+                          onClick={() => setIsEditingTime(true)}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          แก้ไขเวลา
+                        </button>
+                      )
+                    )}
+                  </div>
 
+                  {isEditingTime ? (
+                    <div className="space-y-3 bg-blue-50 rounded-lg p-3 border border-blue-200">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">วันที่จอง</label>
+                        <input
+                          type="date"
+                          value={timeEditData.date}
+                          onChange={(e) => setTimeEditData({ ...timeEditData, date: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">ช่วงเวลา</label>
+                        <select
+                          value={timeEditData.timeSlot}
+                          onChange={(e) => setTimeEditData({ ...timeEditData, timeSlot: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">-- เลือกช่วงเวลา --</option>
+                          {allTimeSlots.map((ts) => (
+                            <option key={ts._id} value={ts._id}>
+                              {ts.startTime} - {ts.endTime}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">เริ่มที่</label>
+                        <div className="flex gap-3">
+                          {[{ value: 0, label: ':00' }, { value: 30, label: ':30' }].map((opt) => (
+                            <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="startMinute"
+                                value={opt.value}
+                                checked={timeEditData.startMinute === opt.value}
+                                onChange={() => setTimeEditData({ ...timeEditData, startMinute: opt.value })}
+                                className="text-blue-600"
+                              />
+                              <span className="text-sm">{opt.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">ระยะเวลา</label>
+                        <select
+                          value={timeEditData.duration}
+                          onChange={(e) => setTimeEditData({ ...timeEditData, duration: parseFloat(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8].map((d) => (
+                            <option key={d} value={d}>
+                              {d === 0.5 ? '30 นาที' : d % 1 === 0 ? `${d} ชั่วโมง` : `${Math.floor(d)} ชม. 30 น.`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={handleReschedule}
+                          disabled={timeEditLoading || !timeEditData.date || !timeEditData.timeSlot}
+                          className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                          {timeEditLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+                        </button>
+                        <button
+                          onClick={() => setIsEditingTime(false)}
+                          className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          ยกเลิก
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
                   <div className="flex items-start gap-3">
                     <Calendar size={20} className="text-gray-400 mt-0.5" />
                     <div>
@@ -335,6 +470,8 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                       </p>
                     </div>
                   </div>
+                    </>
+                  )}
 
                   <div className="flex items-start gap-3">
                     <MapPin size={20} className="text-gray-400 mt-0.5" />
@@ -393,6 +530,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                     </div>
                   </div>
 
+                  {!isEditingTime && (
                   <div className="flex items-start gap-3">
                     <Clock size={20} className="text-gray-400 mt-0.5" />
                     <div>
@@ -402,6 +540,7 @@ const BookingDetailModal = ({ isOpen, onClose, booking, onUpdate, onUpdatePaymen
                       </p>
                     </div>
                   </div>
+                  )}
                 </div>
 
                 {/* Right Column */}

@@ -405,6 +405,11 @@ export const bookingsAPI = {
     return response.data;
   },
 
+  reschedule: async (id, data) => {
+    const response = await api.patch(API_ENDPOINTS.BOOKINGS.UPDATE(id), data);
+    return response.data;
+  },
+
   checkAvailability: async (data) => {
     const response = await api.post(API_ENDPOINTS.BOOKINGS.CHECK_AVAILABILITY, data);
     return response.data;

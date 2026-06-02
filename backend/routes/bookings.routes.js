@@ -836,7 +836,7 @@ router.post('/', protect, validateBookingRequest, async (req, res) => {
  */
 router.patch('/:id', protect, validateObjectId(), validateBookingUpdate, async (req, res) => {
   try {
-    const { customer, paymentMethod, notes, paymentStatus, bookingStatus } = req.body;
+    const { customer, paymentMethod, notes, paymentStatus, bookingStatus, date, timeSlot, startMinute, duration } = req.body;
 
     const booking = await Booking.findById(req.params.id);
 
@@ -865,6 +865,62 @@ router.patch('/:id', protect, validateObjectId(), validateBookingUpdate, async (
           message: `Invalid status transition from '${booking.bookingStatus}' to '${bookingStatus}'`,
         });
       }
+    }
+
+    // Reschedule: update date/timeSlot/startMinute/duration with availability check
+    const hasTimeChange = date || timeSlot || startMinute !== undefined || duration !== undefined;
+    if (hasTimeChange) {
+      if (booking.recurringGroupId) {
+        return res.status(400).json({
+          success: false,
+          message: 'ไม่สามารถแก้ไขเวลาการจองในกลุ่มซ้ำได้',
+        });
+      }
+
+      if (!booking.court) {
+        return res.status(400).json({
+          success: false,
+          message: 'กรุณากำหนดสนามก่อนเปลี่ยนเวลา',
+        });
+      }
+
+      const newDate = date || booking.date;
+      const newTimeSlotId = timeSlot || booking.timeSlot;
+      const newDuration = duration !== undefined ? duration : booking.duration;
+      const newStartMinute = startMinute !== undefined ? startMinute : booking.startMinute;
+
+      const availability = await checkAvailability({
+        courtId: booking.court,
+        date: newDate,
+        timeSlotId: newTimeSlotId,
+        duration: newDuration,
+        startMinute: newStartMinute,
+        excludeBookingId: booking._id,
+      });
+
+      if (!availability.available) {
+        return res.status(409).json({
+          success: false,
+          message: 'สนามถูกจองในเวลานี้แล้ว',
+        });
+      }
+
+      const newPricing = await calculatePrice({
+        timeSlotId: newTimeSlotId,
+        duration: newDuration,
+        customerType: 'normal',
+      });
+
+      booking.date = newDate;
+      booking.timeSlot = newTimeSlotId;
+      booking.startMinute = newStartMinute;
+      booking.duration = newDuration;
+      booking.pricing = {
+        ...booking.pricing,
+        subtotal: newPricing.subtotal,
+        discount: newPricing.discount,
+        total: newPricing.total,
+      };
     }
 
     // Update fields
