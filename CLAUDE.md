@@ -267,7 +267,10 @@ JWT_EXPIRE=30d
 ## Testing Notes
 
 - **Jest tests** run with `--runInBand` to prevent DB conflicts
-- **Jest tests** require local MongoDB at `localhost:27017` — they use a separate test DB, not the Atlas URI from `.env`
+- **Jest tests** require local (Docker) MongoDB — test DB URI: `mongodb://admin:admin123@localhost:27017/badminton-test?authSource=admin` (ต้องใส่ credentials เพราะ Docker MongoDB เปิด auth ไว้; ถ้าใช้แค่ `localhost:27017` จะได้ `Command delete requires authentication`)
+- **Jest test helpers** อยู่ที่ `backend/__tests__/helpers/testSetup.js` — มี factory `createExpiredBooking()`, `createTestCourt()`, `createTestTimeslot()`
+- **Jest HTTP tests (supertest)**: ต้องตั้ง `process.env.MONGODB_URI` และ `process.env.NODE_ENV = 'test'` ก่อน `require('../app')` (module-level, บนสุดของไฟล์) แล้วรอ connection ด้วย `await mongoose.connection.asPromise()` ใน `beforeAll`
+- **User model ใน tests**: `name` เป็น required field — ต้อง include ตอน `User.create()`; password ผ่าน `pre('save')` hook ที่ hash อัตโนมัติ — ส่ง plain text ได้เลย ไม่ต้อง bcrypt ก่อน
 - **Playwright** auto-starts both frontend/backend via webServer config
 - E2E tests use `http://localhost:5173` as baseURL
 - Test environment uses separate test database (configured in test files)
