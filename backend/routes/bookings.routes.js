@@ -1078,6 +1078,11 @@ router.patch('/:id/payment', protect, validateObjectId(), async (req, res) => {
       paymentStatus: newPaymentStatus,
     };
 
+    // Confirm booking when fully paid from payment_pending state
+    if (newPaymentStatus === 'paid' && booking.bookingStatus === 'payment_pending') {
+      updateData.bookingStatus = 'confirmed';
+    }
+
     if (paymentMethod) {
       updateData.paymentMethod = paymentMethod;
     }
@@ -1424,9 +1429,10 @@ router.patch('/:id/verify-slip', protect, admin, validateObjectId(), async (req,
       booking.paymentSlip.verifiedBy = req.user._id;
       booking.paymentSlip.rejectReason = '';
 
-      // Update payment status to paid
+      // Update payment status to paid and confirm booking
       booking.paymentStatus = 'paid';
       booking.pricing.deposit = booking.pricing.total;
+      booking.bookingStatus = 'confirmed';
     } else {
       // Reject slip
       if (!rejectReason) {

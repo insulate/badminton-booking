@@ -13,6 +13,7 @@ const cancelExpiredBookings = async () => {
         bookingStatus: 'payment_pending',
         paymentDeadline: { $lt: now },
         deletedAt: null,
+        'paymentSlip.status': { $ne: 'pending_verification' },
       },
       {
         $set: {
