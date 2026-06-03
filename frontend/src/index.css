@@ -21,7 +21,7 @@
   /* Custom Scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #0066CC #E2E8F0;
+    scrollbar-color: #5170ff #E2E8F0;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -53,11 +53,11 @@
 
   /* Gradient backgrounds */
   .gradient-blue {
-    background: linear-gradient(135deg, #0066CC 0%, #004080 100%);
+    background: linear-gradient(135deg, #5170ff 0%, #3050e0 100%);
   }
 
   .gradient-blue-light {
-    background: linear-gradient(135deg, #4D94FF 0%, #0066CC 100%);
+    background: linear-gradient(135deg, #8fa0ff 0%, #5170ff 100%);
   }
 
   /* CSS Tooltip - displays instantly on hover */

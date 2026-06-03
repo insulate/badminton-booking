@@ -8,14 +8,19 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0066CC',
-          blue: '#0066CC',
-          'light-blue': '#4D94FF',
-          'dark-blue': '#004080',
-          'sky': '#00AAFF',
-          'navy': '#003366',
+          DEFAULT: '#5170ff',
+          blue: '#5170ff',
+          'light-blue': '#8fa0ff',
+          'dark-blue': '#3050e0',
+          'sky': '#6b80ff',
+          'navy': '#1a30cc',
           dark: '#1A1A2E',
           light: '#F5F7FA',
+        },
+        secondary: {
+          DEFAULT: '#cbfa10',
+          light: '#dbfc4d',
+          dark: '#a8d400',
         },
         bg: {
           dark: '#1E293B',
@@ -46,8 +51,8 @@ export default {
         sans: ['Kanit', 'sans-serif'],
       },
       boxShadow: {
-        blue: '0 0 20px rgba(0, 102, 204, 0.3)',
-        'blue-lg': '0 0 30px rgba(0, 102, 204, 0.4)',
+        blue: '0 0 20px rgba(81, 112, 255, 0.3)',
+        'blue-lg': '0 0 30px rgba(81, 112, 255, 0.4)',
       },
       animation: {
         fadeIn: 'fadeIn 0.3s ease-in-out',
@@ -85,8 +90,8 @@ export default {
           '50%': { transform: 'translateY(-5px)' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 102, 204, 0.3)' },
-          '50%': { boxShadow: '0 0 30px rgba(0, 102, 204, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(81, 112, 255, 0.3)' },
+          '50%': { boxShadow: '0 0 30px rgba(81, 112, 255, 0.6)' },
         },
       },
     },
