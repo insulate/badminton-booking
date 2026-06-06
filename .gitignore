@@ -43,6 +43,7 @@ opencode.json
 .claude/
 .mcp.json
 nul
+CLAUDE.md
 
 # Production artifacts
 *.archive.gz
