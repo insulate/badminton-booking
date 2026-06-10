@@ -288,7 +288,8 @@ const validateCancellation = async (req, res, next) => {
     // Get settings for cancellation policy
     const settings = await Setting.findOne();
 
-    if (settings && settings.booking && settings.booking.cancellationHours > 0) {
+    const isAdmin = req.user?.role === 'admin' || req.user?.role === 'staff';
+    if (!isAdmin && settings && settings.booking && settings.booking.cancellationHours > 0) {
       const now = new Date();
       const bookingDateTime = new Date(booking.date);
 
