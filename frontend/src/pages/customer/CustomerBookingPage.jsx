@@ -48,7 +48,10 @@ export default function CustomerBookingPage() {
   const [dateList, setDateList] = useState([]);
   const [blockedDates, setBlockedDates] = useState([]);
   const [advanceBookingDays, setAdvanceBookingDays] = useState(14);
+  const [startMinute, setStartMinute] = useState(0);
   const dateScrollRef = useRef(null);
+  const durationRef = useRef(null);
+  const courtRef = useRef(null);
 
   useEffect(() => { initAuth(); }, [initAuth]);
 
@@ -112,13 +115,26 @@ export default function CustomerBookingPage() {
       setCourtsLoading(true);
       setSelectedCourt(null);
       try {
-        const res = await customerBookingsAPI.getCourtAvailability({
+        const base = {
           date: formatDateToString(selectedDate),
           timeSlotId: selectedSlot.timeSlotId,
           duration: selectedDuration,
-          startMinute: 0,
-        });
-        setAvailableCourts(res.data?.courts || []);
+        };
+        const res0 = await customerBookingsAPI.getCourtAvailability({ ...base, startMinute: 0 });
+        let courts = res0.data?.courts || [];
+        let sm = 0;
+
+        if (courts.length === 0) {
+          const res30 = await customerBookingsAPI.getCourtAvailability({ ...base, startMinute: 30 });
+          const courts30 = res30.data?.courts || [];
+          if (courts30.length > 0) {
+            courts = courts30;
+            sm = 30;
+          }
+        }
+
+        setStartMinute(sm);
+        setAvailableCourts(courts);
       } catch {
         setAvailableCourts([]);
       } finally {
@@ -158,7 +174,10 @@ export default function CustomerBookingPage() {
     ? (player?.isMember ? selectedSlot.pricing.member : selectedSlot.pricing.normal)
     : 0;
   const totalPrice = pricePerHour * selectedDuration;
-  const endTime = selectedSlot ? calcEndTime(selectedSlot.startTime, selectedDuration) : '';
+  const actualStartTime = selectedSlot
+    ? (startMinute === 30 ? calcEndTime(selectedSlot.startTime, 0.5) : selectedSlot.startTime)
+    : '';
+  const endTime = selectedSlot ? calcEndTime(actualStartTime, selectedDuration) : '';
 
   const handleDateSelect = (date) => {
     if (isDateBlocked(date)) return;
@@ -177,13 +196,16 @@ export default function CustomerBookingPage() {
     }
     if (selectedSlot?.timeSlotId === slot.timeSlotId) return;
     setSelectedSlot(slot);
+    setStartMinute(0);
     setSelectedDuration(1);
     setSelectedCourt(null);
+    setTimeout(() => durationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
   };
 
   const handleDurationSelect = (d) => {
     setSelectedDuration(d);
     setSelectedCourt(null);
+    setTimeout(() => courtRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
   };
 
   const handleBookNow = async () => {
@@ -195,6 +217,7 @@ export default function CustomerBookingPage() {
         timeSlot: selectedSlot.timeSlotId,
         duration: selectedDuration,
         court: selectedCourt._id,
+        startMinute,
       });
       if (res.success) {
         navigate(ROUTES.CUSTOMER.PAYMENT(res.data._id));
@@ -215,7 +238,7 @@ export default function CustomerBookingPage() {
     ? 'เลือกวันที่และเวลาให้ครบ'
     : !selectedCourt
     ? 'เลือกสนามให้ครบ'
-    : `จองเลย — ฿${totalPrice.toLocaleString()}`;
+    : `จองเลย · ${selectedCourt.name || `สนาม ${selectedCourt.courtNumber}`} · ${actualStartTime}–${endTime} น. · ฿${totalPrice.toLocaleString()}`;
 
   return (
     <div className="min-h-full bg-gray-50 pb-24">
@@ -298,14 +321,13 @@ export default function CustomerBookingPage() {
           </div>
         ) : (
           <>
-            {/* Step 2: Time + Duration */}
+            {/* Step 2: Time Slots */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <div className="flex items-center gap-2 mb-4">
                 <StepBadge n={2} />
-                <span className="text-sm font-semibold text-gray-700">เลือกเวลาและระยะเวลา</span>
+                <span className="text-sm font-semibold text-gray-700">เลือกเวลา</span>
               </div>
 
-              {/* Time Grid */}
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {availability?.availability?.map((slot) => {
                   const sel = selectedSlot?.timeSlotId === slot.timeSlotId;
@@ -323,53 +345,76 @@ export default function CustomerBookingPage() {
                           : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
                       }`}
                     >
-                      <span className="text-xs">{slot.startTime}</span>
-                      {slot.peakHour && (
+                      <span className="text-xs font-bold">{sel && startMinute === 30 ? actualStartTime : slot.startTime}</span>
+                      {slot.peakHour && !full ? (
                         <span className={`flex items-center gap-0.5 text-[0.5rem] font-bold mt-0.5 ${sel ? 'text-blue-100' : 'text-orange-500'}`}>
                           <Flame className="w-2.5 h-2.5" fill="currentColor" />
                           PEAK
+                        </span>
+                      ) : full ? (
+                        <span className="text-[0.5rem] font-bold mt-0.5 text-gray-300">เต็ม</span>
+                      ) : (
+                        <span className={`text-[0.5rem] mt-0.5 ${sel ? 'text-blue-200' : 'text-gray-400'}`}>
+                          {slot.availableCount} สนาม
                         </span>
                       )}
                     </button>
                   );
                 })}
               </div>
+            </div>
 
-              {/* Duration Selector */}
-              {selectedSlot ? (
-                <div className="mt-5">
-                  <p className="text-xs font-semibold text-gray-500 mb-2.5">ระยะเวลา</p>
-                  <div className="flex flex-wrap gap-2">
-                    {durationOptions.map((d) => (
-                      <button
-                        key={d}
-                        onClick={() => handleDurationSelect(d)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                          selectedDuration === d
-                            ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
-                        }`}
-                      >
-                        {formatDuration(d)}
-                      </button>
-                    ))}
+            {/* Step 2b: Duration + Pricing (แสดงหลังเลือกเวลา) */}
+            {selectedSlot && (
+              <div ref={durationRef} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <StepBadge n={2} />
+                    <span className="text-sm font-semibold text-gray-700">เลือกระยะเวลา</span>
                   </div>
-                  <div className="mt-3 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 text-center">
-                    {selectedSlot.startTime} – {endTime} น. &nbsp;·&nbsp; {formatDuration(selectedDuration)}
-                    &nbsp;·&nbsp; ฿{pricePerHour}/ชม.
-                    {player?.isMember && (
-                      <span className="ml-1.5 text-emerald-600 font-semibold">(ราคาสมาชิก)</span>
-                    )}
+                  <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-lg">
+                    {actualStartTime} น.
+                  </span>
+                </div>
+
+
+                <div className="flex flex-wrap gap-2">
+                  {durationOptions.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => handleDurationSelect(d)}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
+                        selectedDuration === d
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                          : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                      }`}
+                    >
+                      {formatDuration(d)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-4 bg-blue-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-blue-500 font-medium">ช่วงเวลาจอง</p>
+                    <p className="text-sm font-bold text-blue-800 mt-0.5">
+                      {actualStartTime} – {endTime} น.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-blue-500 font-medium">ราคารวม</p>
+                    <p className="text-sm font-bold text-blue-800 mt-0.5">
+                      ฿{totalPrice.toLocaleString()}
+                      {player?.isMember && <span className="ml-1 text-xs text-emerald-600">(สมาชิก)</span>}
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <p className="mt-4 text-xs text-gray-400 text-center">กดเลือกเวลาที่ต้องการด้านบน</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Step 3: Court Selection */}
             {selectedSlot && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div ref={courtRef} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <StepBadge n={3} />
                   <span className="text-sm font-semibold text-gray-700">เลือกสนาม</span>
@@ -393,18 +438,18 @@ export default function CustomerBookingPage() {
                           key={court._id}
                           onClick={() => avail && setSelectedCourt(court)}
                           disabled={!avail}
-                          className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${
+                          className={`flex flex-col items-center justify-center py-4 rounded-xl border-2 transition-all ${
                             sel
-                              ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-100'
+                              ? 'border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-100'
                               : avail
                               ? 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
-                              : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-50'
+                              : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-40'
                           }`}
                         >
-                          <span className="text-sm font-bold text-gray-800 truncate w-full">
+                          <span className={`text-sm font-bold truncate w-full text-center ${sel ? 'text-white' : 'text-gray-800'}`}>
                             {court.name || `สนาม ${court.courtNumber}`}
                           </span>
-                          <span className={`text-xs mt-1 font-medium ${avail ? 'text-emerald-600' : 'text-red-500'}`}>
+                          <span className={`text-xs mt-1 font-medium ${sel ? 'text-blue-100' : avail ? 'text-emerald-600' : 'text-red-400'}`}>
                             {avail ? 'ว่าง' : 'จองแล้ว'}
                           </span>
                         </button>
